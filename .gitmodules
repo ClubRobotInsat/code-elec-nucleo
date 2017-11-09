@@ -1,3 +1,6 @@
 [submodule "mbed-os"]
 	path = mbed-os
 	url = https://github.com/ARMmbed/mbed-os/
+[submodule "herkulex"]
+	path = herkulex
+	url = https://os.mbed.com/users/passionvirus/code/herkulex
