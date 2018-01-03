@@ -1,7 +1,31 @@
 # Code Elec Nucleo
 
 ## *Getting started*
-#### 1. Installer Keil uVision 5 
+
+### Introduction 
+
+Cette section contient les étapes à suivre pour préparer son PC pour pouvoir développer du code embarqué sur le robot, coté élec. 
+
+La carte mère du robot embarque une [Nucleo-F446RE](http://www.st.com/en/evaluation-tools/nucleo-f446re.html), que l'on programme en utilisant le langage C++. Le processeur utilisé est un STM32 Cortex M4 (qui diffère un peu des Cortex M3 des Nucleo-F103RB utilisées en TP de 3A et 4A au GEI). 
+
+Pour pouvoir intéragir avec le "monde extérieur", on utilise la librairie [MBED OS](https://os.mbed.com/) fournie par ARM. 
+Cette librairie nous permet de garder un code simple et accessible, très proche de ce qu'on peut trouver sur les cartes Arduino, 
+tout en ayant la possibilité de mettre les mains dans le cambouis quand on en a vraiment besoin. 
+
+De cette librairie, nous n'utilisons que les *drivers*, et nous laissons de côté la partie *OS*. 
+
+Pour développer du code, on peut utiliser l'outil de développement en ligne de mbed, disponible [ici](https://os.mbed.com/compiler/) (il faut créer un compte pour y accéder). 
+
+On trouve un tutoriel pour *mbed online compiler* [sur leur site web](https://os.mbed.com/docs/latest/tutorials/blinky-on-the-arm-mbed-online-compiler.html). 
+
+Cet outil est bien pour commencer, mais est quand même limité. Comme "vrai" IDE, avec un débuggueur intégré, on 
+utilise donc *Keil uVision 5*, qui est le logiciel utilisé dans les formations STM32 au GEI (en MIC et IMACS). 
+Ce logiciel est donc installé sur une grande partie des postes du GEI, et sur les PC du Club Robot (TBD). 
+
+Les étapes suivantes vont vous guider pour mettre en place un environnement de développement sur votre PC. 
+En cas de pépin... demandez conseil aux gens du Club :satisfied:.
+
+### 1. Installer Keil uVision 5 
 Une version est disponible au téléchargement à cette adresse : https://www.keil.com/download/product/
 Il faut sélectionner le produit "MDK-ARM", puis remplir le formulaire de téléchargement. 
 
@@ -79,11 +103,11 @@ source ~/.bashrc
 **Vous pouvez maintenant lancer Keil en tapant `keil` dans un terminal :blush:** 
 
 
-#### 2. Mettre en place son environnement de travail
-TBD
+### 2. Mettre en place son environnement de travail
+Il faut maintenant configurer Keil, et lui dire 
 
 
-#### 3. Cloner le dossier partagé sur Github
+### 3. Cloner le dossier partagé sur Github
 ``` 
 git clone --recursive https://github.com/ClubRobotInsat/code-elec-nucleo.git
 ```
