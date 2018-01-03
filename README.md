@@ -71,6 +71,13 @@ en remplacant le chemin qui va bien, par exemple :
 alias keil='sudo wine /root/.wine/drive_c/Keil_v5/UV4/UV4.EXE'
 ``` 
 
+Sauvegardez le fichier, et rechargez le fichier de configuration : 
+``` 
+source ~/.bashrc
+``` 
+
+** Vous pouvez maintenant lancer Keil en tapant `keil` dans un terminal :) ** 
+
 
 #### 2. Mettre en place son environnement de travail
 TBD
