@@ -23,7 +23,9 @@ utilise donc *Keil uVision 5*, qui est le logiciel utilisé dans les formations 
 Ce logiciel est donc installé sur une grande partie des postes du GEI, et sur les PC du Club Robot (TBD). 
 
 Les étapes suivantes devraient vous guider pour mettre en place un environnement de développement sur votre PC. 
-En cas de pépin... demandez conseil aux gens du Club :grin:.
+
+
+**En cas de pépin... demandez conseil aux gens du Club :grin:.**
 
 ### 1. Installer Keil uVision 5 
 Une version est disponible au téléchargement à cette adresse : https://www.keil.com/download/product/
@@ -38,7 +40,7 @@ Pour un PC sous Linux, il faut passer par Wine.
 
 Pour installer Wine, voir la page correspondant à votre distro : 
   * [la page pour Ubuntu](https://doc.ubuntu-fr.org/wine), 
-  * [la page pour Arch](https://wiki.archlinux.fr/Wine)), 
+  * [la page pour Arch](https://wiki.archlinux.fr/Wine), 
   * *ajouter ici des pages supplémentaires*
   
 Ensuite, utiliser `wine` pour installer Keil depuis un terminal : 
