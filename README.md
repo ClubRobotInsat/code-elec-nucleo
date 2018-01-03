@@ -76,7 +76,7 @@ Sauvegardez le fichier, et rechargez le fichier de configuration :
 source ~/.bashrc
 ``` 
 
-** Vous pouvez maintenant lancer Keil en tapant `keil` dans un terminal :) ** 
+**Vous pouvez maintenant lancer Keil en tapant `keil` dans un terminal :blush:** 
 
 
 #### 2. Mettre en place son environnement de travail
