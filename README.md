@@ -22,8 +22,8 @@ Cet outil est bien pour commencer, mais est quand même limité. Comme "vrai" ID
 utilise donc *Keil uVision 5*, qui est le logiciel utilisé dans les formations STM32 au GEI (en MIC et IMACS). 
 Ce logiciel est donc installé sur une grande partie des postes du GEI, et sur les PC du Club Robot (TBD). 
 
-Les étapes suivantes vont vous guider pour mettre en place un environnement de développement sur votre PC. 
-En cas de pépin... demandez conseil aux gens du Club :satisfied:.
+Les étapes suivantes devraient vous guider pour mettre en place un environnement de développement sur votre PC. 
+En cas de pépin... demandez conseil aux gens du Club :grin:.
 
 ### 1. Installer Keil uVision 5 
 Une version est disponible au téléchargement à cette adresse : https://www.keil.com/download/product/
