@@ -1,3 +1,10 @@
 /BUILD
 **/*.bin
 **/*.pyc
+core
+**/*.swp
+.temp
+.gdb_history
+herkulex/
+mbed-dev/
+herkulex/

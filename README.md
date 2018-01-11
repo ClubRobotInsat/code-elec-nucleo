@@ -35,6 +35,18 @@ Il faut sélectionner le produit "MDK-ARM", puis remplir le formulaire de télé
 L'installation doit se faire sans problème. 
 
 ##### Linux
+
+Installer mbed :
+ 
+```
+apt-get install mercurial
+mbed deploy
+cd .temp/tools
+pip install -r requirements.txt
+cd ../..
+mbed compile
+```
+
 ###### Installation
 Pour un PC sous Linux, il faut passer par Wine.
 
@@ -117,5 +129,3 @@ git clone --recursive https://github.com/ClubRobotInsat/code-elec-nucleo.git
 
 ### La base pour trouver des ressources : [MBED Cookbook](https://os.mbed.com/cookbook/Homepage)
 ### La doc. pour l'API : [ici](https://os.mbed.com/docs/latest/reference/drivers.html)
-
-
