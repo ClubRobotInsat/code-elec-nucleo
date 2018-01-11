@@ -163,7 +163,7 @@ void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime, 
     txBuf[1]  = HEADER;                 // Packet Header (0xFF)
     txBuf[2]  = MIN_PACKET_SIZE + 5;    // Packet Size
     // txBuf[3]  = MAX_PID;                // pID is total number of servos in the network (0 ~ 253)
-    txBuf[3]  = BROADCAST_ID;                // pID is total number of servos in the network (0 ~ 253)
+    txBuf[3]  = id;                // pID is total number of servos in the network (0 ~ 253)
     txBuf[4]  = CMD_S_JOG;              // Command S JOG (0x06)
     txBuf[5]  = 0;                      // Checksum1
     txBuf[6]  = 0;                      // Checksum2
