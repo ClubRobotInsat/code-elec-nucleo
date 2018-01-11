@@ -162,8 +162,7 @@ void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime, 
     txBuf[0]  = HEADER;                 // Packet Header (0xFF)
     txBuf[1]  = HEADER;                 // Packet Header (0xFF)
     txBuf[2]  = MIN_PACKET_SIZE + 5;    // Packet Size
-    // txBuf[3]  = MAX_PID;                // pID is total number of servos in the network (0 ~ 253)
-    txBuf[3]  = id;                // pID is total number of servos in the network (0 ~ 253)
+    txBuf[3]  = id;                     // pID is the id of the servo (0 ~ 253)
     txBuf[4]  = CMD_S_JOG;              // Command S JOG (0x06)
     txBuf[5]  = 0;                      // Checksum1
     txBuf[6]  = 0;                      // Checksum2
@@ -192,7 +191,7 @@ void Herkulex::velocityControl(uint8_t id, int16_t speed, uint8_t setLED)
     txBuf[0]  = HEADER;                 // Packet Header (0xFF)
     txBuf[1]  = HEADER;                 // Packet Header (0xFF)
     txBuf[2]  = MIN_PACKET_SIZE + 5;    // Packet Size
-    txBuf[3]  = MAX_PID;                // pID is total number of servos in the network (0 ~ 253)
+    txBuf[3]  = id;                // pID is total number of servos in the network (0 ~ 253)
     txBuf[4]  = CMD_S_JOG;              // Command S JOG (0x06)
     txBuf[5]  = 0;                      // Checksum1
     txBuf[6]  = 0;                      // Checksum2
@@ -216,17 +215,17 @@ void Herkulex::setLedOn(uint8_t id)
 {
     uint8_t txBuf[10]; 
 
-    txBuf[0]  = HEADER;            // Packet Header (0xFF)
-    txBuf[1]  = HEADER;            // Packet Header (0xFF)
-    txBuf[2]  = 0x0a;              // Packet Size
-    txBuf[3]  = id;                // pID is total number of servos in the network (0 ~ 253)
-    txBuf[4]  = 0x03;              // Command S JOG (0x06)
-    txBuf[5]  = 0;                 // Checksum1
-    txBuf[6]  = 0;                 // Checksum2
-    txBuf[7]  = 0x35;              // Playtime, unmeaningful in turn mode
-    txBuf[8]  = 0x01;              // Speed (LSB, Least Significant Bit)
-    txBuf[9]  = 0xff;              // Speed (MSB, Most Significanct Bit)
-    // txBuf[10] = TURN_MODE | setLED;     // Turn Mode and LED on/off
+    txBuf[0]  = HEADER;                 // Packet Header (0xFF)
+    txBuf[1]  = HEADER;                 // Packet Header (0xFF)
+    txBuf[2]  = MIN_PACKET_SIZE + 3;    // Packet Size
+    txBuf[3]  = id;                     // pID is total number of servos in the network (0 ~ 253)
+    txBuf[4]  = CMD_RAM_WRITE;          // Command S JOG (CMD_RAM_WRITE)
+    txBuf[5]  = 0;                      // Checksum1
+    txBuf[6]  = 0;                      // Checksum2
+    txBuf[7]  = 0x35;                   // Playtime, unmeaningful in turn mode
+    txBuf[8]  = 0x01;                   // Speed (LSB, Least Significant Bit)
+    txBuf[9]  = 0xff;                   // Speed (MSB, Most Significanct Bit)
+    // txBuf[10] = TURN_MODE | setLED;  // Turn Mode and LED on/off
 
     txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]^txBuf[9]) & 0xFE;
     txBuf[6] = (~txBuf[5])&0xFE;
