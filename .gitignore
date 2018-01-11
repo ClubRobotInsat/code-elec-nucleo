@@ -2,5 +2,6 @@
 **/*.bin
 **/*.pyc
 .temp
+/herkulex/
 mbed-dev/
 herkulex/
