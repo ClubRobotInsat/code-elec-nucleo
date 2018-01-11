@@ -16,6 +16,21 @@ int main()
     pc.printf("lol ?\n");
 
     sv.clear(0x03);
+
+    sv.setTorque(0x03, TORQUE_ON);
+
+
+    while(true)
+    {
+        // sv.setLedOn(0x03); 
+        // wait_us(500); 
+
+        sv.positionControl(0x03, 800, 60, GLED_ON);
+        wait_us(500);
+        
+        sv.positionControl(0x03, 300, 60, GLED_ON);
+        wait_us(500);
+    }
     
 //    sv.setTorque(0x03, TORQUE_ON);
     
@@ -24,7 +39,7 @@ int main()
     // while (1) {
 	   //  sleep();
     // }
-    
+
     sv.getPos(0x03);
    
     while(1) 
