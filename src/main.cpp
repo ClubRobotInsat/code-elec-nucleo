@@ -6,7 +6,9 @@ uint8_t id = 0x03;
 Serial pc(USBTX, USBRX, 9600); 
 
 Serial txd(D8, NC);
-Serial rxd(NC, D2); 
+Serial rxd(NC, D2);
+
+
 
 int main() 
 {  
@@ -18,10 +20,14 @@ int main()
 
     sv.clear(0x03);
     
-    sv.setTorque(0x03, TORQUE_ON);
+//    sv.setTorque(0x03, TORQUE_ON);
     
     sv.getStatus(0x03);
-    
+
+    while (1) {
+	    sleep();
+    }
+    /*
     sv.getPos(0x03);
    
     while(1) 
@@ -49,4 +55,5 @@ int main()
         // Clear error status
         sv.clear(0x03);
     }
+    */
 }

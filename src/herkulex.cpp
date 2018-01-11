@@ -22,15 +22,28 @@
 #include "mbed.h"
 #include "herkulex.h"
 
-void show_callback(void * data) {
-    uint8_t a,b = 1;
-    uint8_t c =  a+b;
+
+uint8_t buffer[5];
+event_callback_t callback2;
+int c;
+
+void show_callback(int events) {
+	if (events & 0xFF) {
+		int c = 0;
+	}
+	else {
+		int c = 1;
+	}
+	if (c == 0) {
+		c = 2;
+	}	
 }
 
 //------------------------------------------------------------------------------
 Herkulex::Herkulex(PinName tx, PinName rx, uint32_t baudRate)
 {
 
+	callback2.attach(&show_callback);
     txd = new Serial(tx, NC);
     rxd = new Serial(NC, rx);
 
@@ -50,6 +63,7 @@ Herkulex::Herkulex(PinName tx, PinName rx, uint32_t baudRate)
 Herkulex::Herkulex(Serial * tx, Serial * rx, Serial * pc) : 
     pc(pc), txd(tx), rxd(rx)
 {
+	callback2.attach(&show_callback);
     pc->printf("OK\n");
 }
 
@@ -74,7 +88,7 @@ void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
         pc->printf("[TX]");
     #endif
 
-    txd->write(data, packetSize, NULL); 
+    txd->write(data, packetSize,0,0); 
     
     // for(uint8_t i = 0; i < packetSize ; i++) 
     // {
@@ -99,7 +113,7 @@ void Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
         pc->printf("[RX]");
     #endif
 
-        rxd->read(data, packetSize, &show_callback); 
+        rxd->read(buffer,(uint8_t) 5, callback2, SERIAL_EVENT_RX_ALL); 
     // for (uint8_t i = 0; i < packetSize; i++) 
     // {   
     //     // data[i] = rxd->getc();
