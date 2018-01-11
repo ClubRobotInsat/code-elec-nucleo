@@ -1,6 +1,0 @@
-2018-01-09T18:34:19 INFO src/common.c: Loading device parameters....
-2018-01-09T18:34:19 INFO src/common.c: Device connected is: F446 device, id 0x10006421
-2018-01-09T18:34:19 INFO src/common.c: SRAM size: 0x20000 bytes (128 KiB), Flash: 0x80000 bytes (512 KiB) in pages of 131072 bytes
-2018-01-09T18:34:19 INFO src/gdbserver/gdb-server.c: Chip ID is 00000421, Core ID is  2ba01477.
-2018-01-09T18:34:19 INFO src/gdbserver/gdb-server.c: Listening at *:4242...
-st-util 1.4.0
