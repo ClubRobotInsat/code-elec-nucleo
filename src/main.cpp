@@ -5,16 +5,13 @@
 uint8_t id = 0x03; 
 Serial pc(USBTX, USBRX, 9600); 
 
-Serial txd(D8, NC);
-Serial rxd(NC, D2);
-
-
+Serial connection(D8,D2);
 
 int main() 
 {  
     pc.printf("lol\n");
 
-    Herkulex sv(&txd, &rxd, &pc);//, pc);
+    Herkulex sv(&connection, &pc);//, pc);
 
     pc.printf("lol ?\n");
 

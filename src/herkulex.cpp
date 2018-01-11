@@ -38,57 +38,28 @@ void show_callback(int events) {
 		c = 2;
 	}	
 }
-
-//------------------------------------------------------------------------------
-Herkulex::Herkulex(PinName tx, PinName rx, uint32_t baudRate)
-{
-
-	callback2.attach(&show_callback);
-    txd = new Serial(tx, NC);
-    rxd = new Serial(NC, rx);
-
-    #ifdef HERKULEX_DEBUG
-    pc = new Serial(USBTX, USBRX); 
-    pc->printf("\n\nHerkulex Init!\n");
-    #endif
-    
-    wait(5); 
-    
-    txd->baud(baudRate);
-    rxd->baud(baudRate);
-
-    pc->printf("Gros blob\n" );
-}
-
-Herkulex::Herkulex(Serial * tx, Serial * rx, Serial * pc) : 
-    pc(pc), txd(tx), rxd(rx)
+Herkulex::Herkulex(Serial * connection, Serial * pc) : 
+    _pc(pc), _ser(connection)
 {
 	callback2.attach(&show_callback);
-    pc->printf("OK\n");
+    _pc->printf("OK\n");
 }
 
 //------------------------------------------------------------------------------
 Herkulex::~Herkulex()
 {
-    #ifdef HERKULEX_DEBUG
-        if(pc != NULL)
-            delete pc;
-    #endif
-    
-    if(txd != NULL)
-        delete txd;
-    if(rxd != NULL)
-        delete rxd;
+    if(_ser != NULL)
+        delete _ser;
 }
 
 //------------------------------------------------------------------------------
 void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
 {
     #ifdef HERKULEX_DEBUG
-        pc->printf("[TX]");
+        _pc->printf("[TX]");
     #endif
 
-    txd->write(data, packetSize,0,0); 
+    _ser->write(data, packetSize, 0, 0); 
     
     // for(uint8_t i = 0; i < packetSize ; i++) 
     // {
@@ -100,7 +71,7 @@ void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
     // }
     
     #ifdef HERKULEX_DEBUG
-        pc->printf("\n");
+        _pc->printf("\n");
     #endif
 }
 
@@ -110,10 +81,10 @@ void Herkulex::txPacket(uint8_t packetSize, uint8_t* data)
 void Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
 {
     #ifdef HERKULEX_DEBUG
-        pc->printf("[RX]");
+        _pc->printf("[RX]");
     #endif
 
-        rxd->read(buffer,(uint8_t) 5, callback2, SERIAL_EVENT_RX_ALL); 
+        _ser->read(buffer,(uint8_t) 5, callback2, SERIAL_EVENT_RX_ALL); 
     // for (uint8_t i = 0; i < packetSize; i++) 
     // {   
     //     // data[i] = rxd->getc();
@@ -125,7 +96,7 @@ void Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
     // }      
     
     #ifdef HERKULEX_DEBUG
-        pc->printf("\n");
+        _pc->printf("\n");
     #endif
 }
 
@@ -266,7 +237,7 @@ int8_t Herkulex::getStatus(uint8_t id)
     if (chksum1 != rxBuf[5])
     {
         #ifdef HERKULEX_DEBUG
-            pc->printf("Checksum1 fault\n");
+            _pc->printf("Checksum1 fault\n");
         #endif
         
         return -1;
@@ -277,7 +248,7 @@ int8_t Herkulex::getStatus(uint8_t id)
     if (chksum2 != rxBuf[6])
     {
         #ifdef HERKULEX_DEBUG
-            pc->printf("Checksum2 fault\n");
+            _pc->printf("Checksum2 fault\n");
         #endif
         
         return -1;
@@ -287,7 +258,7 @@ int8_t Herkulex::getStatus(uint8_t id)
   //status = rxBuf[8];  // Status Detail
     
     #ifdef HERKULEX_DEBUG
-        pc->printf("Status = %02X\n", status);
+        _pc->printf("Status = %02X\n", status);
     #endif
     
     return status;
@@ -325,7 +296,7 @@ int16_t Herkulex::getPos(uint8_t id)
     if (chksum1 != rxBuf[5])
     {
         #ifdef HERKULEX_DEBUG
-            pc->printf("Checksum1 fault\n");
+            _pc->printf("Checksum1 fault\n");
         #endif
         
         return -1;
@@ -336,7 +307,7 @@ int16_t Herkulex::getPos(uint8_t id)
     if (chksum2 != rxBuf[6])
     {
         #ifdef HERKULEX_DEBUG
-            pc->printf("Checksum2 fault\n");
+            _pc->printf("Checksum2 fault\n");
         #endif
         
         return -1;
@@ -345,7 +316,7 @@ int16_t Herkulex::getPos(uint8_t id)
     position = ((rxBuf[10]&0x03)<<8) | rxBuf[9];
     
     #ifdef HERKULEX_DEBUG
-        pc->printf("position = %04X(%d)\n", position, position);
+        _pc->printf("position = %04X(%d)\n", position, position);
     #endif
     
     return position;

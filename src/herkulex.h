@@ -252,9 +252,8 @@ public:
      * @param rx Receive pin. 
      * @param baudRate The serial tx/rx speed. 
      */
-    Herkulex(PinName tx, PinName rx, uint32_t baudRate);//, Serial& pc);
 
-    Herkulex(Serial * tx, Serial * rx, Serial * pc); 
+    Herkulex(Serial * connection, Serial * pc); 
     
     /** Destroy an Herkulex servo object
      */
@@ -322,11 +321,11 @@ private :
 
     /** PC serial connection used in debug mode.
     */
-    Serial *pc;
+    Serial * _pc;
     
     /** Serial connection (mbed <-> herkulex).
     */  
-    Serial *txd, *rxd;
+    Serial * _ser;
 };
 
 //------------------------------------------------------------------------------
