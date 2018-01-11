@@ -131,11 +131,7 @@ source ~/.bashrc
 **Vous pouvez maintenant lancer Keil en tapant `keil` dans un terminal :blush:** 
 
 
-### 2. Mettre en place son environnement de travail
-Il faut maintenant configurer Keil, et lui dire 
-
-
-### 3. Cloner le dossier partagé sur Github
+### 2. Cloner le dossier partagé sur Github
 ``` 
 git clone --recursive https://github.com/ClubRobotInsat/code-elec-nucleo.git
 ```
