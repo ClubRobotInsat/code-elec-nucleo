@@ -316,6 +316,9 @@ public:
      * @return -1 is getPos failed. other is servo's current position.
      */         
     int16_t getPos(uint8_t id);
+
+        void setLedOn(uint8_t id);
+
          
 private :
 
