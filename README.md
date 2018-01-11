@@ -36,15 +36,29 @@ L'installation doit se faire sans problème.
 
 ##### Linux
 
+Installer la toolchain arm :
+
+```
+sudo apt-get install gcc-arm-none-eabi gdb-arm-none-eabi openocd
+```
+
+Il existe un chouette thème pour gdb par [ici](https://github.com/cyrus-and/gdb-dashboard).
+
 Installer mbed :
  
 ```
-apt-get install mercurial
+git clone https://github.com/ClubRobotInsat/code-elec-nucleo
+sudo apt-get install mercurial python-pip
+sudo pip install mbed-cli
+cd code-elec-nucleo
 mbed deploy
 cd .temp/tools
-pip install -r requirements.txt
+sudo pip install -r requirements.txt
 cd ../..
-mbed compile
+# On désactive la sécurité de gdb.
+echo "set auto-load safe-path /" >> ~/.gdbinit
+mbed compile --profile .temp/tools/profiles/debug.json
+./debug.sh
 ```
 
 ###### Installation
