@@ -269,7 +269,7 @@ public:
 	 * @param packetSize The packet size.
 	 * @param data The receive packet data array.
 	 */
-	void rxPacket(uint8_t packetSize, uint8_t* data);
+	// void rxPacket(uint8_t packetSize, uint8_t* data);
 
 	/** Clear error status
 	 *
@@ -308,6 +308,16 @@ public:
 	 */
 	int8_t getStatus();
 
+	/**
+	 * Fetch the status from the servomotor and put it inside _status.
+	 */
+	void fetchStatus();
+
+	/**
+	 * Fetch the position from the servomotor and put it inside _status_position.
+	 */
+	void fetchPosition();
+
 	/** Get Position
 	 *
 	 * @param id The herkulex servo ID.
@@ -319,11 +329,27 @@ public:
 
 
 private:
+	// The callback method when fetchStatus has been called.
+	void parseStatusMessage(int event);
+
+	// The callback method when fetchPosition has been called.
+	void parsePositionMessage(int event);
+
+	// Hold the last position fetched from the servo.
 	int16_t _status_position;
 
-	int8_t _status_general;
+	// Hold the last status fetched from the servo.
+	int8_t _status;
 
 	uint8_t _id;
+
+	event_callback_t _callback_read_status;
+
+	event_callback_t _callback_read_position;
+
+	uint8_t _buffer_status[9];
+
+	uint8_t _buffer_position[32];
 
 	/** PC serial connection used in debug mode.
 	*/

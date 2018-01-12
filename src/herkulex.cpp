@@ -22,25 +22,74 @@
 #include "herkulex.h"
 #include "mbed.h"
 
+void Herkulex::parseStatusMessage(int event) {
+	// Checksum1
+	uint8_t chksum1 = (_buffer_status[2] ^ _buffer_status[3] ^ _buffer_status[4] ^ _buffer_status[7] ^ _buffer_status[8]) & 0xFE;
+	if(chksum1 != _buffer_status[5]) {
+#ifdef HERKULEX_DEBUG
+		_pc->printf("Checksum1 fault\n");
+#endif
 
-uint8_t buffer[5];
-event_callback_t callback2;
-int c;
+		_status = -1;
+	}
 
-void show_callback(int events) {
-	if(events & 0xFF) {
-		int c = 0;
-	} else {
-		int c = 1;
+	// Checksum2
+	uint8_t chksum2 = (~_buffer_status[5] & 0xFE);
+	if(chksum2 != _buffer_status[6]) {
+#ifdef HERKULEX_DEBUG
+		_pc->printf("Checksum2 fault\n");
+#endif
+
+		_status = -1;
 	}
-	if(c == 0) {
-		c = 2;
-	}
+
+	_status = _buffer_status[7]; // Status Error
+                                 // status = _buffer_status[8];  // Status Detail
+#ifdef HERKULEX_DEBUG
+	_pc->printf("Status = %02X\n", _status);
+#endif
 }
+
 Herkulex::Herkulex(uint8_t id, Serial* connection, Serial* pc)
-        : _id(id), _status_position(0), _status_general(0), _pc(pc), _ser(connection) {
-	callback2.attach(&show_callback);
+        : _status_position(0)
+        , _status(0)
+        , _id(id)
+        , _callback_read_status(Callback<void(int)>(this, &Herkulex::parseStatusMessage))
+        , _callback_read_position(Callback<void(int)>(this, &Herkulex::parsePositionMessage))
+        , _pc(pc)
+        , _ser(connection) {
 	_pc->printf("OK\n");
+}
+
+void Herkulex::parsePositionMessage(int event) {
+	// Checksum1
+	uint8_t chksum1 =
+	    (_buffer_position[2] ^ _buffer_position[3] ^ _buffer_position[4] ^ _buffer_position[7] ^ _buffer_position[8] ^
+	     _buffer_position[9] ^ _buffer_position[10] ^ _buffer_position[11] ^ _buffer_position[12]) &
+	    0xFE;
+	if(chksum1 != _buffer_position[5]) {
+#ifdef HERKULEX_DEBUG
+		_pc->printf("Checksum1 fault\n");
+#endif
+
+		_status_position = -1;
+	}
+
+	// Checksum2
+	uint8_t chksum2 = (~_buffer_position[5] & 0xFE);
+	if(chksum2 != _buffer_position[6]) {
+#ifdef HERKULEX_DEBUG
+		_pc->printf("Checksum2 fault\n");
+#endif
+
+		_status_position = -1;
+	}
+
+	_status_position = ((_buffer_position[10] & 0x03) << 8) | _buffer_position[9];
+
+#ifdef HERKULEX_DEBUG
+	_pc->printf("position = %04X(%d)\n", _status_position, _status_position);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -57,44 +106,10 @@ void Herkulex::txPacket(uint8_t packetSize, uint8_t* data) {
 
 	_ser->write(data, packetSize, 0, 0);
 
-// for(uint8_t i = 0; i < packetSize ; i++)
-// {
-//     #ifdef HERKULEX_DEBUG
-//         pc->printf("%02X ",data[i]);
-//     #endif
-//
-//     // txd->putc(data[i]);
-// }
-
 #ifdef HERKULEX_DEBUG
 	_pc->printf("\n");
 #endif
 }
-
-// event_callback_t cb(&show_callback);
-
-//------------------------------------------------------------------------------
-void Herkulex::rxPacket(uint8_t packetSize, uint8_t* data) {
-#ifdef HERKULEX_DEBUG
-	_pc->printf("[RX]");
-#endif
-
-	_ser->read(buffer, (uint8_t)5, callback2, SERIAL_EVENT_RX_ALL);
-// for (uint8_t i = 0; i < packetSize; i++)
-// {
-//     // data[i] = rxd->getc();
-//     rxd->read(&data[i], 1);
-
-//     #ifdef HERKULEX_DEBUG
-//         pc->printf("%02X ",data[i]);
-//     #endif
-// }
-
-#ifdef HERKULEX_DEBUG
-	_pc->printf("\n");
-#endif
-}
-
 //------------------------------------------------------------------------------
 void Herkulex::clear() {
 	uint8_t txBuf[11];
@@ -147,8 +162,6 @@ void Herkulex::setTorque(uint8_t cmdTorue) {
 //------------------------------------------------------------------------------
 void Herkulex::positionControl(uint16_t position, uint8_t playtime, uint8_t setLED) {
 	if(position > 1023)
-		return;
-	if(playtime > 255)
 		return;
 
 	uint8_t txBuf[12];
@@ -228,7 +241,15 @@ void Herkulex::setLedOn() {
 
 //------------------------------------------------------------------------------
 int8_t Herkulex::getStatus() {
-	uint8_t status;
+	return _status;
+}
+
+//------------------------------------------------------------------------------
+int16_t Herkulex::getPos() {
+	return _status_position;
+}
+
+void Herkulex::fetchStatus() {
 	uint8_t txBuf[7];
 
 	txBuf[0] = HEADER;          // Packet Header (0xFF)
@@ -244,95 +265,30 @@ int8_t Herkulex::getStatus() {
 	// send packet (mbed -> herkulex)
 	txPacket(7, txBuf);
 
-	uint8_t rxBuf[9];
-	rxPacket(9, rxBuf);
-
-	// Checksum1
-	uint8_t chksum1 = (rxBuf[2] ^ rxBuf[3] ^ rxBuf[4] ^ rxBuf[7] ^ rxBuf[8]) & 0xFE;
-	if(chksum1 != rxBuf[5]) {
-#ifdef HERKULEX_DEBUG
-		_pc->printf("Checksum1 fault\n");
-#endif
-
-		return -1;
-	}
-
-	// Checksum2
-	uint8_t chksum2 = (~rxBuf[5] & 0xFE);
-	if(chksum2 != rxBuf[6]) {
-#ifdef HERKULEX_DEBUG
-		_pc->printf("Checksum2 fault\n");
-#endif
-
-		return -1;
-	}
-
-	status = rxBuf[7]; // Status Error
-                       // status = rxBuf[8];  // Status Detail
-
-#ifdef HERKULEX_DEBUG
-	_pc->printf("Status = %02X\n", status);
-#endif
-
-	return status;
+	_ser->read(_buffer_status, (uint8_t)9, _callback_read_status, SERIAL_EVENT_RX_ALL);
 }
 
-//------------------------------------------------------------------------------
-int16_t Herkulex::getPos() {
-	/*
-	  uint16_t position = 0;
+void Herkulex::fetchPosition() {
+	uint8_t txBuf[9];
 
-	  uint8_t txBuf[9];
+	txBuf[0] = HEADER;                  // Packet Header (0xFF)
+	txBuf[1] = HEADER;                  // Packet Header (0xFF)
+	txBuf[2] = MIN_PACKET_SIZE + 2;     // Packet Size
+	txBuf[3] = _id;                     // Servo ID
+	txBuf[4] = CMD_RAM_READ;            // Status Error, Status Detail request
+	txBuf[5] = 0;                       // Checksum1
+	txBuf[6] = 0;                       // Checksum2
+	txBuf[7] = RAM_CALIBRATED_POSITION; // Address 52
+	txBuf[8] = BYTE2;                   // Address 52 and 53
 
-	  txBuf[0] = HEADER;                  // Packet Header (0xFF)
-	  txBuf[1] = HEADER;                  // Packet Header (0xFF)
-	  txBuf[2] = MIN_PACKET_SIZE + 2;     // Packet Size
-	  txBuf[3] = id;                      // Servo ID
-	  txBuf[4] = CMD_RAM_READ;            // Status Error, Status Detail request
-	  txBuf[5] = 0;                       // Checksum1
-	  txBuf[6] = 0;                       // Checksum2
-	  txBuf[7] = RAM_CALIBRATED_POSITION; // Address 52
-	  txBuf[8] = BYTE2;                   // Address 52 and 53
+	// Check Sum1 and Check Sum2
+	txBuf[5] = (txBuf[2] ^ txBuf[3] ^ txBuf[4] ^ txBuf[7] ^ txBuf[8]) & 0xFE;
+	txBuf[6] = (~txBuf[5]) & 0xFE;
 
-	  // Check Sum1 and Check Sum2
-	  txBuf[5] = (txBuf[2]^txBuf[3]^txBuf[4]^txBuf[7]^txBuf[8]) & 0xFE;
-	  txBuf[6] = (~txBuf[5])&0xFE;
+	// send packet (mbed -> herkulex)
+	txPacket(9, txBuf);
 
-	  // send packet (mbed -> herkulex)
-	  txPacket(9, txBuf);
-
-	  uint8_t rxBuf[13];
-	  rxPacket(13, rxBuf);
-
-	  // Checksum1
-	  uint8_t chksum1 = (rxBuf[2]^rxBuf[3]^rxBuf[4]^rxBuf[7]^rxBuf[8]^rxBuf[9]^rxBuf[10]^rxBuf[11]^rxBuf[12]) & 0xFE;
-	  if (chksum1 != rxBuf[5])
-	  {
-	      #ifdef HERKULEX_DEBUG
-	          _pc->printf("Checksum1 fault\n");
-	      #endif
-
-	      return -1;
-	  }
-
-	  // Checksum2
-	  uint8_t chksum2 = (~rxBuf[5]&0xFE);
-	  if (chksum2 != rxBuf[6])
-	  {
-	      #ifdef HERKULEX_DEBUG
-	          _pc->printf("Checksum2 fault\n");
-	      #endif
-
-	      return -1;
-	  }
-
-	  position = ((rxBuf[10]&0x03)<<8) | rxBuf[9];
-
-	  #ifdef HERKULEX_DEBUG
-	      _pc->printf("position = %04X(%d)\n", position, position);
-	  #endif
-	 */
-	return _status_position;
+	_ser->read(_buffer_position, (uint8_t)13, _callback_read_position, SERIAL_EVENT_RX_ALL);
 }
 
 //------------------------------------------------------------------------------
