@@ -253,7 +253,7 @@ public:
      * @param baudRate The serial tx/rx speed. 
      */
 
-    Herkulex(Serial * connection, Serial * pc); 
+    Herkulex(uint8_t id,Serial * connection, Serial * pc); 
     
     /** Destroy an Herkulex servo object
      */
@@ -277,14 +277,14 @@ public:
      *        
      * @param id The herkulex servo ID.
      */      
-     void clear(uint8_t id);
+     void clear();
     
     /** Set torque setting
      *        
      * @param id The herkulex servo ID.
      * @param cmdTorue The Command for setting of torque (TORQUE_FREE 0x00, BREAK_ON 0x40, TORQUE_ON 0x60)
      */      
-    void setTorque(uint8_t id, uint8_t cmdTorue);
+    void setTorque(uint8_t cmdTorue);
     
     /** Position Control
      *        
@@ -293,7 +293,7 @@ public:
      * @param playtime Time to target position.
      * @param setLED Select LED and on/off controll (GLED_ON 0x00,BLED_ON 0x08, RLED_ON 0x10)
      */          
-    void positionControl(uint8_t id, uint16_t position, uint8_t playtime, uint8_t setLED);
+    void positionControl(uint16_t position, uint8_t playtime, uint8_t setLED);
 
     /** Velocity Control
      *        
@@ -301,26 +301,32 @@ public:
      * @param speed The goal position of herkulex servo.
      * @param setLED Select LED and on/off controll (GLED_ON 0x00,BLED_ON 0x08, RLED_ON 0x10)
      */             
-    void velocityControl(uint8_t id, int16_t speed,uint8_t setLED);
+    void velocityControl(int16_t speed,uint8_t setLED);
     
     /** Get Status
      *        
      * @param id The herkulex servo ID.
      * @return -1 is getStatus failed. other is servo`s status error value.
      */       
-    int8_t getStatus(uint8_t id);
+    int8_t getStatus();
     
     /** Get Position
      *        
      * @param id The herkulex servo ID.
      * @return -1 is getPos failed. other is servo's current position.
      */         
-    int16_t getPos(uint8_t id);
+    int16_t getPos();
 
-        void setLedOn(uint8_t id);
+    void setLedOn();
 
          
 private :
+
+    int16_t _status_position;
+
+    int8_t _status_general;
+
+    uint8_t _id;
 
     /** PC serial connection used in debug mode.
     */

@@ -34,15 +34,15 @@ void show_callback(int events) {
 	else {
 		int c = 1;
 	}
-	if (c == 0) {
-		c = 2;
-	}	
+        if (c == 0) {
+          c = 2;
+        }	
 }
-Herkulex::Herkulex(Serial * connection, Serial * pc) : 
-    _pc(pc), _ser(connection)
+Herkulex::Herkulex(uint8_t id,Serial * connection, Serial * pc) : 
+  _id(id), _status_position(0), _status_general(0), _pc(pc), _ser(connection)
 {
-	callback2.attach(&show_callback);
-    _pc->printf("OK\n");
+  callback2.attach(&show_callback);
+  _pc->printf("OK\n");
 }
 
 //------------------------------------------------------------------------------
@@ -101,14 +101,14 @@ void Herkulex::rxPacket(uint8_t packetSize, uint8_t* data)
 }
 
 //------------------------------------------------------------------------------
-void Herkulex::clear(uint8_t id)
+void Herkulex::clear()
 {
     uint8_t txBuf[11];
     
     txBuf[0] = HEADER;              // Packet Header (0xFF)
     txBuf[1] = HEADER;              // Packet Header (0xFF)
     txBuf[2] = MIN_PACKET_SIZE + 4; // Packet Size
-    txBuf[3] = id;                  // Servo ID
+    txBuf[3] = _id;                 // Servo ID
     txBuf[4] = CMD_RAM_WRITE;       // Command Ram Write (0x03)
     txBuf[5] = 0;                   // Checksum1
     txBuf[6] = 0;                   // Checksum2
@@ -127,14 +127,14 @@ void Herkulex::clear(uint8_t id)
 }
 
 //------------------------------------------------------------------------------
-void Herkulex::setTorque(uint8_t id, uint8_t cmdTorue)
+void Herkulex::setTorque(uint8_t cmdTorue)
 {
     uint8_t txBuf[10];
     
     txBuf[0] = HEADER;              // Packet Header (0xFF)
     txBuf[1] = HEADER;              // Packet Header (0xFF)
     txBuf[2] = MIN_PACKET_SIZE + 3; // Packet Size
-    txBuf[3] = id;                  // Servo ID
+    txBuf[3] = _id;                 // Servo ID
     txBuf[4] = CMD_RAM_WRITE;       // Command Ram Write (0x03)
     txBuf[5] = 0;                   // Checksum1
     txBuf[6] = 0;                   // Checksum2
@@ -152,7 +152,7 @@ void Herkulex::setTorque(uint8_t id, uint8_t cmdTorue)
 }
 
 //------------------------------------------------------------------------------
-void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime, uint8_t setLED)
+void Herkulex::positionControl(uint16_t position, uint8_t playtime, uint8_t setLED)
 {
     if (position > 1023) return;
     if (playtime > 255) return;
@@ -162,7 +162,7 @@ void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime, 
     txBuf[0]  = HEADER;                 // Packet Header (0xFF)
     txBuf[1]  = HEADER;                 // Packet Header (0xFF)
     txBuf[2]  = MIN_PACKET_SIZE + 5;    // Packet Size
-    txBuf[3]  = id;                     // pID is the id of the servo (0 ~ 253)
+    txBuf[3]  = _id;                     // pID is the id of the servo (0 ~ 253)
     txBuf[4]  = CMD_S_JOG;              // Command S JOG (0x06)
     txBuf[5]  = 0;                      // Checksum1
     txBuf[6]  = 0;                      // Checksum2
@@ -170,7 +170,7 @@ void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime, 
     txBuf[8]  = position & 0x00FF;      // Position (LSB, Least Significant Bit)
     txBuf[9]  =(position & 0xFF00) >> 8;// position (MSB, Most Significanct Bit)
     txBuf[10] = POS_MODE | setLED;      // Pos Mode and LED on/off
-    txBuf[11] = id;                     // Servo ID
+    txBuf[11] = _id;                    // Servo ID
     
     // Checksum1 = (PacketSize ^ pID ^ CMD ^ Data[0] ^ Data[1] ^ ... ^ Data[n]) & 0xFE
     // Checksum2 = (~Checksum1)&0xFE
@@ -182,7 +182,7 @@ void Herkulex::positionControl(uint8_t id, uint16_t position, uint8_t playtime, 
 }
 
 //------------------------------------------------------------------------------
-void Herkulex::velocityControl(uint8_t id, int16_t speed, uint8_t setLED)
+void Herkulex::velocityControl(int16_t speed, uint8_t setLED)
 {
     if (speed > 1023 || speed < -1023) return;
     
@@ -191,7 +191,7 @@ void Herkulex::velocityControl(uint8_t id, int16_t speed, uint8_t setLED)
     txBuf[0]  = HEADER;                 // Packet Header (0xFF)
     txBuf[1]  = HEADER;                 // Packet Header (0xFF)
     txBuf[2]  = MIN_PACKET_SIZE + 5;    // Packet Size
-    txBuf[3]  = id;                // pID is total number of servos in the network (0 ~ 253)
+    txBuf[3]  = _id;                    // pID is total number of servos in the network (0 ~ 253)
     txBuf[4]  = CMD_S_JOG;              // Command S JOG (0x06)
     txBuf[5]  = 0;                      // Checksum1
     txBuf[6]  = 0;                      // Checksum2
@@ -199,7 +199,7 @@ void Herkulex::velocityControl(uint8_t id, int16_t speed, uint8_t setLED)
     txBuf[8]  = speed & 0x00FF;         // Speed (LSB, Least Significant Bit)
     txBuf[9]  =(speed & 0xFF00) >> 8;   // Speed (MSB, Most Significanct Bit)
     txBuf[10] = TURN_MODE | setLED;     // Turn Mode and LED on/off
-    txBuf[11] = id;                     // Servo ID
+    txBuf[11] = _id;                    // Servo ID
     
     // Checksum1 = (PacketSize ^ pID ^ CMD ^ Data[0] ^ Data[1] ^ ... ^ Data[n]) & 0xFE
     // Checksum2 = (~Checksum1)&0xFE
@@ -211,14 +211,14 @@ void Herkulex::velocityControl(uint8_t id, int16_t speed, uint8_t setLED)
 }
 
 
-void Herkulex::setLedOn(uint8_t id)
+void Herkulex::setLedOn()
 {
     uint8_t txBuf[10]; 
 
     txBuf[0]  = HEADER;                 // Packet Header (0xFF)
     txBuf[1]  = HEADER;                 // Packet Header (0xFF)
     txBuf[2]  = MIN_PACKET_SIZE + 3;    // Packet Size
-    txBuf[3]  = id;                     // pID is total number of servos in the network (0 ~ 253)
+    txBuf[3]  = _id;                    // pID is total number of servos in the network (0 ~ 253)
     txBuf[4]  = CMD_RAM_WRITE;          // Command S JOG (CMD_RAM_WRITE)
     txBuf[5]  = 0;                      // Checksum1
     txBuf[6]  = 0;                      // Checksum2
@@ -234,7 +234,7 @@ void Herkulex::setLedOn(uint8_t id)
 }
 
 //------------------------------------------------------------------------------
-int8_t Herkulex::getStatus(uint8_t id) 
+int8_t Herkulex::getStatus() 
 {
     uint8_t status;
     uint8_t txBuf[7];
@@ -242,7 +242,7 @@ int8_t Herkulex::getStatus(uint8_t id)
     txBuf[0] = HEADER;                  // Packet Header (0xFF)
     txBuf[1] = HEADER;                  // Packet Header (0xFF)
     txBuf[2] = MIN_PACKET_SIZE;         // Packet Size
-    txBuf[3] = id;                      // Servo ID
+    txBuf[3] = _id;                     // Servo ID
     txBuf[4] = CMD_STAT;                // Status Error, Status Detail request
 
     // Check Sum1 and Check Sum2
@@ -288,8 +288,9 @@ int8_t Herkulex::getStatus(uint8_t id)
 }
 
 //------------------------------------------------------------------------------
-int16_t Herkulex::getPos(uint8_t id) 
+int16_t Herkulex::getPos() 
 {
+  /*
     uint16_t position = 0;
     
     uint8_t txBuf[9];
@@ -341,8 +342,8 @@ int16_t Herkulex::getPos(uint8_t id)
     #ifdef HERKULEX_DEBUG
         _pc->printf("position = %04X(%d)\n", position, position);
     #endif
-    
-    return position;
+   */ 
+    return _status_position;
 }
 
 //------------------------------------------------------------------------------
