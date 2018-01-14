@@ -329,11 +329,12 @@ public:
 
 
 private:
-	// The callback method when fetchStatus has been called.
-	void parseStatusMessage(int event);
+	void parseStatusMessage();
 
-	// The callback method when fetchPosition has been called.
-	void parsePositionMessage(int event);
+	void parsePositionMessage();
+
+	// The callback method when fetchStatus has been called.
+	void interpretBuffer(int event);
 
 	// Hold the last position fetched from the servo.
 	int16_t _status_position;
@@ -343,13 +344,9 @@ private:
 
 	uint8_t _id;
 
-	event_callback_t _callback_read_status;
+	event_callback_t _callback_read;
 
-	event_callback_t _callback_read_position;
-
-	uint8_t _buffer_status[9];
-
-	uint8_t _buffer_position[32];
+	uint8_t _buffer[13];
 
 	/** PC serial connection used in debug mode.
 	*/

@@ -22,10 +22,23 @@
 #include "herkulex.h"
 #include "mbed.h"
 
-void Herkulex::parseStatusMessage(int event) {
+void Herkulex::interpretBuffer(int event) {
+
+	if(_buffer[4] == 0X47) {
+		this->parseStatusMessage();
+	}
+	// FIXME : Mettre le bon ID.
+	else if(_buffer[4] == 0x46) {
+		this->parsePositionMessage();
+	} else {
+		_pc->printf("Erreur de commande");
+	}
+}
+
+void Herkulex::parseStatusMessage() {
 	// Checksum1
-	uint8_t chksum1 = (_buffer_status[2] ^ _buffer_status[3] ^ _buffer_status[4] ^ _buffer_status[7] ^ _buffer_status[8]) & 0xFE;
-	if(chksum1 != _buffer_status[5]) {
+	uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8]) & 0xFE;
+	if(chksum1 != _buffer[5]) {
 #ifdef HERKULEX_DEBUG
 		_pc->printf("Checksum1 fault\n");
 #endif
@@ -34,8 +47,8 @@ void Herkulex::parseStatusMessage(int event) {
 	}
 
 	// Checksum2
-	uint8_t chksum2 = (~_buffer_status[5] & 0xFE);
-	if(chksum2 != _buffer_status[6]) {
+	uint8_t chksum2 = (~_buffer[5] & 0xFE);
+	if(chksum2 != _buffer[6]) {
 #ifdef HERKULEX_DEBUG
 		_pc->printf("Checksum2 fault\n");
 #endif
@@ -43,8 +56,8 @@ void Herkulex::parseStatusMessage(int event) {
 		_status = -1;
 	}
 
-	_status = _buffer_status[7]; // Status Error
-                                 // status = _buffer_status[8];  // Status Detail
+	_status = _buffer[7]; // Status Error
+                          // status = _buffer[8];  // Status Detail
 #ifdef HERKULEX_DEBUG
 	_pc->printf("Status = %02X\n", _status);
 #endif
@@ -54,20 +67,18 @@ Herkulex::Herkulex(uint8_t id, Serial* connection, Serial* pc)
         : _status_position(0)
         , _status(0)
         , _id(id)
-        , _callback_read_status(Callback<void(int)>(this, &Herkulex::parseStatusMessage))
-        , _callback_read_position(Callback<void(int)>(this, &Herkulex::parsePositionMessage))
+        , _callback_read(Callback<void(int)>(this, &Herkulex::interpretBuffer))
         , _pc(pc)
         , _ser(connection) {
 	_pc->printf("OK\n");
+	this->fetchStatus();
 }
 
-void Herkulex::parsePositionMessage(int event) {
+void Herkulex::parsePositionMessage() {
 	// Checksum1
 	uint8_t chksum1 =
-	    (_buffer_position[2] ^ _buffer_position[3] ^ _buffer_position[4] ^ _buffer_position[7] ^ _buffer_position[8] ^
-	     _buffer_position[9] ^ _buffer_position[10] ^ _buffer_position[11] ^ _buffer_position[12]) &
-	    0xFE;
-	if(chksum1 != _buffer_position[5]) {
+	    (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8] ^ _buffer[9] ^ _buffer[10] ^ _buffer[11] ^ _buffer[12]) & 0xFE;
+	if(chksum1 != _buffer[5]) {
 #ifdef HERKULEX_DEBUG
 		_pc->printf("Checksum1 fault\n");
 #endif
@@ -76,16 +87,15 @@ void Herkulex::parsePositionMessage(int event) {
 	}
 
 	// Checksum2
-	uint8_t chksum2 = (~_buffer_position[5] & 0xFE);
-	if(chksum2 != _buffer_position[6]) {
+	uint8_t chksum2 = (~_buffer[5] & 0xFE);
+	if(chksum2 != _buffer[6]) {
 #ifdef HERKULEX_DEBUG
 		_pc->printf("Checksum2 fault\n");
 #endif
-
 		_status_position = -1;
 	}
 
-	_status_position = ((_buffer_position[10] & 0x03) << 8) | _buffer_position[9];
+	_status_position = ((_buffer[10] & 0x03) << 8) | _buffer[9];
 
 #ifdef HERKULEX_DEBUG
 	_pc->printf("position = %04X(%d)\n", _status_position, _status_position);
@@ -104,7 +114,10 @@ void Herkulex::txPacket(uint8_t packetSize, uint8_t* data) {
 	_pc->printf("[TX]");
 #endif
 
-	_ser->write(data, packetSize, 0, 0);
+	for(uint8_t i = 0; i < packetSize; i++) {
+		_ser->putc(data[i]);
+	}
+//_ser->write(data, packetSize, 0, 0);
 
 #ifdef HERKULEX_DEBUG
 	_pc->printf("\n");
@@ -265,7 +278,7 @@ void Herkulex::fetchStatus() {
 	// send packet (mbed -> herkulex)
 	txPacket(7, txBuf);
 
-	_ser->read(_buffer_status, (uint8_t)9, _callback_read_status, SERIAL_EVENT_RX_ALL);
+	_ser->read(_buffer, (uint8_t)9, _callback_read, SERIAL_EVENT_RX_COMPLETE);
 }
 
 void Herkulex::fetchPosition() {
@@ -288,7 +301,7 @@ void Herkulex::fetchPosition() {
 	// send packet (mbed -> herkulex)
 	txPacket(9, txBuf);
 
-	_ser->read(_buffer_position, (uint8_t)13, _callback_read_position, SERIAL_EVENT_RX_ALL);
+	_ser->read(_buffer, (uint8_t)13, _callback_read, SERIAL_EVENT_RX_COMPLETE);
 }
 
 //------------------------------------------------------------------------------
