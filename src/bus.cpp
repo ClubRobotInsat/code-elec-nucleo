@@ -8,30 +8,41 @@ HerkulexServo HerkulexBus::makeNewServo(uint8_t id) {
 }
 
 void HerkulexBus::write(uint8_t* data, uint8_t length) {
-	_ser->write(data, length, 0, 0);
+	for (uint8_t i = 0; i < length; i++) {
+		_ser->putc(data[i]);
+	}
 }
 
 void HerkulexBus::interpretBuffer(int event) {
+
+	if(!_buffer[3] != _servo_registered_for_callback->getId()) {
+
 	if(_buffer[4] == 0X47) {
 		this->parseStatusMessage(_servo_registered_for_callback);
 	} else if(_buffer[4] == 0x46) {
 		this->parsePositionMessage(_servo_registered_for_callback);
 	} else {
-		/// FIXME : Erreur
+		debug("Bad CMD");
 	}
 	_callback_waiting = false;
+	}
+	else {
+		debug("Bad ID");
+	}
 }
 
 void HerkulexBus::parseStatusMessage(HerkulexServo* servo) {
 	// Checksum1
 	uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8]) & 0xFE;
 	if(chksum1 != _buffer[5]) {
+		debug("Bad status Checksum #1");
 		servo->setStatus(0xFF);
 	}
 
 	// Checksum2
 	uint8_t chksum2 = (~_buffer[5] & 0xFE);
 	if(chksum2 != _buffer[6]) {
+		debug("Bad status Checksum #2");
 		servo->setStatus(0xFF);
 	}
 
@@ -44,12 +55,14 @@ void HerkulexBus::parsePositionMessage(HerkulexServo* servo) {
 	uint8_t chksum1 =
 	    (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8] ^ _buffer[9] ^ _buffer[10] ^ _buffer[11] ^ _buffer[12]) & 0xFE;
 	if(chksum1 != _buffer[5]) {
+		debug("Bad position Checksum #1");
 		servo->setPosition(0xFFFF);
 	}
 
 	// Checksum2
 	uint8_t chksum2 = (~_buffer[5] & 0xFE);
 	if(chksum2 != _buffer[6]) {
+		debug("Bad position Checksum #2");
 		servo->setPosition(0xFFFF);
 	}
 
