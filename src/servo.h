@@ -1,8 +1,22 @@
+#ifndef HERKULEX_SERVO_H
+#define HERKULEX_SERVO_H
+
+
 #include "mbed.h"
 
 class HerkulexBus;
 
-class HerkulexServo {
+template <uint8_t N_SERVOS>
+class HerkulexManager; 
+
+class HerkulexServo 
+{
+	template <uint8_t N_SERVOS> 
+	friend class HerkulexManager; 
+
+private: 
+	void setId(uint8_t id);
+
 public:
 	/* You should not call this constructor directly, but call HerkulexBus::makeNewServo */
 	HerkulexServo(uint8_t id, HerkulexBus* bus);
@@ -62,3 +76,6 @@ private:
 	// The internal bus that communicates in serial with the servo.
 	HerkulexBus* _bus;
 };
+
+
+#endif

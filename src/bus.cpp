@@ -3,7 +3,7 @@
 HerkulexBus::HerkulexBus(Serial* ser)
         : _callback_waiting(false), _ser(ser), _read_callback(Callback<void(int)>(this, &HerkulexBus::interpretBuffer)) {}
 
-HerkulexServo HerkulexBus::makeNewServo(uint8_t id) {
+HerkulexBus::makeNewServo(uint8_t id) {
 	return HerkulexServo(id, this);
 }
 
