@@ -1,3 +1,6 @@
+#ifndef HERKULEX_BUS_H
+#define HERKULEX_BUS_H
+
 
 // Herkulex ROM Register
 #define ROM_MODEL_NO1 0
@@ -183,38 +186,72 @@
 #define BLED_ON 0x08
 #define RLED_ON 0x10
 
-#include "servo.h"
+#include "HerkulexServo.h"
+#include "HerkulexConst.h"
 
-class HerkulexBus {
-public:
-	HerkulexBus(Serial* ser);
+namespace herkulex 
+{
+	template <uint8_t N_SERVOS> 
+	class HerkulexManager; 
 
-	/* Write data to the bus */
-	void write(uint8_t* data, uint8_t length);
+	class HerkulexBus {
+	private: 
+		template <uint8_t N_SERVOS>
+		friend class HerkulexManager;
 
-	/* You should not call this method directly but prefer HerkulexServo::updatePosition. */
-	void fetchPosition(HerkulexServo* servo);
+	public:
+		HerkulexBus(Serial* ser);
 
-	/* You should not call this method directly but prefer HerkulexServo::updateStatus. */
-	void fetchStatus(HerkulexServo* servo);
+		/* Write data to the bus */
+		void write(uint8_t* data, uint8_t length);
 
-	/* Creates a new HerkulexServo that is registered in this bus. */
-	HerkulexServo makeNewServo(uint8_t id);
+		/* You should not call this method directly but prefer HerkulexServo::updatePosition. */
+		void fetchPosition(HerkulexServo * servo);
 
-private:
-	void parseStatusMessage(HerkulexServo* servo);
+		/* You should not call this method directly but prefer HerkulexServo::updateStatus. */
+		void fetchStatus(HerkulexServo * servo);
 
-	void parsePositionMessage(HerkulexServo* servo);
+		/* Creates a new HerkulexServo that is registered in this bus. */
+		// HerkulexServo makeNewServo(uint8_t id);
 
-	void interpretBuffer(int event);
+	private:
+		void parseStatusMessage(HerkulexServo* servo);
 
-	volatile bool _callback_waiting;
+		void parsePositionMessage(HerkulexServo* servo);
 
-	Serial* _ser;
+		void interpretBuffer(int event);
 
-	event_callback_t _read_callback;
+		template <uint8_t ID, constants::CMD::toServo CMD, uint8_t DATA_SIZE>
+		inline void sendMsg(const uint8_t data[DATA_SIZE]) const; 
 
-	uint8_t _buffer[13];
+		// Warning : this function cannot be used to write data with len > 2
+		void sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00); 
+		
+		// Warning : this function cannot be used to read data with len > 2
+		void sendEEPReadMsg(uint8_t id, constants::EEPAddr addr, uint8_t len = 1);
+		void sendRAMWriteMsg(uint8_t id, constants::RAMAddr addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+		void sendRAMReadMsg(uint8_t id, constants::RAMAddr addr, uint8_t len = 1);		
+		// void sendIJOGMsg(); 
+		// void sendSJOGMsg(); 
+		// void sendStatMsg(); 
+		// void sendRollbackMsg(); 
+		// void sendRebootMsg(); 
 
-	HerkulexServo* _servo_registered_for_callback;
-};
+		template <uint8_t ID, constants::CMD::fromServo CMD>
+		inline uint8_t readMsg(uint8_t * message);
+
+
+
+		volatile bool _callback_waiting;
+
+		Serial* _ser;
+
+		event_callback_t _read_callback;
+
+		uint8_t _buffer[13];
+
+		HerkulexServo* _servo_registered_for_callback;
+	};
+}
+
+#endif

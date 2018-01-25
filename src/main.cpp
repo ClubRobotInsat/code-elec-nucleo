@@ -1,7 +1,8 @@
-#include "bus.h"
+#include "HerkulexBus.h"
 #include "mbed.h"
 #include "HerkulexConst.h"
 
+using namespace herkulex; 
 // set serial port and baudrate, (mbed <-> HerculexX)
 uint8_t id = 0x03;
 Serial pc(USBTX, USBRX, 9600);
