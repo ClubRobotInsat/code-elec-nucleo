@@ -21,6 +21,7 @@ public:
 	virtual ~HerkulexManager(); 
 
 	HerkulexServo & registerNewServo(uint8_t id);
+	
 }; 
 
 #endif
