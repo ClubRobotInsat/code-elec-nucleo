@@ -61,6 +61,7 @@ mbed compile --profile .temp/tools/profiles/debug.json
 ./debug.sh
 ```
 
+
 ###### Installation
 Pour un PC sous Linux, il faut passer par Wine.
 
@@ -130,6 +131,28 @@ source ~/.bashrc
 
 **Vous pouvez maintenant lancer Keil en tapant `keil` dans un terminal :blush:** 
 
+###### Compiler et executer du code sur la carte
+
+Pour compiler, se mettre dans le dossier cloné plus tôt (depuis https://github.com/ClubRobotInsat/code-elec-nucleo) 
+et utiliser la commande :
+
+```
+mbed compile --profile .temp/tools/profiles/debug.json
+```
+
+Brancher la carte au PC, puis utiliser :
+
+```
+openocd -f stm32.cfg
+```
+
+Sans fermer le terminal, en ouvrir un deuxième. Dans celui-ci, executer debug.sh avec
+
+```
+./debug.sh
+```
+
+Ensuite, une fois le chargement terminé, entrer *c* ou *continue*
 
 ### 2. Cloner le dossier partagé sur Github
 ``` 
