@@ -1,5 +1,6 @@
 #include "HerkulexBus.h"
 #include "HerkulexConst.h"
+#include "HerkulexManager.h"
 #include "mbed.h"
 
 using namespace herkulex;

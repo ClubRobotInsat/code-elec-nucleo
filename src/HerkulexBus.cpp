@@ -124,30 +124,29 @@ namespace herkulex {
 		_ser->read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
 	}
 
-	template <uint8_t ID, constants::CMD::toServo CMD, uint8_t DATA_SIZE>
-	void HerkulexBus::sendMsg(const uint8_t data[DATA_SIZE]) {
-		uint8_t txBuf[DATA_SIZE + constants::Size::MinPacketSize];
-		uint8_t index;
+	void HerkulexBus::sendMsg(const uint8_t id, const constants::CMD::toServo cmd, const uint8_t* data, const uint8_t length) {
+		uint8_t txBuf[length + static_cast<uint8_t>(constants::Size::MinPacketSize)];
+		uint8_t index = 0;
 
 		txBuf[0] = constants::header;
 		txBuf[1] = constants::header;
-		txBuf[2] = DATA_SIZE + constants::Size::MinPacketSize;
-		txBuf[3] = ID;
-		txBuf[4] = CMD;
+		txBuf[2] = length + static_cast<uint8_t>(constants::Size::MinPacketSize);
+		txBuf[3] = id;
+		txBuf[4] = static_cast<uint8_t>(cmd);
 
 		// Start construction of checksum
 		txBuf[5] = txBuf[2] ^ txBuf[3] ^ txBuf[4];
 		txBuf[6] = 0;
 
-		for(index = 0; index < DATA_SIZE; ++index) {
-			txBuf[constants::Size::MinPacketSize + index] = data[index];
+		for(index = 0; index < length; ++index) {
+			txBuf[static_cast<uint8_t>(constants::Size::MinPacketSize) + index] = data[index];
 			// Iteratively construct the checksum
 			txBuf[5] ^= txBuf[index];
 		}
 
 		txBuf[6] = (~txBuf[5]) & 0xFE;
 
-		write(txBuf, DATA_SIZE + constants::Size::MinPacketSize);
+		write(txBuf, length + static_cast<uint8_t>(constants::Size::MinPacketSize));
 	}
 
 	void HerkulexBus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len, uint8_t msb) {
@@ -157,14 +156,14 @@ namespace herkulex {
 
 		uint8_t data[2 + len];
 
-		data[0] = addr;
+		data[0] = static_cast<uint8_t>(addr);
 		data[1] = len;
 		data[2] = lsb;
 		if(len > 1) {
 			data[3] = msb;
 		}
 
-		sendMsg<id, constants::CMD::toServo::EEPWrite, (2 + len)>(data);
+		sendMsg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
 	}
 
 	void HerkulexBus::sendEEPReadMsg(uint8_t id, constants::EEPAddr addr, uint8_t len) {
@@ -174,10 +173,10 @@ namespace herkulex {
 
 		uint8_t data[2];
 
-		data[0] = addr;
+		data[0] = static_cast<uint8_t>(addr);
 		data[1] = len;
 
-		sendMsg<id, constants::CMD::toServo::EEPRead, 2>(data);
+		sendMsg(id, constants::CMD::toServo::EEPRead, data, 2);
 	}
 
 	void HerkulexBus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr addr, uint8_t lsb, uint8_t len, uint8_t msb) {
@@ -187,14 +186,14 @@ namespace herkulex {
 
 		uint8_t data[2 + len];
 
-		data[0] = addr;
+		data[0] = static_cast<uint8_t>(addr);
 		data[1] = len;
 		data[2] = lsb;
 		if(len > 1) {
 			data[3] = msb;
 		}
 
-		sendMsg<id, constants::CMD::toServo::RAMWrite, 2 + len>(data);
+		sendMsg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
 	}
 
 	void HerkulexBus::sendRAMReadMsg(uint8_t id, constants::RAMAddr addr, uint8_t len) {
@@ -204,10 +203,14 @@ namespace herkulex {
 
 		uint8_t data[2 + len];
 
-		data[0] = addr;
+		data[0] = static_cast<uint8_t>(addr);
 		data[1] = len;
 
-		sendMsg<id, constants::CMD::toServo::RAMRead, 2>(data);
+		sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
+	}
+
+	HerkulexServo HerkulexBus::makeNewServo(uint8_t id) {
+		return HerkulexServo(id, this);
 	}
 
 	// void HerkulexBus::sendIJOGMsg();

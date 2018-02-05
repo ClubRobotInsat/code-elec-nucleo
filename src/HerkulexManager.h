@@ -1,11 +1,9 @@
 #ifndef HERKULEX_MANAGER_H
 #define HERKULEX_MANAGER_H
 
-#include <mbed.h>
-
-#include "GlobalMapping.h"
 #include "HerkulexBus.h"
 #include "HerkulexServo.h"
+#include <mbed.h>
 
 namespace herkulex {
 	template <uint8_t N_SERVOS>
@@ -19,7 +17,7 @@ namespace herkulex {
 		static uint8_t _nb_reg_servos;
 
 		// The manager stores the bus -
-		static HerkulexBus _bus;
+		HerkulexBus _bus;
 
 		// The state is refreshed at a defined period
 		const uint32_t _refreshPeriod;
@@ -29,7 +27,7 @@ namespace herkulex {
 		Ticker _it_ticker;
 
 	public:
-		HerkulexManager(uint32_t refreshTime);
+		HerkulexManager(uint8_t txPin, uint8_t rxPin, uint32_t refreshTime);
 		virtual ~HerkulexManager();
 
 		// This function is used to get a reference to a servo object with desired ID

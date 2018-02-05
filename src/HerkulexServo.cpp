@@ -1,4 +1,5 @@
 #include "HerkulexServo.h"
+#include "HerkulexBus.h"
 
 namespace herkulex {
 	HerkulexServo::HerkulexServo(uint8_t id, HerkulexBus* bus) : _id(id), _status(0), _position(0), _bus(bus) {}

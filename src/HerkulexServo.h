@@ -1,7 +1,6 @@
 #ifndef HERKULEX_SERVO_H
 #define HERKULEX_SERVO_H
 
-
 #include "mbed.h"
 
 namespace herkulex {

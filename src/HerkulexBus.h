@@ -211,7 +211,7 @@ namespace herkulex {
 		void fetchStatus(HerkulexServo* servo);
 
 		/* Creates a new HerkulexServo that is registered in this bus. */
-		// HerkulexServo makeNewServo(uint8_t id);
+		HerkulexServo makeNewServo(uint8_t id);
 
 	private:
 		void parseStatusMessage(HerkulexServo* servo);
@@ -220,8 +220,7 @@ namespace herkulex {
 
 		void interpretBuffer(int event);
 
-		template <uint8_t ID, constants::CMD::toServo CMD, uint8_t DATA_SIZE>
-		inline void sendMsg(const uint8_t data[DATA_SIZE]) const;
+		void sendMsg(const uint8_t id, const constants::CMD::toServo, const uint8_t* data, const uint8_t length);
 
 		// Warning : this function cannot be used to write data with len > 2
 		void sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
