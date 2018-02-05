@@ -186,16 +186,15 @@
 #define BLED_ON 0x08
 #define RLED_ON 0x10
 
-#include "HerkulexServo.h"
 #include "HerkulexConst.h"
+#include "HerkulexServo.h"
 
-namespace herkulex 
-{
-	template <uint8_t N_SERVOS> 
-	class HerkulexManager; 
+namespace herkulex {
+	template <uint8_t N_SERVOS>
+	class HerkulexManager;
 
 	class HerkulexBus {
-	private: 
+	private:
 		template <uint8_t N_SERVOS>
 		friend class HerkulexManager;
 
@@ -206,10 +205,10 @@ namespace herkulex
 		void write(uint8_t* data, uint8_t length);
 
 		/* You should not call this method directly but prefer HerkulexServo::updatePosition. */
-		void fetchPosition(HerkulexServo * servo);
+		void fetchPosition(HerkulexServo* servo);
 
 		/* You should not call this method directly but prefer HerkulexServo::updateStatus. */
-		void fetchStatus(HerkulexServo * servo);
+		void fetchStatus(HerkulexServo* servo);
 
 		/* Creates a new HerkulexServo that is registered in this bus. */
 		// HerkulexServo makeNewServo(uint8_t id);
@@ -222,24 +221,23 @@ namespace herkulex
 		void interpretBuffer(int event);
 
 		template <uint8_t ID, constants::CMD::toServo CMD, uint8_t DATA_SIZE>
-		inline void sendMsg(const uint8_t data[DATA_SIZE]) const; 
+		inline void sendMsg(const uint8_t data[DATA_SIZE]) const;
 
 		// Warning : this function cannot be used to write data with len > 2
-		void sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00); 
-		
+		void sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+
 		// Warning : this function cannot be used to read data with len > 2
 		void sendEEPReadMsg(uint8_t id, constants::EEPAddr addr, uint8_t len = 1);
 		void sendRAMWriteMsg(uint8_t id, constants::RAMAddr addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
-		void sendRAMReadMsg(uint8_t id, constants::RAMAddr addr, uint8_t len = 1);		
-		// void sendIJOGMsg(); 
-		// void sendSJOGMsg(); 
-		// void sendStatMsg(); 
-		// void sendRollbackMsg(); 
-		// void sendRebootMsg(); 
+		void sendRAMReadMsg(uint8_t id, constants::RAMAddr addr, uint8_t len = 1);
+		// void sendIJOGMsg();
+		// void sendSJOGMsg();
+		// void sendStatMsg();
+		// void sendRollbackMsg();
+		// void sendRebootMsg();
 
 		template <uint8_t ID, constants::CMD::fromServo CMD>
-		inline uint8_t readMsg(uint8_t * message);
-
+		inline uint8_t readMsg(uint8_t* message);
 
 
 		volatile bool _callback_waiting;

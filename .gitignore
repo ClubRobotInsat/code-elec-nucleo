@@ -8,3 +8,5 @@ core
 herkulex/
 mbed-dev/
 herkulex/
+.idea/
+cmake-build-debug/

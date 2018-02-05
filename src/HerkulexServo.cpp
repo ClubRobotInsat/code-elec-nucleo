@@ -1,7 +1,6 @@
 #include "HerkulexServo.h"
 
-namespace herkulex
-{
+namespace herkulex {
 	HerkulexServo::HerkulexServo(uint8_t id, HerkulexBus* bus) : _id(id), _status(0), _position(0), _bus(bus) {}
 
 	uint16_t HerkulexServo::getPosition() const {

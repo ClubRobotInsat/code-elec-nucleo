@@ -1,8 +1,7 @@
 #include "HerkulexBus.h"
 
-namespace herkulex
-{
-	HerkulexBus::HerkulexBus(Serial * ser)
+namespace herkulex {
+	HerkulexBus::HerkulexBus(Serial* ser)
 	        : _callback_waiting(false), _ser(ser), _read_callback(Callback<void(int)>(this, &HerkulexBus::interpretBuffer)) {}
 
 	// HerkulexServo HerkulexBus::makeNewServo(uint8_t id) {
@@ -10,7 +9,7 @@ namespace herkulex
 	// }
 
 	void HerkulexBus::write(uint8_t* data, uint8_t length) {
-		for (uint8_t i = 0; i < length; i++) {
+		for(uint8_t i = 0; i < length; i++) {
 			_ser->putc(data[i]);
 		}
 	}
@@ -19,16 +18,15 @@ namespace herkulex
 
 		if(!_buffer[3] != _servo_registered_for_callback->getId()) {
 
-		if(_buffer[4] == 0X47) {
-			this->parseStatusMessage(_servo_registered_for_callback);
-		} else if(_buffer[4] == 0x46) {
-			this->parsePositionMessage(_servo_registered_for_callback);
+			if(_buffer[4] == 0X47) {
+				this->parseStatusMessage(_servo_registered_for_callback);
+			} else if(_buffer[4] == 0x46) {
+				this->parsePositionMessage(_servo_registered_for_callback);
+			} else {
+				debug("Bad CMD");
+			}
+			_callback_waiting = false;
 		} else {
-			debug("Bad CMD");
-		}
-		_callback_waiting = false;
-		}
-		else {
 			debug("Bad ID");
 		}
 	}
@@ -54,8 +52,9 @@ namespace herkulex
 
 	void HerkulexBus::parsePositionMessage(HerkulexServo* servo) {
 		// Checksum1
-		uint8_t chksum1 =
-		    (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8] ^ _buffer[9] ^ _buffer[10] ^ _buffer[11] ^ _buffer[12]) & 0xFE;
+		uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8] ^ _buffer[9] ^ _buffer[10] ^
+		                   _buffer[11] ^ _buffer[12]) &
+		                  0xFE;
 		if(chksum1 != _buffer[5]) {
 			debug("Bad position Checksum #1");
 			servo->setPosition(0xFFFF);
@@ -126,99 +125,94 @@ namespace herkulex
 	}
 
 	template <uint8_t ID, constants::CMD::toServo CMD, uint8_t DATA_SIZE>
- 	void HerkulexBus::sendMsg(const uint8_t data[DATA_SIZE])
- 	{
- 		uint8_t txBuf[DATA_SIZE + constants::Size::MinPacketSize]; 
- 		uint8_t index; 
+	void HerkulexBus::sendMsg(const uint8_t data[DATA_SIZE]) {
+		uint8_t txBuf[DATA_SIZE + constants::Size::MinPacketSize];
+		uint8_t index;
 
- 		txBuf[0] = constants::header;
- 		txBuf[1] = constants::header; 
- 		txBuf[2] = DATA_SIZE + constants::Size::MinPacketSize; 
- 		txBuf[3] = ID; 
- 		txBuf[4] = CMD; 
+		txBuf[0] = constants::header;
+		txBuf[1] = constants::header;
+		txBuf[2] = DATA_SIZE + constants::Size::MinPacketSize;
+		txBuf[3] = ID;
+		txBuf[4] = CMD;
 
- 		// Start construction of checksum
- 		txBuf[5] = txBuf[2] ^ txBuf[3] ^ txBuf[4]; 
- 		txBuf[6] = 0; 
+		// Start construction of checksum
+		txBuf[5] = txBuf[2] ^ txBuf[3] ^ txBuf[4];
+		txBuf[6] = 0;
 
- 		for(index = 0; index < DATA_SIZE; ++index) 
- 		{
- 			txBuf[constants::Size::MinPacketSize + index] = data[index]; 
- 			// Iteratively construct the checksum
- 			txBuf[5] ^= txBuf[index]; 
- 		} 
+		for(index = 0; index < DATA_SIZE; ++index) {
+			txBuf[constants::Size::MinPacketSize + index] = data[index];
+			// Iteratively construct the checksum
+			txBuf[5] ^= txBuf[index];
+		}
 
- 		txBuf[6] = (~txBuf[5]) & 0xFE; 
+		txBuf[6] = (~txBuf[5]) & 0xFE;
 
- 		write(txBuf, DATA_SIZE + constants::Size::MinPacketSize);
- 	}
+		write(txBuf, DATA_SIZE + constants::Size::MinPacketSize);
+	}
 
- 	void HerkulexBus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len, uint8_t msb)
- 	{
- 		// Check valid length
- 		if(len < 1 || len > 2) return; 
-
- 		uint8_t data[2 + len]; 
-
- 		data[0] = addr; 
- 		data[1] = len; 
- 		data[2] = lsb; 
- 		if(len > 1) 
- 		{
- 			data[3] = msb; 
- 		}
-
- 		sendMsg<id, constants::CMD::toServo::EEPWrite, (2 + len)>(data); 
- 	} 
-
-	void HerkulexBus::sendEEPReadMsg(uint8_t id, constants::EEPAddr addr, uint8_t len)
-	{
+	void HerkulexBus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len, uint8_t msb) {
 		// Check valid length
- 		if(len < 1 || len > 2) return; 
+		if(len < 1 || len > 2)
+			return;
 
- 		uint8_t data[2]; 
+		uint8_t data[2 + len];
 
- 		data[0] = addr; 
- 		data[1] = len; 
+		data[0] = addr;
+		data[1] = len;
+		data[2] = lsb;
+		if(len > 1) {
+			data[3] = msb;
+		}
 
- 		sendMsg<id, constants::CMD::toServo::EEPRead, 2>(data); 
+		sendMsg<id, constants::CMD::toServo::EEPWrite, (2 + len)>(data);
 	}
 
-	void HerkulexBus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr addr, uint8_t lsb, uint8_t len, uint8_t msb)
-	{
+	void HerkulexBus::sendEEPReadMsg(uint8_t id, constants::EEPAddr addr, uint8_t len) {
 		// Check valid length
- 		if(len < 1 || len > 2) return; 
+		if(len < 1 || len > 2)
+			return;
 
- 		uint8_t data[2 + len];
+		uint8_t data[2];
 
- 		data[0] = addr; 
- 		data[1] = len; 
- 		data[2] = lsb; 
- 		if(len > 1) 
- 		{
- 			data[3] = msb; 
- 		}
+		data[0] = addr;
+		data[1] = len;
 
- 		sendMsg<id, constants::CMD::toServo::RAMWrite, 2 + len>(data); 
+		sendMsg<id, constants::CMD::toServo::EEPRead, 2>(data);
 	}
 
-	void HerkulexBus::sendRAMReadMsg(uint8_t id, constants::RAMAddr addr, uint8_t len)
-	{
-		// Check valid length	
- 		if(len < 1 || len > 2) return; 
+	void HerkulexBus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr addr, uint8_t lsb, uint8_t len, uint8_t msb) {
+		// Check valid length
+		if(len < 1 || len > 2)
+			return;
 
- 		uint8_t data[2 + len];
+		uint8_t data[2 + len];
 
- 		data[0] = addr; 
- 		data[1] = len; 
+		data[0] = addr;
+		data[1] = len;
+		data[2] = lsb;
+		if(len > 1) {
+			data[3] = msb;
+		}
 
- 		sendMsg<id, constants::CMD::toServo::RAMRead, 2>(data); 
+		sendMsg<id, constants::CMD::toServo::RAMWrite, 2 + len>(data);
 	}
 
-	// void HerkulexBus::sendIJOGMsg(); 
-	// void HerkulexBus::sendSJOGMsg(); 
-	// void HerkulexBus::sendStatMsg(); 
-	// void HerkulexBus::sendRollbackMsg(); 
-	// void HerkulexBus::sendRebootMsg(); 
+	void HerkulexBus::sendRAMReadMsg(uint8_t id, constants::RAMAddr addr, uint8_t len) {
+		// Check valid length
+		if(len < 1 || len > 2)
+			return;
 
+		uint8_t data[2 + len];
+
+		data[0] = addr;
+		data[1] = len;
+
+		sendMsg<id, constants::CMD::toServo::RAMRead, 2>(data);
+	}
+
+	// void HerkulexBus::sendIJOGMsg();
+	// void HerkulexBus::sendSJOGMsg();
+	// void HerkulexBus::sendStatMsg();
+	// void HerkulexBus::sendRollbackMsg();
+	// void HerkulexBus::sendRebootMsg();
 }

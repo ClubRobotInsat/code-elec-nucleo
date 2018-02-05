@@ -4,19 +4,17 @@
 
 #include "mbed.h"
 
-namespace herkulex 
-{
+namespace herkulex {
 	class HerkulexBus;
 
 	template <uint8_t N_SERVOS>
-	class HerkulexManager; 
+	class HerkulexManager;
 
-	class HerkulexServo 
-	{
-		template <uint8_t N_SERVOS> 
-		friend class HerkulexManager; 
+	class HerkulexServo {
+		template <uint8_t N_SERVOS>
+		friend class HerkulexManager;
 
-	private: 
+	private:
 		void setId(uint8_t id);
 
 	public:
