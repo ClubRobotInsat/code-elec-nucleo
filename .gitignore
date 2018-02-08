@@ -5,8 +5,6 @@ core
 **/*.swp
 .temp
 .gdb_history
-herkulex/
 mbed-dev/
-herkulex/
 .idea/
 cmake-build-debug/

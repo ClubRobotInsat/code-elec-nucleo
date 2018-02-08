@@ -6,26 +6,32 @@
 using namespace herkulex;
 // set serial port and baudrate, (mbed <-> HerculexX)
 uint8_t id = 0x03;
+
 Serial pc(USBTX, USBRX, 9600);
 
 Serial connection(D8, D2, 115200);
 
 int main() {
-	pc.printf("xxxXXX-DEBUT-XXXxxx");
+	pc.printf("xxxXXX-DEBUT-XXXxxx \n");
+	Manager<16> mgr(D8, D2, 1500, &pc);
+	pc.printf("1 \n");
+	Servo* sv3 = mgr.registerNewServo(0xFD);
+	pc.printf("2 \n");
+	sv3->clear();
+	pc.printf("3 \n");
+	sv3->setLedOn();
+	pc.printf("4 \n");
+	sv3->setTorque(TORQUE_ON);
+	pc.printf("5 \n");
 
-	Bus bus(&connection);
-	Servo sv3 = bus.makeNewServo(0x03);
-	Servo svfd = bus.makeNewServo(0xFD);
-	sv3.clear();
+	/*Servo svfd = bus.makeNewServo(0xFD);
 	svfd.clear();
-
-	sv3.setLedOn();
 	svfd.setLedOn();
-
-	sv3.setTorque(TORQUE_ON);
 	svfd.setTorque(TORQUE_ON);
+*/
 
-	sv3.positionControl(800, 60, GLED_ON);
+	sv3->positionControl(800, 60, GLED_ON);
+	/*
 	svfd.positionControl(800, 60, GLED_ON);
 	wait_ms(800);
 	svfd.positionControl(300, 60, BLED_ON);
@@ -37,12 +43,13 @@ int main() {
 	sv3.updatePosition();
 	svfd.updatePosition();
 	wait_ms(750);
-
+*/
 	while(true) {
-		sv3.updateStatus();
-		svfd.updateStatus();
-		svfd.updatePosition();
-		sv3.updatePosition();
+		/*		sv3.updateStatus();
+		        svfd.updateStatus();
+		        svfd.updatePosition();
+		        sv3.updatePosition();
+		        */
 		wait_ms(7);
 	}
 }
