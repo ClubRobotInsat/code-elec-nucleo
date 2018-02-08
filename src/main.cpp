@@ -13,9 +13,9 @@ Serial connection(D8, D2, 115200);
 int main() {
 	pc.printf("xxxXXX-DEBUT-XXXxxx");
 
-	HerkulexBus bus(&connection);
-	HerkulexServo sv3 = bus.makeNewServo(0x03);
-	HerkulexServo svfd = bus.makeNewServo(0xFD);
+	Bus bus(&connection);
+	Servo sv3 = bus.makeNewServo(0x03);
+	Servo svfd = bus.makeNewServo(0xFD);
 	sv3.clear();
 	svfd.clear();
 
