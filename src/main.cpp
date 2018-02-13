@@ -9,14 +9,15 @@ uint8_t id = 0x03;
 
 Serial pc(USBTX, USBRX, 9600);
 
-Serial connection(D8, D2, 115200);
-
 int main() {
 	pc.printf("xxxXXX-DEBUT-XXXxxx \n");
 	Manager<16> mgr(D8, D2, 1500, &pc);
 	pc.printf("1 \n");
 	Servo* sv3 = mgr.registerNewServo(0xFD);
 	pc.printf("2 \n");
+	if(sv3 == nullptr) {
+		pc.printf("AIE\n");
+	}
 	sv3->clear();
 	pc.printf("3 \n");
 	sv3->setLedOn();

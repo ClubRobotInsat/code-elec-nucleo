@@ -3,7 +3,7 @@
 namespace herkulex {
 	Bus::Bus(PinName txPin, PinName rxPin, Serial* log)
 	        : _callback_waiting(false)
-	        , _ser(new Serial(txPin, rxPin))
+	        , _ser(new Serial(txPin, rxPin, 115200))
 	        , _log(log)
 	        , _read_callback(Callback<void(int)>(this, &Bus::interpretBuffer)) {}
 
@@ -12,14 +12,13 @@ namespace herkulex {
 	// }
 
 	void Bus::write(uint8_t* data, uint8_t length) {
-		_log->printf("Writing");
-		/*
+		//_log->printf("Writing\n");
 		for(uint8_t i = 0; i < length; i++) {
-		    _ser->putc(data[i]);
+			_ser->putc(data[i]);
 		}
-		 */
-		_ser->write(data, length, 0, 0);
-		_log->printf("Done writing");
+
+		//_ser->write(data, length, 0, 0);
+		//_log->printf("Done writing\n");
 	}
 
 	void Bus::interpretBuffer(int event) {
@@ -133,12 +132,13 @@ namespace herkulex {
 	}
 
 	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo cmd, const uint8_t* data, const uint8_t length) {
-		uint8_t txBuf[length + static_cast<uint8_t>(constants::Size::MinPacketSize)];
+		uint8_t total_length = length + static_cast<uint8_t>(constants::Size::MinPacketSize);
+		uint8_t* txBuf = new uint8_t(total_length);
 		uint8_t index = 0;
 
 		txBuf[0] = constants::header;
 		txBuf[1] = constants::header;
-		txBuf[2] = length + static_cast<uint8_t>(constants::Size::MinPacketSize);
+		txBuf[2] = total_length;
 		txBuf[3] = id;
 		txBuf[4] = static_cast<uint8_t>(cmd);
 
@@ -154,7 +154,8 @@ namespace herkulex {
 
 		txBuf[6] = (~txBuf[5]) & 0xFE;
 
-		write(txBuf, length + static_cast<uint8_t>(constants::Size::MinPacketSize));
+		write(txBuf, total_length);
+		delete txBuf;
 	}
 
 	void Bus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len, uint8_t msb) {
@@ -162,7 +163,7 @@ namespace herkulex {
 		if(len < 1 || len > 2)
 			return;
 
-		uint8_t data[2 + len];
+		uint8_t* data = new uint8_t(2 + len);
 
 		data[0] = static_cast<uint8_t>(addr);
 		data[1] = len;
@@ -192,7 +193,7 @@ namespace herkulex {
 		if(len < 1 || len > 2)
 			return;
 
-		uint8_t data[2 + len];
+		uint8_t* data = new uint8_t(2 + len);
 
 		data[0] = static_cast<uint8_t>(addr);
 		data[1] = len;
@@ -209,7 +210,7 @@ namespace herkulex {
 		if(len < 1 || len > 2)
 			return;
 
-		uint8_t data[2 + len];
+		uint8_t* data = new uint8_t(2 + len);
 
 		data[0] = static_cast<uint8_t>(addr);
 		data[1] = len;
@@ -217,10 +218,15 @@ namespace herkulex {
 		sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
 	}
 
-	Servo Bus::makeNewServo(uint8_t id) {
-		return Servo(id, *this, _log);
+	Servo* Bus::makeNewServo(uint8_t id) {
+		Servo* result = new Servo(id, *this, _log);
+		return result;
 	}
 
+
+	Bus::~Bus() {
+		_log->printf("Destruction du bus");
+	}
 	// void Bus::sendIJOGMsg();
 	// void Bus::sendSJOGMsg();
 	// void Bus::sendStatMsg();

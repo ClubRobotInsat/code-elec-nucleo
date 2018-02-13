@@ -10,11 +10,11 @@ namespace herkulex {
 	class Manager {
 	private:
 		// The manager stores servos
-		static Servo* _servos[N_SERVOS];
+		Servo* _servos[N_SERVOS];
 
 		// This member stores the number of registred servos.
 		// It must raise an error/a warning if _nb_reg_servos != N_SERVOS
-		static uint8_t _nb_reg_servos;
+		uint8_t _nb_reg_servos;
 
 		// The manager stores the bus -
 		Bus _bus;
@@ -36,8 +36,8 @@ namespace herkulex {
 		Servo* registerNewServo(uint8_t id);
 
 	private:
-		static void updateServoState(uint8_t num_servo);
-		static void updateAllServos();
+		void updateServoState(uint8_t num_servo);
+		void updateAllServos();
 	};
 }
 

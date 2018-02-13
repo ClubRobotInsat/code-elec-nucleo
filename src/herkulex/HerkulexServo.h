@@ -16,6 +16,10 @@ namespace herkulex {
 	private:
 		void setId(uint8_t id);
 
+		virtual ~Servo() {
+			_log->printf("Destruction servo");
+		};
+
 	public:
 		/* You should not call this constructor directly, but call Bus::makeNewServo */
 		Servo(uint8_t id, Bus& bus, Serial* log);

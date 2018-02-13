@@ -212,8 +212,10 @@ namespace herkulex {
 		void sendMsg(const uint8_t id, const constants::CMD::toServo, const uint8_t* data, const uint8_t length);
 
 	private:
+		virtual ~Bus();
+
 		/* Creates a new Servo that is registered in this bus. */
-		Servo makeNewServo(uint8_t id);
+		Servo* makeNewServo(uint8_t id);
 
 		void parseStatusMessage(Servo* servo);
 

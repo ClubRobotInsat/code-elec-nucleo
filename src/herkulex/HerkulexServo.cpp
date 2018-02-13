@@ -2,7 +2,9 @@
 #include "HerkulexBus.h"
 
 namespace herkulex {
-	Servo::Servo(uint8_t id, Bus& bus, Serial* log) : _id(id), _status(0), _position(0), _bus(bus), _log(log) {}
+	Servo::Servo(uint8_t id, Bus& bus, Serial* log) : _id(id), _status(0), _position(0), _bus(bus), _log(log) {
+		_log->printf("Hello from servo \n");
+	}
 
 	uint16_t Servo::getPosition() const {
 		return _position;
@@ -25,7 +27,7 @@ namespace herkulex {
 	}
 
 	void Servo::clear() const {
-
+		//_log->printf("slt\n");
 		uint8_t txBuf[11];
 
 		txBuf[0] = HEADER;              // Packet Header (0xFF)
@@ -44,7 +46,7 @@ namespace herkulex {
 		// Checksum2 = (~Checksum1)&0xFE
 		txBuf[5] = (txBuf[2] ^ txBuf[3] ^ txBuf[4] ^ txBuf[7] ^ txBuf[8] ^ txBuf[9] ^ txBuf[10]) & 0xFE;
 		txBuf[6] = (~txBuf[5]) & 0xFE;
-
+		//_log->printf("Ici aussi \n");
 		// send packet (mbed -> herkulex)
 		_bus.write(txBuf, 11);
 	}
@@ -67,7 +69,7 @@ namespace herkulex {
 		// Checksum2 = (~Checksum1)&0xFE
 		txBuf[5] = (txBuf[2] ^ txBuf[3] ^ txBuf[4] ^ txBuf[7] ^ txBuf[8] ^ txBuf[9]) & 0xFE;
 		txBuf[6] = (~txBuf[5]) & 0xFE;
-
+		_log->printf("Coucou \n");
 		// send packet (mbed -> herkulex)
 		_bus.write(txBuf, 10);
 	}
