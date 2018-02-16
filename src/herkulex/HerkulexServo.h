@@ -22,7 +22,7 @@ namespace herkulex {
 
 	public:
 		/* You should not call this constructor directly, but call Bus::makeNewServo */
-		Servo(uint8_t id, Bus& bus, Serial* log);
+		Servo(uint8_t id, Bus* bus, Serial* log);
 
 		/* Accessors --- */
 
@@ -81,7 +81,7 @@ namespace herkulex {
 		Serial* _log;
 
 		// The internal bus that communicates in serial with the servo.
-		Bus& _bus;
+		Bus* _bus;
 	};
 }
 

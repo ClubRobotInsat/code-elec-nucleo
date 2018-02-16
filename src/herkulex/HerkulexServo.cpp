@@ -2,7 +2,8 @@
 #include "HerkulexBus.h"
 
 namespace herkulex {
-	Servo::Servo(uint8_t id, Bus& bus, Serial* log) : _id(id), _status(0), _position(0), _bus(bus), _log(log) {
+	Servo::Servo(uint8_t id, Bus* bus, Serial* log) : _id(id), _status(0), _position(0), _bus(bus), _log(log) {
+        _bus = bus;
 		_log->printf("Hello from servo \n");
 	}
 
@@ -48,7 +49,7 @@ namespace herkulex {
 		txBuf[6] = (~txBuf[5]) & 0xFE;
 		//_log->printf("Ici aussi \n");
 		// send packet (mbed -> herkulex)
-		_bus.write(txBuf, 11);
+		_bus->write(txBuf, 11);
 	}
 
 	void Servo::setTorque(uint8_t torque) const {
@@ -71,7 +72,7 @@ namespace herkulex {
 		txBuf[6] = (~txBuf[5]) & 0xFE;
 		_log->printf("Coucou \n");
 		// send packet (mbed -> herkulex)
-		_bus.write(txBuf, 10);
+		_bus->write(txBuf, 10);
 	}
 
 	//------------------------------------------------------------------------------
@@ -100,7 +101,7 @@ namespace herkulex {
 		txBuf[6] = (~txBuf[5]) & 0xFE;
 
 		// send packet (mbed -> herkulex)
-		_bus.write(txBuf, 12);
+		_bus->write(txBuf, 12);
 	}
 
 	//------------------------------------------------------------------------------
@@ -129,7 +130,7 @@ namespace herkulex {
 		txBuf[6] = (~txBuf[5]) & 0xFE;
 
 		// send packet (mbed -> herkulex)
-		_bus.write(txBuf, 12);
+		_bus->write(txBuf, 12);
 	}
 
 
@@ -151,15 +152,15 @@ namespace herkulex {
 		txBuf[5] = (txBuf[2] ^ txBuf[3] ^ txBuf[4] ^ txBuf[7] ^ txBuf[8] ^ txBuf[9]) & 0xFE;
 		txBuf[6] = (~txBuf[5]) & 0xFE;
 
-		_bus.write(txBuf, 10);
+		_bus->write(txBuf, 10);
 	}
 
 	void Servo::updatePosition() {
-		_bus.fetchPosition(this);
+		_bus->fetchPosition(this);
 	}
 
 	void Servo::updateStatus() {
-		_bus.fetchStatus(this);
+		_bus->fetchStatus(this);
 	}
 
 	void Servo::setId(uint8_t id) {

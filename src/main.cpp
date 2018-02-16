@@ -11,19 +11,22 @@ Serial pc(USBTX, USBRX, 9600);
 
 int main() {
 	pc.printf("xxxXXX-DEBUT-XXXxxx \n");
-	Manager<16> mgr(D8, D2, 1500, &pc);
+	Manager<16> mgr(D8, D2, 500, &pc);
 	pc.printf("1 \n");
-	Servo* sv3 = mgr.registerNewServo(0xFD);
+	Servo* sv3 = mgr.registerNewServo(0xFE);
 	pc.printf("2 \n");
-	if(sv3 == nullptr) {
+	if(sv3 == NULL) {
 		pc.printf("AIE\n");
 	}
 	sv3->clear();
+    wait_ms(750);
 	pc.printf("3 \n");
 	sv3->setLedOn();
+    wait_ms(750);
 	pc.printf("4 \n");
 	sv3->setTorque(TORQUE_ON);
 	pc.printf("5 \n");
+    wait_ms(750);
 
 	/*Servo svfd = bus.makeNewServo(0xFD);
 	svfd.clear();

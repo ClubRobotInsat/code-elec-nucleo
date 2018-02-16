@@ -2,7 +2,7 @@
 #define HERKULEX_CONST_H
 
 #include "mbed.h"
-
+/*
 namespace herkulex {
 	namespace constants {
 		static const uint8_t header = 0xff;
@@ -177,5 +177,5 @@ namespace herkulex {
 	}
 }
 
-
+*/
 #endif

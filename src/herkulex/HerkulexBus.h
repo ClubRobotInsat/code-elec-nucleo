@@ -209,7 +209,7 @@ namespace herkulex {
 		/* You should not call this method directly but prefer Servo::updateStatus. */
 		void fetchStatus(Servo* servo);
 
-		void sendMsg(const uint8_t id, const constants::CMD::toServo, const uint8_t* data, const uint8_t length);
+		void sendMsg(const uint8_t id, const uint8_t cmd, const uint8_t* data, const uint8_t length);
 
 	private:
 		virtual ~Bus();
@@ -225,25 +225,21 @@ namespace herkulex {
 
 
 		// Warning : this function cannot be used to write data with len > 2
-		void sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+		void sendEEPWriteMsg(uint8_t id,  const uint8_t eepaddr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
 
 		// Warning : this function cannot be used to read data with len > 2
-		void sendEEPReadMsg(uint8_t id, constants::EEPAddr addr, uint8_t len = 1);
-		void sendRAMWriteMsg(uint8_t id, constants::RAMAddr addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
-		void sendRAMReadMsg(uint8_t id, constants::RAMAddr addr, uint8_t len = 1);
+		void sendEEPReadMsg(uint8_t id, const uint8_t eepaddr, uint8_t len = 1);
+		void sendRAMWriteMsg(uint8_t id, const uint8_t ramaddr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+		void sendRAMReadMsg(uint8_t id, const uint8_t ramaddr, uint8_t len = 1);
 		// void sendIJOGMsg();
 		// void sendSJOGMsg();
 		// void sendStatMsg();
 		// void sendRollbackMsg();
 		// void sendRebootMsg();
 
-		template <uint8_t ID, constants::CMD::fromServo CMD>
-		inline uint8_t readMsg(uint8_t* message);
-
-
 		volatile bool _callback_waiting;
 
-		Serial* _ser;
+		Serial _ser;
 
 		Serial* _log;
 

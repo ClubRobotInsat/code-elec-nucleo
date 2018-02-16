@@ -3,22 +3,28 @@
 namespace herkulex {
 	Bus::Bus(PinName txPin, PinName rxPin, Serial* log)
 	        : _callback_waiting(false)
-	        , _ser(new Serial(txPin, rxPin, 115200))
-	        , _log(log)
-	        , _read_callback(Callback<void(int)>(this, &Bus::interpretBuffer)) {}
+            , _ser(txPin,rxPin,115200)
+			, _log(log)
+			, _read_callback(Callback<void(int)>(this, &Bus::interpretBuffer)) {
 
-	// Servo Bus::makeNewServo(uint8_t id) {
-	// 	return Servo(id, this);
-	// }
+    }
+
 
 	void Bus::write(uint8_t* data, uint8_t length) {
 		//_log->printf("Writing\n");
+
 		for(uint8_t i = 0; i < length; i++) {
-			_ser->putc(data[i]);
+            while (!_ser.writeable()) {
+            }
+			_ser.putc(data[i]);
 		}
 
-		//_ser->write(data, length, 0, 0);
-		//_log->printf("Done writing\n");
+        _log->printf("Sending : (%d) [",length);
+        for (uint8_t i = 0; i < length; i++) {
+            _log->printf("%#x ",data[i]);
+        }
+        _log->printf("]\n");
+		//_ser.write(data, length, 0, 0);
 	}
 
 	void Bus::interpretBuffer(int event) {
@@ -99,7 +105,7 @@ namespace herkulex {
 		// Bus::send packet (mbed -> herkulex)
 		this->write(txBuf, 7);
 
-		_ser->read(_buffer, (uint8_t)9, _read_callback, SERIAL_EVENT_RX_COMPLETE);
+		_ser.read(_buffer, (uint8_t)9, _read_callback, SERIAL_EVENT_RX_COMPLETE);
 	}
 
 	void Bus::fetchPosition(Servo* servo) {
@@ -128,16 +134,16 @@ namespace herkulex {
 		// Bus::send packet (mbed -> herkulex)
 		this->write(txBuf, 9);
 
-		_ser->read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
+		_ser.read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
 	}
 
-	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo cmd, const uint8_t* data, const uint8_t length) {
-		uint8_t total_length = length + static_cast<uint8_t>(constants::Size::MinPacketSize);
+	void Bus::sendMsg(const uint8_t id,  const uint8_t cmd, const uint8_t* data, const uint8_t length) {
+		uint8_t total_length = length + static_cast<uint8_t>(MIN_PACKET_SIZE);
 		uint8_t* txBuf = new uint8_t(total_length);
 		uint8_t index = 0;
 
-		txBuf[0] = constants::header;
-		txBuf[1] = constants::header;
+		txBuf[0] = HEADER;
+		txBuf[1] = HEADER;
 		txBuf[2] = total_length;
 		txBuf[3] = id;
 		txBuf[4] = static_cast<uint8_t>(cmd);
@@ -147,7 +153,7 @@ namespace herkulex {
 		txBuf[6] = 0;
 
 		for(index = 0; index < length; ++index) {
-			txBuf[static_cast<uint8_t>(constants::Size::MinPacketSize) + index] = data[index];
+			txBuf[static_cast<uint8_t>(MIN_PACKET_SIZE) + index] = data[index];
 			// Iteratively construct the checksum
 			txBuf[5] ^= txBuf[index];
 		}
@@ -158,68 +164,68 @@ namespace herkulex {
 		delete txBuf;
 	}
 
-	void Bus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len, uint8_t msb) {
+	void Bus::sendEEPWriteMsg(uint8_t id, const uint8_t eppaddr, uint8_t lsb, uint8_t len, uint8_t msb) {
 		// Check valid length
 		if(len < 1 || len > 2)
 			return;
 
 		uint8_t* data = new uint8_t(2 + len);
 
-		data[0] = static_cast<uint8_t>(addr);
+		data[0] = static_cast<uint8_t>(eppaddr);
 		data[1] = len;
 		data[2] = lsb;
 		if(len > 1) {
 			data[3] = msb;
 		}
 
-		sendMsg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
+		sendMsg(id, 0x01 /*CMD_EEP_WRITE*/, data, (2 + len));
 	}
 
-	void Bus::sendEEPReadMsg(uint8_t id, constants::EEPAddr addr, uint8_t len) {
+	void Bus::sendEEPReadMsg(uint8_t id, const uint8_t eepaddr, uint8_t len) {
 		// Check valid length
 		if(len < 1 || len > 2)
 			return;
 
 		uint8_t data[2];
 
-		data[0] = static_cast<uint8_t>(addr);
+		data[0] = static_cast<uint8_t>(eepaddr);
 		data[1] = len;
 
-		sendMsg(id, constants::CMD::toServo::EEPRead, data, 2);
+		sendMsg(id, 0x02 /* CMD_EEP_READ */, data, 2);
 	}
 
-	void Bus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr addr, uint8_t lsb, uint8_t len, uint8_t msb) {
+	void Bus::sendRAMWriteMsg(uint8_t id, const uint8_t ramaddr, uint8_t lsb, uint8_t len, uint8_t msb) {
 		// Check valid length
 		if(len < 1 || len > 2)
 			return;
 
 		uint8_t* data = new uint8_t(2 + len);
 
-		data[0] = static_cast<uint8_t>(addr);
+		data[0] = static_cast<uint8_t>(ramaddr);
 		data[1] = len;
 		data[2] = lsb;
 		if(len > 1) {
 			data[3] = msb;
 		}
 
-		sendMsg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
+		sendMsg(id, CMD_RAM_WRITE, data, 2 + len);
 	}
 
-	void Bus::sendRAMReadMsg(uint8_t id, constants::RAMAddr addr, uint8_t len) {
+	void Bus::sendRAMReadMsg(uint8_t id, const uint8_t ramaddr, uint8_t len) {
 		// Check valid length
 		if(len < 1 || len > 2)
 			return;
 
 		uint8_t* data = new uint8_t(2 + len);
 
-		data[0] = static_cast<uint8_t>(addr);
+		data[0] = static_cast<uint8_t>(ramaddr);
 		data[1] = len;
 
-		sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
+		sendMsg(id, CMD_RAM_READ, data, 2);
 	}
 
 	Servo* Bus::makeNewServo(uint8_t id) {
-		Servo* result = new Servo(id, *this, _log);
+		Servo* result = new Servo(id, this, _log);
 		return result;
 	}
 
