@@ -8,7 +8,74 @@ namespace herkulex {
 		static const uint8_t header = 0xff;
 		static const uint8_t broadcast_id = 0xfe;
 
-		enum class EEPAddr : uint8_t {
+		namespace CMD {
+			enum class toServo : uint8_t {
+				EEPWrite = 0x01,
+				EEPRead = 0x02,
+				RAMWrite = 0x03,
+				RAMRead = 0x04,
+				IJOG = 0x05,
+				SJOG = 0x06,
+				Stat = 0x07,
+				Rollback = 0x08,
+				Reboot = 0x09
+			};
+
+			enum class fromServo : uint8_t {
+				EEPWriteAck = 0x41,
+				EEPReadAck = 0x42,
+				RAMWriteAck = 0x43,
+				RAMReadAck = 0x44,
+				IJOGAck = 0x45,
+				SJOGAck = 0x46,
+				StatAck = 0x47,
+				RollbackAck = 0x48,
+				RebootAck = 0x49
+			};
+		}
+
+		enum class StatusError : uint8_t {
+			OK = 0x00,
+			ExceedInputVoltage = 0x01,
+			ExceedPotLimit = 0x02,
+			ExceedTemperatureLimit = 0x04,
+			InvalidPacket = 0x08,
+			Overload = 0x10,
+			DriverFault = 0x20,
+			EEPRegDistort = 0x40
+		};
+
+		enum class StatusDetail : uint8_t {
+			MovingFlag = 0x01,
+			InpositionFlag = 0x02,
+			ChecksumError = 0x04,
+			UnknownCommand = 0x08,
+			ExceedRegRange = 0x10,
+			GarbageDetected = 0x20,
+			MotorOnFlag = 0x40
+		};
+
+		enum class Size : uint8_t {
+			MinPacketSize = 7,
+			MinAckPacketSize = 9,
+			WritePacketSize = 13,
+			MaxPacketSize = 223,
+			MaxDataSize = MaxPacketSize - MinPacketSize
+		};
+
+
+		enum class JOG_CMD : uint8_t {
+			PositionMode = 0x00,
+			Stop = 0x01,
+			TurnMode = 0x02,
+			GreenLedOn = 0x04,
+			BlueLedOn = 0x08,
+			RedLedOn = 0x10
+		};
+
+		enum class Torque_CMD : uint8_t { TorqueFree = 0x00, BreakOn = 0x40, TorqueOn = 0x60 };
+		
+				enum class EEPAddr : uint8_t {
 			ModelNo1 = 0,
 			ModelNo2 = 1,
 			Version1 = 2,
@@ -109,71 +176,7 @@ namespace herkulex {
 			DesiredVelocity = 72,              // 2 bytes
 		};
 
-		namespace CMD {
-			enum class toServo : uint8_t {
-				EEPWrite = 0x01,
-				EEPRead = 0x02,
-				RAMWrite = 0x03,
-				RAMRead = 0x04,
-				IJOG = 0x05,
-				SJOG = 0x06,
-				Stat = 0x07,
-				Rollback = 0x08,
-				Reboot = 0x09
-			};
 
-			enum class fromServo : uint8_t {
-				EEPWriteAck = 0x41,
-				EEPReadAck = 0x42,
-				RAMWriteAck = 0x43,
-				RAMReadAck = 0x44,
-				IJOGAck = 0x45,
-				SJOGAck = 0x46,
-				StatAck = 0x47,
-				RollbackAck = 0x48,
-				RebootAck = 0x49
-			};
-		}
-
-		enum class StatusError : uint8_t {
-			OK = 0x00,
-			ExceedInputVoltage = 0x01,
-			ExceedPotLimit = 0x02,
-			ExceedTemperatureLimit = 0x04,
-			InvalidPacket = 0x08,
-			Overload = 0x10,
-			DriverFault = 0x20,
-			EEPRegDistort = 0x40
-		};
-
-		enum class StatusDetail : uint8_t {
-			MovingFlag = 0x01,
-			InpositionFlag = 0x02,
-			ChecksumError = 0x04,
-			UnknownCommand = 0x08,
-			ExceedRegRange = 0x10,
-			GarbageDetected = 0x20,
-			MotorOnFlag = 0x40
-		};
-
-		enum class Size : uint8_t {
-			MinPacketSize = 7,
-			MinAckPacketSize = 9,
-			WritePacketSize = 13,
-			MaxPacketSize = 223,
-			MaxDataSize = MaxPacketSize - MinPacketSize
-		};
-
-		enum class JOG_CMD : uint8_t {
-			PositionMode = 0x00,
-			Stop = 0x01,
-			TurnMode = 0x02,
-			GreenLedOn = 0x04,
-			BlueLedOn = 0x08,
-			RedLedOn = 0x10
-		};
-
-		enum class Torque_CMD : uint8_t { TorqueFree = 0x00, BreakOn = 0x40, TorqueOn = 0x60 };
 	}
 }
 

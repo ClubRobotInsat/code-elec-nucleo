@@ -23,7 +23,7 @@ namespace herkulex {
 
 	void Bus::interpretBuffer(int event) {
 
-		if(!_buffer[3] != _servo_registered_for_callback->getId()) {
+		if( (!_buffer[3]) != _servo_registered_for_callback->getId()) {
 
 			if(_buffer[4] == 0X47) {
 				this->parseStatusMessage(_servo_registered_for_callback);
@@ -80,11 +80,11 @@ namespace herkulex {
 	void Bus::fetchStatus(Servo* servo) {
 		uint8_t txBuf[7];
 
-		txBuf[0] = HEADER;          // Packet Header (0xFF)
-		txBuf[1] = HEADER;          // Packet Header (0xFF)
-		txBuf[2] = MIN_PACKET_SIZE; // Packet Size
+		txBuf[0] = static_cast<uint8_t>(constants::header);          // Packet Header (0xFF)
+		txBuf[1] = static_cast<uint8_t>(constants::header);          // Packet Header (0xFF)
+		txBuf[2] = static_cast<uint8_t>(constants::Size::MinPacketSize); // Packet Size
 		txBuf[3] = servo->getId();  // Servo ID
-		txBuf[4] = CMD_STAT;        // Status Error, Status Detail request
+		txBuf[4] = static_cast<uint8_t>(constants::CMD::toServo::Stat);        // Status Error, Status Detail request
 
 		// Check Sum1 and Check Sum2
 		txBuf[5] = (txBuf[2] ^ txBuf[3] ^ txBuf[4]) & 0xFE;
@@ -105,15 +105,15 @@ namespace herkulex {
 	void Bus::fetchPosition(Servo* servo) {
 		uint8_t txBuf[9];
 
-		txBuf[0] = HEADER;                  // Packet Header (0xFF)
-		txBuf[1] = HEADER;                  // Packet Header (0xFF)
-		txBuf[2] = MIN_PACKET_SIZE + 2;     // Packet Size
+		txBuf[0] = static_cast<uint8_t>(constants::header);                  // Packet Header (0xFF)
+		txBuf[1] = static_cast<uint8_t>(constants::header);                  // Packet Header (0xFF)
+		txBuf[2] = static_cast<uint8_t>(constants::Size::MinPacketSize) + 2;     // Packet Size
 		txBuf[3] = servo->getId();          // Servo ID
-		txBuf[4] = CMD_RAM_READ;            // Status Error, Status Detail request
+		txBuf[4] = static_cast<uint8_t>(constants::CMD::toServo::RAMRead);            // Status Error, Status Detail request
 		txBuf[5] = 0;                       // Checksum1
 		txBuf[6] = 0;                       // Checksum2
-		txBuf[7] = RAM_CALIBRATED_POSITION; // Address 52
-		txBuf[8] = BYTE2;                   // Address 52 and 53
+		txBuf[7] = static_cast<uint8_t>(constants::RAMAddr::CalibratedPosition); // Address 58
+		txBuf[8] = 2;                   // Address 58 and 59
 
 		// Check Sum1 and Check Sum2
 		txBuf[5] = (txBuf[2] ^ txBuf[3] ^ txBuf[4] ^ txBuf[7] ^ txBuf[8]) & 0xFE;
@@ -136,8 +136,8 @@ namespace herkulex {
 		uint8_t* txBuf = new uint8_t(total_length);
 		uint8_t index = 0;
 
-		txBuf[0] = constants::header;
-		txBuf[1] = constants::header;
+		txBuf[0] = static_cast<uint8_t>(constants::header);
+		txBuf[1] = static_cast<uint8_t>(constants::header);
 		txBuf[2] = total_length;
 		txBuf[3] = id;
 		txBuf[4] = static_cast<uint8_t>(cmd);
