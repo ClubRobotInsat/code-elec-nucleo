@@ -11,11 +11,19 @@ namespace herkulex {
 	Servo* Manager<N_SERVOS>::registerNewServo(uint8_t id) {
 		if(_nb_reg_servos < N_SERVOS) 
 		{
-			_servos[_nb_reg_servos] = _bus.makeNewServo(id);
-			_nb_reg_servos++;
 			_log->printf("Tiens voilà un servo\n");
+
+			// On incremente le nombre de servos 
+			_nb_reg_servos++; 
+			// _nb_reg_servos >= 1 ici
+			
+			// On cree un nouveau servo, que l'on stocke 
+			_servos[_nb_reg_servos - 1] = _bus.makeNewServo(id);
+
+			// Et on le retourne 
 			return _servos[_nb_reg_servos - 1];
-		} else 
+		} 
+		else 
 		{
 			_log->printf("Trop de servos !!!\n");
 			/// FIXME : LE NULLPTR
