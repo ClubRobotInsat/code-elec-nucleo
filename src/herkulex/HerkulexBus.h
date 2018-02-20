@@ -15,12 +15,26 @@ namespace herkulex {
 	class Manager;
 
 	class Bus {
+	protected: 
 		template <uint8_t N_SERVOS>
 		friend class Manager;
 
-		Bus(PinName txPin, PinName rxPin, Serial* _log);
+		/* --------------------------------------------------------------------------------------------
+		 * Constructeur (explicit)
+		 * Construit un bus serie pour communiquer avec les servos sur les pin txPin et rxPin. 
+		 * Log son activite sur le Serial pointe par log.
+		 * Le baudrate de la com. peut etre specifie.  
+		 * --------------------------------------------------------------------------------------------
+		 */
+		explicit Bus(PinName txPin, PinName rxPin, Serial * log, uint32_t baudrate = 115200);
 
-	public:
+		/* --------------------------------------------------------------------------------------------
+		 * Destructeur 
+		 * Desalloue le Serial utilise par le bus
+		 * --------------------------------------------------------------------------------------------
+		 */
+		virtual ~Bus();
+
 		/* --------------------------------------------------------------------------------------------
 		 * write
 		 * Prend un buffer (data), de taille fixe (length), passe par addresse et l'ecoule sur le bus 
@@ -28,27 +42,12 @@ namespace herkulex {
 		 */
 		void write(uint8_t* data, uint8_t length);
 
-		/* You should not call this method directly but prefer Servo::updatePosition. */
-		void fetchPosition(Servo* servo);
-
-		/* You should not call this method directly but prefer Servo::updateStatus. */
-		void fetchStatus(Servo* servo);
-
 		/* --------------------------------------------------------------------------------------------
 		 * sendMsg
 		 * Construit un message pour les servos, et l'envoi immediatement sur le bus. 
 		 * --------------------------------------------------------------------------------------------
 		 */ 
 		void sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data, const uint8_t length);
-
-	private:
-		virtual ~Bus();
-
-		void parseStatusMessage(Servo* servo);
-
-		void parsePositionMessage(Servo* servo);
-
-		void interpretBuffer(int event);
 
 
 		/* --------------------------------------------------------------------------------------------
@@ -96,9 +95,25 @@ namespace herkulex {
 		inline uint8_t readMsg(uint8_t* message);
 
 
+		/* You should not call this method directly but prefer Servo::updatePosition. */
+		void fetchPosition(Servo* servo);
+
+		/* You should not call this method directly but prefer Servo::updateStatus. */
+		void fetchStatus(Servo* servo);
+
+
+		void parseStatusMessage(Servo* servo);
+
+		void parsePositionMessage(Servo* servo);
+
+
+
+		void interpretBuffer(int event);
+
+	private: 
 		volatile bool _callback_waiting;
 
-		Serial* _ser;
+		Serial* _ser; // TODO : Changer en value
 
 		Serial* _log;
 
@@ -106,7 +121,7 @@ namespace herkulex {
 
 		uint8_t _buffer[13];
 
-		Servo* _servo_registered_for_callback;
+		Servo* _servo_registered_for_callback; // ??? 
 	};
 }
 

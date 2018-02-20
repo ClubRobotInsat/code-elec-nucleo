@@ -1,11 +1,21 @@
 namespace herkulex {
 
 	template <uint8_t N_SERVOS>
-	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, uint32_t refreshTime, Serial* pc)
-	        : _bus(txPin, rxPin, pc), _refreshPeriod(refreshTime), _log(pc), _nb_reg_servos(0) {}
+	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, uint32_t refreshTime, Serial* pc) : 
+		_bus(txPin, rxPin, pc), 
+	    _refreshPeriod(refreshTime), 
+	    _log(pc), 
+	    _nb_reg_servos(0) 
+	{}
 
 	template <uint8_t N_SERVOS>
-	Manager<N_SERVOS>::~Manager() {}
+	Manager<N_SERVOS>::~Manager() 
+	{
+		for(uint8_t i = 0; i < _nb_reg_servos; ++i)
+		{
+			delete _servos[i];
+		}
+	}
 
 	template <uint8_t N_SERVOS>
 	Servo* Manager<N_SERVOS>::registerNewServo(uint8_t id) {
@@ -18,6 +28,7 @@ namespace herkulex {
 			// _nb_reg_servos >= 1 ici
 			
 			// On cree un nouveau servo, que l'on stocke 
+			// NEW -> DELETE dans ~Manager
 			_servos[_nb_reg_servos - 1] = new Servo(id, _bus, _log);
 
 			// Et on le retourne 

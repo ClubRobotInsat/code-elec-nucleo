@@ -1,16 +1,37 @@
 #include "HerkulexBus.h"
 
 namespace herkulex {
-	Bus::Bus(PinName txPin, PinName rxPin, Serial* log)
-	        : _callback_waiting(false)
-	        , _ser(new Serial(txPin, rxPin, 115200))
-	        , _log(log)
-	        , _read_callback(Callback<void(int)>(this, &Bus::interpretBuffer)) {}
 
-	// Servo Bus::makeNewServo(uint8_t id) {
-	// 	return Servo(id, this);
-	// }
+	/* --------------------------------------------------------------------------------------------
+	 * Constructeur (explicit)
+	 * Construit un bus serie pour communiquer avec les servos sur les pin txPin et rxPin. 
+	 * Log son activite sur le Serial pointe par log.
+	 * Le baudrate de la com. peut etre specifie.  
+	 * --------------------------------------------------------------------------------------------
+	 */
+	Bus::Bus(PinName txPin, PinName rxPin, Serial * log, uint32_t baudrate) : 
+		_callback_waiting(false), 
+		_ser(new Serial(txPin, rxPin, baudrate)), // TODO - Detruire ca ? Changer en value storage ?
+		_log(log), 
+		_read_callback(Callback<void(int)>(this, &Bus::interpretBuffer)) {}
 
+	/* --------------------------------------------------------------------------------------------
+	 * Destructeur 
+	 * Desalloue le Serial utilise par le bus
+	 * --------------------------------------------------------------------------------------------
+	 */
+	Bus::~Bus() 
+	{
+		_log->printf("Destruction du bus");
+
+		delete _ser; 	
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * write
+	 * Prend un buffer (data), de taille fixe (length), passe par addresse et l'ecoule sur le bus 
+	 * --------------------------------------------------------------------------------------------
+	 */
 	void Bus::write(uint8_t* data, uint8_t length) {
 		//_log->printf("Writing\n");
 		for(uint8_t i = 0; i < length; i++) {
@@ -20,6 +41,165 @@ namespace herkulex {
 		//_ser->write(data, length, 0, 0);
 		//_log->printf("Done writing\n");
 	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * sendMsg
+	 * Construit un message pour les servos, et l'envoi immediatement sur le bus. 
+	 * --------------------------------------------------------------------------------------------
+	 */ 
+	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data, const uint8_t length)
+	{
+		uint8_t total_length = length + constants::Size::MinPacketSize;
+		uint8_t index = 0;
+
+		// NEW 
+		uint8_t * txBuf = new uint8_t(total_length); 
+
+		txBuf[0] = constants::header;
+		txBuf[1] = constants::header;
+		txBuf[2] = total_length;
+		txBuf[3] = id;
+		txBuf[4] = cmd;
+
+		// Start construction of checksum
+		txBuf[5] = txBuf[2] ^ txBuf[3] ^ txBuf[4];
+		txBuf[6] = 0;
+
+		for(index = 0; index < length; ++index) {
+			txBuf[constants::Size::MinPacketSize + index] = data[index];
+			// Iteratively construct the checksum
+			txBuf[5] ^= txBuf[index];
+		}
+
+		txBuf[6] = (~txBuf[5]) & 0xFE;
+
+		write(txBuf, total_length);
+
+		// DELETE
+		delete txBuf;
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * sendEEPWriteMsg
+	 * Construit un message d'ecriture dans la ROM, et l'envoie avec Bus::sendMsg.
+	 * len < 2
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Bus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
+		// Check valid length
+		if(len < 1 || len > 2)
+		{
+			_log->printf("Utilisation de Bus::sendEEPWriteMsg avec une longueur erronee !\n");
+		} 
+		else 
+		{
+			// NEW
+			uint8_t * data = new uint8_t(2 + len);
+	
+			data[0] = addr;
+			data[1] = len;
+			data[2] = lsb;
+			if(len > 1) {
+				data[3] = msb;
+			}
+	
+			sendMsg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
+
+			// DELETE
+			delete data; 
+		}
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * sendEEPReadMsg
+	 * Construit un de lecture dans la ROM, et l'envoie avec Bus::sendMsg.
+	 * len < 2
+	 * !!! Ne realise pas l'operation de lecture !!! 
+	 * --------------------------------------------------------------------------------------------
+	 */	
+	void Bus::sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len) {
+		// Check valid length
+		if(len < 1 || len > 2)
+		{
+			_log->printf("Utilisation de Bus::sendEEPReadMsg avec une longueur erronee !\n");
+		} 
+		else 
+		{
+			uint8_t data[2];
+
+			data[0] = addr;
+			data[1] = len;
+
+			sendMsg(id, constants::CMD::toServo::EEPRead, data, 2);
+		}
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * sendRAMWriteMsg
+	 * Construit un message d'ecriture dans la RAM, et l'envoie avec Bus::sendMsg.
+	 * len < 2
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Bus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
+		// Check valid length
+		if(len < 1 || len > 2)
+		{
+			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
+		} 
+		else 
+		{
+			// NEW
+			uint8_t * data = new uint8_t(2 + len);
+
+			data[0] = addr;
+			data[1] = len;
+			data[2] = lsb;
+			if(len > 1) {
+				data[3] = msb;
+			}
+
+			sendMsg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
+
+			// DELETE
+			delete data;
+		}
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * sendRAMReadMsg
+	 * Construit un de lecture dans la RAM, et l'envoie avec Bus::sendMsg.
+	 * len < 2
+	 * !!! Ne realise pas l'operation de lecture !!! 
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Bus::sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len) {
+		// Check valid length
+		if(len < 1 || len > 2)
+		{
+			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
+		} 
+		else 
+		{
+			// NEW
+			uint8_t * data = new uint8_t(2 + len);
+
+			data[0] = addr;
+			data[1] = len;
+
+			sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
+
+			// DELETE
+			delete data;
+		}
+	}
+
+
+	// void Bus::sendIJOGMsg();
+	// void Bus::sendSJOGMsg();
+	// void Bus::sendStatMsg();
+	// void Bus::sendRollbackMsg();
+	// void Bus::sendRebootMsg();
+
 
 	void Bus::interpretBuffer(int event) {
 
@@ -130,135 +310,4 @@ namespace herkulex {
 
 		_ser->read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
 	}
-
-
-	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data, const uint8_t length)
-	{
-		uint8_t total_length = length + constants::Size::MinPacketSize;
-		uint8_t index = 0;
-
-		// NEW 
-		uint8_t * txBuf = new uint8_t(total_length); 
-
-		txBuf[0] = constants::header;
-		txBuf[1] = constants::header;
-		txBuf[2] = total_length;
-		txBuf[3] = id;
-		txBuf[4] = cmd;
-
-		// Start construction of checksum
-		txBuf[5] = txBuf[2] ^ txBuf[3] ^ txBuf[4];
-		txBuf[6] = 0;
-
-		for(index = 0; index < length; ++index) {
-			txBuf[constants::Size::MinPacketSize + index] = data[index];
-			// Iteratively construct the checksum
-			txBuf[5] ^= txBuf[index];
-		}
-
-		txBuf[6] = (~txBuf[5]) & 0xFE;
-
-		write(txBuf, total_length);
-
-		// DELETE
-		delete txBuf;
-	}
-
-	void Bus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
-		// Check valid length
-		if(len < 1 || len > 2)
-		{
-			_log->printf("Utilisation de Bus::sendEEPWriteMsg avec une longueur erronee !\n");
-		} 
-		else 
-		{
-			// NEW
-			uint8_t * data = new uint8_t(2 + len);
-	
-			data[0] = addr;
-			data[1] = len;
-			data[2] = lsb;
-			if(len > 1) {
-				data[3] = msb;
-			}
-	
-			sendMsg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
-
-			// DELETE
-			delete data; 
-		}
-	}
-
-	void Bus::sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len) {
-		// Check valid length
-		if(len < 1 || len > 2)
-		{
-			_log->printf("Utilisation de Bus::sendEEPReadMsg avec une longueur erronee !\n");
-		} 
-		else 
-		{
-			uint8_t data[2];
-
-			data[0] = addr;
-			data[1] = len;
-
-			sendMsg(id, constants::CMD::toServo::EEPRead, data, 2);
-		}
-	}
-
-	void Bus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
-		// Check valid length
-		if(len < 1 || len > 2)
-		{
-			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
-		} 
-		else 
-		{
-			// NEW
-			uint8_t * data = new uint8_t(2 + len);
-
-			data[0] = addr;
-			data[1] = len;
-			data[2] = lsb;
-			if(len > 1) {
-				data[3] = msb;
-			}
-
-			sendMsg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
-
-			// DELETE
-			delete data;
-		}
-	}
-
-	void Bus::sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len) {
-		// Check valid length
-		if(len < 1 || len > 2)
-		{
-			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
-		} 
-		else 
-		{
-			// NEW
-			uint8_t * data = new uint8_t(2 + len);
-
-			data[0] = addr;
-			data[1] = len;
-
-			sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
-
-			// DELETE
-			delete data
-		}
-	}
-
-	Bus::~Bus() 
-	{
-		_log->printf("Destruction du bus");
-	}
-	// void Bus::sendIJOGMsg();
-	// void Bus::sendSJOGMsg();
-	// void Bus::sendStatMsg();
-	// void Bus::sendRollbackMsg();
-	// void Bus::sendRebootMsg();
 }
