@@ -14,7 +14,16 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	class Manager;
 
-	class Bus {
+	/* TODO : Revoir le mecanisme de lecture, 
+	 * le bus n'a pas a stocker de Servo. 
+	 * Il doit notifier une reponse d'un servo (identifié par un ID) au manager. 
+	 * L'ideal etant que le manager s'occupe de chaque servo de maniere periodique. 
+	 * On pourrait ainsi borner le temps d'attente pour la reponse d'un servo, et 
+	 * s'en servir comme timeout pour une fonction de lecture blocante. 
+	 * Dans ce cas la, on eviterait de rechercher par ID quel servo a repondu, du cote du manager. 
+	 * En sachant que la solution : bus qui update le servo sans passer par le manager n'est vraiment pas propre...   
+	 */ 
+	class Bus { 
 	protected: 
 		template <uint8_t N_SERVOS>
 		friend class Manager;
@@ -108,7 +117,7 @@ namespace herkulex {
 
 
 
-		void interpretBuffer(int event);
+		void cbInterpretBuffer(int event);
 
 	private: 
 		volatile bool _callback_waiting;

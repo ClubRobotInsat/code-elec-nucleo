@@ -13,7 +13,7 @@ namespace herkulex {
 		_callback_waiting(false), 
 		_ser(new Serial(txPin, rxPin, baudrate)), // TODO - Detruire ca ? Changer en value storage ?
 		_log(log), 
-		_read_callback(Callback<void(int)>(this, &Bus::interpretBuffer)) {}
+		_read_callback(Callback<void(int)>(this, &Bus::cbInterpretBuffer)) {}
 
 	/* --------------------------------------------------------------------------------------------
 	 * Destructeur 
@@ -193,7 +193,6 @@ namespace herkulex {
 		}
 	}
 
-
 	// void Bus::sendIJOGMsg();
 	// void Bus::sendSJOGMsg();
 	// void Bus::sendStatMsg();
@@ -201,7 +200,7 @@ namespace herkulex {
 	// void Bus::sendRebootMsg();
 
 
-	void Bus::interpretBuffer(int event) {
+	void Bus::cbInterpretBuffer(int event) {
 
 		if( (!_buffer[3]) != _servo_registered_for_callback->getId()) {
 
