@@ -22,7 +22,7 @@ int main() {
 	pc.printf("3 \n");
 	sv3->setLedOn();
 	pc.printf("4 \n");
-	sv3->setTorque(TORQUE_ON);
+	// sv3->setTorque(TORQUE_ON);
 	pc.printf("5 \n");
 
 	/*Servo svfd = bus.makeNewServo(0xFD);
@@ -31,7 +31,7 @@ int main() {
 	svfd.setTorque(TORQUE_ON);
 */
 
-	sv3->positionControl(800, 60, GLED_ON);
+	// sv3->positionControl(800, 60, GLED_ON);
 	/*
 	svfd.positionControl(800, 60, GLED_ON);
 	wait_ms(800);

@@ -80,11 +80,11 @@ namespace herkulex {
 	void Bus::fetchStatus(Servo* servo) {
 		uint8_t txBuf[7];
 
-		txBuf[0] = static_cast<uint8_t>(constants::header);          // Packet Header (0xFF)
-		txBuf[1] = static_cast<uint8_t>(constants::header);          // Packet Header (0xFF)
-		txBuf[2] = static_cast<uint8_t>(constants::Size::MinPacketSize); // Packet Size
+		txBuf[0] = constants::header;          // Packet Header (0xFF)
+		txBuf[1] = constants::header;          // Packet Header (0xFF)
+		txBuf[2] = constants::Size::MinPacketSize; // Packet Size
 		txBuf[3] = servo->getId();  // Servo ID
-		txBuf[4] = static_cast<uint8_t>(constants::CMD::toServo::Stat);        // Status Error, Status Detail request
+		txBuf[4] = constants::CMD::toServo::Stat;        // Status Error, Status Detail request
 
 		// Check Sum1 and Check Sum2
 		txBuf[5] = (txBuf[2] ^ txBuf[3] ^ txBuf[4]) & 0xFE;
@@ -131,16 +131,18 @@ namespace herkulex {
 		_ser->read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
 	}
 
-	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo cmd, const uint8_t* data, const uint8_t length) {
-		uint8_t total_length = length + static_cast<uint8_t>(constants::Size::MinPacketSize);
-		uint8_t* txBuf = new uint8_t(total_length);
+
+	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data, const uint8_t length)
+	{
+		uint8_t total_length = length + constants::Size::MinPacketSize;
+		uint8_t * txBuf = new uint8_t(total_length);
 		uint8_t index = 0;
 
-		txBuf[0] = static_cast<uint8_t>(constants::header);
-		txBuf[1] = static_cast<uint8_t>(constants::header);
+		txBuf[0] = constants::header;
+		txBuf[1] = constants::header;
 		txBuf[2] = total_length;
 		txBuf[3] = id;
-		txBuf[4] = static_cast<uint8_t>(cmd);
+		txBuf[4] = cmd;
 
 		// Start construction of checksum
 		txBuf[5] = txBuf[2] ^ txBuf[3] ^ txBuf[4];
@@ -158,73 +160,84 @@ namespace herkulex {
 		delete txBuf;
 	}
 
-	void Bus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr addr, uint8_t lsb, uint8_t len, uint8_t msb) {
+	void Bus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
 		// Check valid length
 		if(len < 1 || len > 2)
-			return;
-
-		uint8_t* data = new uint8_t(2 + len);
-
-		data[0] = static_cast<uint8_t>(addr);
-		data[1] = len;
-		data[2] = lsb;
-		if(len > 1) {
-			data[3] = msb;
+		{
+			_log->printf("Utilisation de Bus::sendEEPWriteMsg avec une longueur erronee !\n");
+		} 
+		else 
+		{
+			uint8_t* data = new uint8_t(2 + len);
+	
+			data[0] = addr;
+			data[1] = len;
+			data[2] = lsb;
+			if(len > 1) {
+				data[3] = msb;
+			}
+	
+			sendMsg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
 		}
-
-		sendMsg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
 	}
 
-	void Bus::sendEEPReadMsg(uint8_t id, constants::EEPAddr addr, uint8_t len) {
+	void Bus::sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len) {
 		// Check valid length
 		if(len < 1 || len > 2)
-			return;
+		{
+			_log->printf("Utilisation de Bus::sendEEPReadMsg avec une longueur erronee !\n");
+		} 
+		else 
+		{
+			uint8_t data[2];
 
-		uint8_t data[2];
+			data[0] = addr;
+			data[1] = len;
 
-		data[0] = static_cast<uint8_t>(addr);
-		data[1] = len;
-
-		sendMsg(id, constants::CMD::toServo::EEPRead, data, 2);
-	}
-
-	void Bus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr addr, uint8_t lsb, uint8_t len, uint8_t msb) {
-		// Check valid length
-		if(len < 1 || len > 2)
-			return;
-
-		uint8_t* data = new uint8_t(2 + len);
-
-		data[0] = static_cast<uint8_t>(addr);
-		data[1] = len;
-		data[2] = lsb;
-		if(len > 1) {
-			data[3] = msb;
+			sendMsg(id, constants::CMD::toServo::EEPRead, data, 2);
 		}
-
-		sendMsg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
 	}
 
-	void Bus::sendRAMReadMsg(uint8_t id, constants::RAMAddr addr, uint8_t len) {
+	void Bus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
 		// Check valid length
 		if(len < 1 || len > 2)
-			return;
+		{
+			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
+		} 
+		else 
+		{
+			uint8_t* data = new uint8_t(2 + len);
 
-		uint8_t* data = new uint8_t(2 + len);
+			data[0] = addr;
+			data[1] = len;
+			data[2] = lsb;
+			if(len > 1) {
+				data[3] = msb;
+			}
 
-		data[0] = static_cast<uint8_t>(addr);
-		data[1] = len;
-
-		sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
+			sendMsg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
+		}
 	}
 
-	Servo* Bus::makeNewServo(uint8_t id) {
-		Servo* result = new Servo(id, *this, _log);
-		return result;
+	void Bus::sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len) {
+		// Check valid length
+		if(len < 1 || len > 2)
+		{
+			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
+		} 
+		else 
+		{
+			uint8_t* data = new uint8_t(2 + len);
+
+			data[0] = addr;
+			data[1] = len;
+
+			sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
+		}
 	}
 
-
-	Bus::~Bus() {
+	Bus::~Bus() 
+	{
 		_log->printf("Destruction du bus");
 	}
 	// void Bus::sendIJOGMsg();
