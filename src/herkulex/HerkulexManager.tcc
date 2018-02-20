@@ -9,12 +9,14 @@ namespace herkulex {
 
 	template <uint8_t N_SERVOS>
 	Servo* Manager<N_SERVOS>::registerNewServo(uint8_t id) {
-		if(_nb_reg_servos < N_SERVOS) {
+		if(_nb_reg_servos < N_SERVOS) 
+		{
 			_servos[_nb_reg_servos] = _bus.makeNewServo(id);
 			_nb_reg_servos++;
 			_log->printf("Tiens voilà un servo\n");
-			return _servos[_nb_reg_servos];
-		} else {
+			return _servos[_nb_reg_servos - 1];
+		} else 
+		{
 			_log->printf("Trop de servos !!!\n");
 			/// FIXME : LE NULLPTR
 			return nullptr;
