@@ -18,7 +18,7 @@ namespace herkulex {
 			// _nb_reg_servos >= 1 ici
 			
 			// On cree un nouveau servo, que l'on stocke 
-			_servos[_nb_reg_servos - 1] = _bus.makeNewServo(id);
+			_servos[_nb_reg_servos - 1] = new Servo(id, _bus, _log);
 
 			// Et on le retourne 
 			return _servos[_nb_reg_servos - 1];
