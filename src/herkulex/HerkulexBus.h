@@ -132,8 +132,13 @@ namespace herkulex {
 		 */
 		inline void sendRebootMsg(uint8_t id);
 
-		template <uint8_t ID, constants::CMD::fromServo::fromServoEnum CMD>
-		inline uint8_t readMsg(uint8_t* message);
+		/* --------------------------------------------------------------------------------------------
+		 * cbInterpretBuffer
+		 * Callback pour lire et interpreter un message recu. Globalement, switch sur le type de 
+		 * message et appelle le parser correspondant au message.
+		 * --------------------------------------------------------------------------------------------
+		 */
+		void cbInterpretBuffer(int event);
 
 
 		/* You should not call this method directly but prefer Servo::updatePosition. */
@@ -149,7 +154,6 @@ namespace herkulex {
 
 
 
-		void cbInterpretBuffer(int event);
 
 	private: 
 		volatile bool _callback_waiting;

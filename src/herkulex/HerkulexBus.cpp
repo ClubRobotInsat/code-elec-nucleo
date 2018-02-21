@@ -289,8 +289,13 @@ namespace herkulex {
 		sendMsg(id, constants::CMD::toServo::Rollback); 
 	}
 
+	/* --------------------------------------------------------------------------------------------
+	 * cbInterpretBuffer
+	 * Callback pour lire et interpreter un message recu. Globalement, switch sur le type de 
+	 * message et appelle le parser correspondant au message.
+	 * --------------------------------------------------------------------------------------------
+	 */
 	void Bus::cbInterpretBuffer(int event) {
-
 		if( _buffer[3] == _servo_registered_for_callback->getId()) 
 		{
 			switch(_buffer[4]) 
