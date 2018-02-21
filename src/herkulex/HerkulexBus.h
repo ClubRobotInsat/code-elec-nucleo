@@ -69,7 +69,7 @@ namespace herkulex {
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendEEPReadMsg
-		 * Construit un de lecture dans la ROM, et l'envoie avec Bus::sendMsg.
+		 * Construit un message de lecture dans la ROM, et l'envoie avec Bus::sendMsg.
 		 * len < 2
 		 * !!! Ne realise pas l'operation de lecture !!! 
 		 * --------------------------------------------------------------------------------------------
@@ -86,19 +86,51 @@ namespace herkulex {
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRAMReadMsg
-		 * Construit un de lecture dans la RAM, et l'envoie avec Bus::sendMsg.
+		 * Construit un message de lecture dans la RAM, et l'envoie avec Bus::sendMsg.
 		 * len < 2
 		 * !!! Ne realise pas l'operation de lecture !!! 
 		 * --------------------------------------------------------------------------------------------
 		 */
 		void sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len = 1);
 
+		/* --------------------------------------------------------------------------------------------
+		 * sendIJOGMsg
+		 * Envoi d'une commande IJOG par Bus::sendMsg
+		 * Utiliser des | entre flags de l'enum constants::JOG_CMD::JOG_CMDEnum pour composer SET
+		 * --------------------------------------------------------------------------------------------
+		 */
+		void sendIJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
 
-		// void sendIJOGMsg();
-		// void sendSJOGMsg();
-		// void sendStatMsg();
-		// void sendRollbackMsg();
-		// void sendRebootMsg();
+		/* --------------------------------------------------------------------------------------------
+		 * sendSJOGMsg
+		 * Envoi d'une commande SJOG par Bus::sendMsg
+		 * Utiliser des | entre flags de l'enum constants::JOG_CMD::JOG_CMDEnum pour composer SET
+		 * --------------------------------------------------------------------------------------------
+		 */
+		void sendSJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
+
+		/* --------------------------------------------------------------------------------------------
+		 * sendStatMsg
+		 * Envoi un message de demande de status
+!!! NB: Ambiguite dans la documentation (6.7 p.49) sur la contenance de data[0] et data[1] pour 
+!!! la requete de status
+		 * --------------------------------------------------------------------------------------------
+		 */
+		void sendStatMsg(uint8_t id);
+
+		/* --------------------------------------------------------------------------------------------
+		 * sendRollbackMsg
+		 * Envoi un message de rollback : remise en parametre d'usine (voir doc. p.49)
+		 * --------------------------------------------------------------------------------------------
+		 */
+		void sendRollbackMsg(uint8_t id, bool skipIDRollback = true, bool skipBaudrateRollback = true);
+
+		/* --------------------------------------------------------------------------------------------
+		 * sendRebootMsg
+		 * Envoi un message de reboot
+		 * --------------------------------------------------------------------------------------------
+		 */
+		inline void sendRebootMsg(uint8_t id);
 
 		template <uint8_t ID, constants::CMD::fromServo::fromServoEnum CMD>
 		inline uint8_t readMsg(uint8_t* message);

@@ -47,7 +47,7 @@ namespace herkulex {
 	 * Construit un message pour les servos, et l'envoi immediatement sur le bus. 
 	 * --------------------------------------------------------------------------------------------
 	 */ 
-	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data, const uint8_t length)
+	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data = nullptr, const uint8_t length = 0)
 	{
 		uint8_t total_length = length + constants::Size::MinPacketSize;
 		uint8_t index = 0;
@@ -65,10 +65,13 @@ namespace herkulex {
 		txBuf[5] = txBuf[2] ^ txBuf[3] ^ txBuf[4];
 		txBuf[6] = 0;
 
-		for(index = 0; index < length; ++index) {
-			txBuf[constants::Size::MinPacketSize + index] = data[index];
-			// Iteratively construct the checksum
-			txBuf[5] ^= txBuf[index];
+		if(data != nullptr)
+		{
+			for(index = 0; index < length; ++index) {
+				txBuf[constants::Size::MinPacketSize + index] = data[index];
+				// Iteratively construct the checksum
+				txBuf[5] ^= txBuf[index];
+			}
 		}
 
 		txBuf[6] = (~txBuf[5]) & 0xFE;
@@ -193,26 +196,154 @@ namespace herkulex {
 		}
 	}
 
-	// void Bus::sendIJOGMsg();
-	// void Bus::sendSJOGMsg();
-	// void Bus::sendStatMsg();
-	// void Bus::sendRollbackMsg();
-	// void Bus::sendRebootMsg();
+	/* --------------------------------------------------------------------------------------------
+	 * sendIJOGMsg
+	 * Envoi d'une commande IJOG par Bus::sendMsg
+	 * jogFlags est une liste de drapeaux, on peut trouver la definition dans la doc Herkulex : 
+	 * -> champ SET d'un paquet IJOG
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Bus::sendIJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
+		// NEW
+		uint8_t * data = new uint8_t(5); 
 
+		data[0] = (jogValue & 0xff); 
+		data[1] = (jogValue & 0xff00) >> 8; 
+		data[2] = set; 
+		data[3] = id; 
+		data[4] = playtime; 
+
+		sendMsg(id, constants::CMD::toServo::IJOG, data, 5); 
+
+		// DELETE
+		delete data; 
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * sendSJOGMsg
+	 * Envoi d'une commande SJOG par Bus::sendMsg
+	 * jogFlags est une liste de drapeaux, on peut trouver la definition dans la doc Herkulex : 
+	 * -> champ SET d'un paquet SJOG
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Bus::sendSJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
+		// NEW
+		uint8_t * data = new uint8_t(5); 
+
+		data[0] = playtime; 
+		data[1] = (jogValue & 0xff); 
+		data[2] = (jogValue & 0xff00) >> 8; 
+		data[3] = set; 
+		data[4] = id; 
+
+		sendMsg(id, constants::CMD::toServo::SJOG, data, 5); 
+
+		// DELETE
+		delete data; 
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * sendStatMsg
+	 * Envoi un message de demande de status
+!!! NB: Ambiguite dans la documentation (6.7 p.49) sur la contenance de data[0] et data[1] pour 
+!!! la requete de status
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Bus::sendStatMsg(uint8_t id) {
+		// NEW 
+		uint8_t * data = new uint8_t(2); 
+
+		data[0] = 0; 
+		data[1] = 0; 
+
+		sendMsg(id, constants::CMD::toServo::Stat, data, 2); 
+
+		// DELETE
+		delete data; 
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * sendRollbackMsg
+	 * Envoi un message de rollback : remise en parametre d'usine (voir doc. p.49)
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Bus::sendRollbackMsg(uint8_t id, bool skipIDRollback, bool skipBaudrateRollback) {
+		// NEW 
+		uint8_t * data = new uint8_t(2); 
+
+		data[0] = (skipIDRollback ? 1 : 0); 
+		data[1] = (skipBaudrateRollback ? 1 : 0); 
+
+		sendMsg(id, constants::CMD::toServo::Rollback, data, 2); 
+
+		// DELETE
+		delete data; 		
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * sendRebootMsg
+	 * Envoi un message de reboot
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Bus::sendRebootMsg(uint8_t id) {
+		sendMsg(id, constants::CMD::toServo::Rollback); 
+	}
 
 	void Bus::cbInterpretBuffer(int event) {
 
-		if( (!_buffer[3]) != _servo_registered_for_callback->getId()) {
+		if( _buffer[3] == _servo_registered_for_callback->getId()) 
+		{
+			switch(_buffer[4]) 
+			{
+				case constants::CMD::fromServo::EEPWriteAck:
+					break; 
 
-			if(_buffer[4] == 0X47) {
-				this->parseStatusMessage(_servo_registered_for_callback);
-			} else if(_buffer[4] == 0x46) {
-				this->parsePositionMessage(_servo_registered_for_callback);
-			} else {
-				debug("Bad CMD");
+				case constants::CMD::fromServo::EEPReadAck:
+					break; 
+
+				case constants::CMD::fromServo::RAMWriteAck:
+					break; 
+
+				case constants::CMD::fromServo::RAMReadAck:
+					break; 
+
+				case constants::CMD::fromServo::IJOGAck:
+					break; 
+
+				case constants::CMD::fromServo::SJOGAck:
+					break; 
+
+				case constants::CMD::fromServo::StatAck:
+					parseStatusMessage(_servo_registered_for_callback);
+					break; 
+
+				case constants::CMD::fromServo::RollbackAck:
+					break; 
+
+				case constants::CMD::fromServo::RebootAck:
+					break; 
+
+				default: 
+					_log->printf("Recu un message servo avec une mauvaise CMD\n");
+					break; 
 			}
+
+			// if(_buffer[4] == 0X47) 
+			// {
+			// 	this->parseStatusMessage(_servo_registered_for_callback);
+			// } 
+			// else if(_buffer[4] == 0x46) 
+			// {
+			// 	this->parsePositionMessage(_servo_registered_for_callback);
+			// } 
+			// else 
+			// {
+			// 	debug("Bad CMD");
+			// }
 			_callback_waiting = false;
-		} else {
+		} 
+		else 
+		{
 			debug("Bad ID");
 		}
 	}
