@@ -77,6 +77,7 @@ namespace herkulex {
 		uint8_t _id;
 		uint8_t _status;
 		uint16_t _position;
+		uint16_t _desired_position; 
 
 		Serial* _log;
 

@@ -7,6 +7,7 @@ namespace herkulex {
 	namespace constants {
 		static const uint8_t header = 0xff;
 		static const uint8_t broadcast_id = 0xfe;
+		static const uint8_t jog_default_playtime = 0x3c; 
 
 		namespace CMD {
 			namespace toServo { 

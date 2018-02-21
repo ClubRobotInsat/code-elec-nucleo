@@ -23,7 +23,8 @@ namespace herkulex {
 	}
 
 	void Servo::setPosition(uint16_t newPosition) {
-		_position = newPosition;
+		// _position = newPosition; // ??
+		_desired_position = newPosition; 
 	}
 
 	void Servo::clear() const {
