@@ -11,8 +11,7 @@ namespace herkulex {
 	{}
 
 	template <uint8_t N_SERVOS>
-	Manager<N_SERVOS>::~Manager() 
-	{
+	Manager<N_SERVOS>::~Manager() {
 		for(uint8_t i = 0; i < _nb_reg_servos; ++i)
 		{
 			delete _servos[i];
@@ -36,7 +35,8 @@ namespace herkulex {
 			// On lance le ticker pour manager les servos !
 			if(_nb_reg_servos == 1)
 			{
-				_it_ticker.attach(this, sendUpdatesToNextServo, refreshPeriod / N_SERVOS);
+				_it_ticker.attach(Callback<void()>(this, &Manager<N_SERVOS>::sendUpdatesToNextServo), 
+					_refreshPeriod / N_SERVOS);
 			}
 
 			// Et on le retourne 
@@ -62,6 +62,6 @@ namespace herkulex {
 			constants::JOG_CMD::PositionMode | constants::JOG_CMD::GreenLedOn); 
 
 		// Read calibrated position 
-		_bus.sendRAMReadMsg(s->id, constants::RAMAddr::CalibratedPosition, 2); 
+		_bus.sendRAMReadMsg(s->_id, constants::RAMAddr::CalibratedPosition, 2); 
 	}
 }

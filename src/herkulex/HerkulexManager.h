@@ -34,6 +34,7 @@ namespace herkulex {
 		// sera de _refreshPeriod / N_SERVOS (? ou _nb_reg_servos ? a voir)
 		const us_timestamp_t _refreshPeriod;
 
+
 	public:
 		Manager(PinName txPin, PinName rxPin, us_timestamp_t _refreshPeriod, Serial* pc);
 		virtual ~Manager();
@@ -43,6 +44,10 @@ namespace herkulex {
 
 	private:
 		void sendUpdatesToNextServo(); 
+
+		void cbUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail);
+		void cbUpdateServoPosition(uint8_t id, uint8_t calibrated_position); // Checker l'addresse lue dans le Ack coté bus
+
 		inline void updateServo(uint8_t id); 
 		void updateAllServos(); // ??
 	};
