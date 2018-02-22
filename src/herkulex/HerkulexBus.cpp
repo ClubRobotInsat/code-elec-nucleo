@@ -137,6 +137,7 @@ namespace herkulex {
 		}
 	}
 
+
 	/* --------------------------------------------------------------------------------------------
 	 * sendRAMWriteMsg
 	 * Construit un message d'ecriture dans la RAM, et l'envoie avec Bus::sendMsg.

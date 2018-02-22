@@ -24,10 +24,7 @@ namespace herkulex {
 	 * En sachant que la solution : bus qui update le servo sans passer par le manager n'est vraiment pas propre...   
 	 */ 
 	class Bus { 
-	protected: 
-		template <uint8_t N_SERVOS>
-		friend class Manager;
-
+	public: 
 		/* --------------------------------------------------------------------------------------------
 		 * Constructeur (explicit)
 		 * Construit un bus serie pour communiquer avec les servos sur les pin txPin et rxPin. 
@@ -44,12 +41,6 @@ namespace herkulex {
 		 */
 		virtual ~Bus();
 
-		/* --------------------------------------------------------------------------------------------
-		 * write
-		 * Prend un buffer (data), de taille fixe (length), passe par addresse et l'ecoule sur le bus 
-		 * --------------------------------------------------------------------------------------------
-		 */
-		void write(uint8_t* data, uint8_t length);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendMsg
@@ -132,6 +123,17 @@ namespace herkulex {
 		 */
 		inline void sendRebootMsg(uint8_t id);
 
+
+	protected: 
+
+		/* --------------------------------------------------------------------------------------------
+		 * write
+		 * Prend un buffer (data), de taille fixe (length), passe par addresse et l'ecoule sur le bus 
+		 * --------------------------------------------------------------------------------------------
+		 */
+		void write(uint8_t* data, uint8_t length);
+
+
 		/* --------------------------------------------------------------------------------------------
 		 * cbInterpretBuffer
 		 * Callback pour lire et interpreter un message recu. Globalement, switch sur le type de 
@@ -139,7 +141,6 @@ namespace herkulex {
 		 * --------------------------------------------------------------------------------------------
 		 */
 		void cbInterpretBuffer(int event);
-
 
 		/* You should not call this method directly but prefer Servo::updatePosition. */
 		void fetchPosition(Servo* servo);
