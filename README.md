@@ -64,7 +64,6 @@ wget -P ~ git.io/.gdbinit
 On dois surtout autoriser le chargement du script pour flasher la carte (*pas optionnel*).
 
 ```
-cd ../..
 echo "set auto-load safe-path /" >> ~/.gdbinit
 ```
 
@@ -75,8 +74,13 @@ echo "set auto-load safe-path /" >> ~/.gdbinit
 Pour compiler, se mettre dans le dossier cloné plus tôt (depuis https://github.com/ClubRobotInsat/code-elec-nucleo) et utiliser la commande :
 
 ```
-mbed compile --profile .temp/tools/profiles/debug.json
+mbed compile --profile debug_robot.json
 ```
+
+On spécifie un profil de compilation qui fait plusieurs choses :
+
+* il active les symboles de debug pour que gdb ait des choses à nous montrer
+* il active le standard C++11
 
 #### Openocd
 
