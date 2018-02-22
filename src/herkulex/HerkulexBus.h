@@ -123,6 +123,13 @@ namespace herkulex {
 		 */
 		inline void sendRebootMsg(uint8_t id);
 
+		void readEEPAddr(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len, 
+			Callback<void(uint8_t, uint8_t, uint8_t[])>& callback);
+
+		void readRAMAddr(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len, 
+			Callback<void(uint8_t, uint8_t, uint8_t, uint8_t)>& callback);
+
+		void readStat(uint8_t id, Callback<void(uint8_t, uint8_t, uint8_t)>& callback)
 
 	protected: 
 
