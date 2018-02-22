@@ -111,4 +111,13 @@ namespace herkulex {
 			_servos[_num_next_servo]->_status_detail = status_detail;
 		}
 	}
+	template <uint8_t N_SERVOS>
+	Servo* Manager<N_SERVOS>::getServoById(uint8_t id) {
+		for (uint8_t i = 0; i < _nb_reg_servos; i++) {
+			if (_servos[i]-> id == id) {
+				return _servos[i];
+			}
+		}
+		return nullptr;
+	}
 }
