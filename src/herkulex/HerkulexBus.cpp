@@ -47,7 +47,7 @@ namespace herkulex {
 	 * Construit un message pour les servos, et l'envoi immediatement sur le bus. 
 	 * --------------------------------------------------------------------------------------------
 	 */ 
-	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data = nullptr, const uint8_t length = 0)
+	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t * data, const uint8_t length)
 	{
 		uint8_t total_length = length + constants::Size::MinPacketSize;
 		uint8_t index = 0;
@@ -82,213 +82,6 @@ namespace herkulex {
 		delete txBuf;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * sendEEPWriteMsg
-	 * Construit un message d'ecriture dans la ROM, et l'envoie avec Bus::sendMsg.
-	 * len < 2
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
-		// Check valid length
-		if(len < 1 || len > 2)
-		{
-			_log->printf("Utilisation de Bus::sendEEPWriteMsg avec une longueur erronee !\n");
-		} 
-		else 
-		{
-			// NEW
-			uint8_t * data = new uint8_t(2 + len);
-	
-			data[0] = addr;
-			data[1] = len;
-			data[2] = lsb;
-			if(len > 1) {
-				data[3] = msb;
-			}
-	
-			sendMsg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
-
-			// DELETE
-			delete data; 
-		}
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * sendEEPReadMsg
-	 * Construit un de lecture dans la ROM, et l'envoie avec Bus::sendMsg.
-	 * len < 2
-	 * !!! Ne realise pas l'operation de lecture !!! 
-	 * --------------------------------------------------------------------------------------------
-	 */	
-	void Bus::sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len) {
-		// Check valid length
-		if(len < 1 || len > 2)
-		{
-			_log->printf("Utilisation de Bus::sendEEPReadMsg avec une longueur erronee !\n");
-		} 
-		else 
-		{
-			uint8_t data[2];
-
-			data[0] = addr;
-			data[1] = len;
-
-			sendMsg(id, constants::CMD::toServo::EEPRead, data, 2);
-		}
-	}
-
-
-	/* --------------------------------------------------------------------------------------------
-	 * sendRAMWriteMsg
-	 * Construit un message d'ecriture dans la RAM, et l'envoie avec Bus::sendMsg.
-	 * len < 2
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
-		// Check valid length
-		if(len < 1 || len > 2)
-		{
-			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
-		} 
-		else 
-		{
-			// NEW
-			uint8_t * data = new uint8_t(2 + len);
-
-			data[0] = addr;
-			data[1] = len;
-			data[2] = lsb;
-			if(len > 1) {
-				data[3] = msb;
-			}
-
-			sendMsg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
-
-			// DELETE
-			delete data;
-		}
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * sendRAMReadMsg
-	 * Construit un de lecture dans la RAM, et l'envoie avec Bus::sendMsg.
-	 * len < 2
-	 * !!! Ne realise pas l'operation de lecture !!! 
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len) {
-		// Check valid length
-		if(len < 1 || len > 2)
-		{
-			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
-		} 
-		else 
-		{
-			// NEW
-			uint8_t * data = new uint8_t(2 + len);
-
-			data[0] = addr;
-			data[1] = len;
-
-			sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
-
-			// DELETE
-			delete data;
-		}
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * sendIJOGMsg
-	 * Envoi d'une commande IJOG par Bus::sendMsg
-	 * jogFlags est une liste de drapeaux, on peut trouver la definition dans la doc Herkulex : 
-	 * -> champ SET d'un paquet IJOG
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::sendIJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
-		// NEW
-		uint8_t * data = new uint8_t(5); 
-
-		data[0] = (jogValue & 0xff); 
-		data[1] = (jogValue & 0xff00) >> 8; 
-		data[2] = set; 
-		data[3] = id; 
-		data[4] = playtime; 
-
-		sendMsg(id, constants::CMD::toServo::IJOG, data, 5); 
-
-		// DELETE
-		delete data; 
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * sendSJOGMsg
-	 * Envoi d'une commande SJOG par Bus::sendMsg
-	 * jogFlags est une liste de drapeaux, on peut trouver la definition dans la doc Herkulex : 
-	 * -> champ SET d'un paquet SJOG
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::sendSJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
-		// NEW
-		uint8_t * data = new uint8_t(5); 
-
-		data[0] = playtime; 
-		data[1] = (jogValue & 0xff); 
-		data[2] = (jogValue & 0xff00) >> 8; 
-		data[3] = set; 
-		data[4] = id; 
-
-		sendMsg(id, constants::CMD::toServo::SJOG, data, 5); 
-
-		// DELETE
-		delete data; 
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * sendStatMsg
-	 * Envoi un message de demande de status
-!!! NB: Ambiguite dans la documentation (6.7 p.49) sur la contenance de data[0] et data[1] pour 
-!!! la requete de status
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::sendStatMsg(uint8_t id) {
-		// NEW 
-		uint8_t * data = new uint8_t(2); 
-
-		data[0] = 0; 
-		data[1] = 0; 
-
-		sendMsg(id, constants::CMD::toServo::Stat, data, 2); 
-
-		// DELETE
-		delete data; 
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * sendRollbackMsg
-	 * Envoi un message de rollback : remise en parametre d'usine (voir doc. p.49)
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::sendRollbackMsg(uint8_t id, bool skipIDRollback, bool skipBaudrateRollback) {
-		// NEW 
-		uint8_t * data = new uint8_t(2); 
-
-		data[0] = (skipIDRollback ? 1 : 0); 
-		data[1] = (skipBaudrateRollback ? 1 : 0); 
-
-		sendMsg(id, constants::CMD::toServo::Rollback, data, 2); 
-
-		// DELETE
-		delete data; 		
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * sendRebootMsg
-	 * Envoi un message de reboot
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::sendRebootMsg(uint8_t id) {
-		sendMsg(id, constants::CMD::toServo::Rollback); 
-	}
 
 	/* --------------------------------------------------------------------------------------------
 	 * cbInterpretBuffer
@@ -297,35 +90,27 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::cbInterpretBuffer(int event) {
-		if( _buffer[3] == _servo_registered_for_callback->getId()) 
+		if( _buffer[3] == _expected_reply_id && _buffer[4] == _expected_reply_cmd) 
 		{
 			switch(_buffer[4]) 
 			{
-				case constants::CMD::fromServo::EEPWriteAck:
-					break; 
-
+				// If we received an addr read ack
 				case constants::CMD::fromServo::EEPReadAck:
-					break; 
-
-				case constants::CMD::fromServo::RAMWriteAck:
-					break; 
-
 				case constants::CMD::fromServo::RAMReadAck:
+					parseAddrMsg();
 					break; 
 
-				case constants::CMD::fromServo::IJOGAck:
-					break; 
-
-				case constants::CMD::fromServo::SJOGAck:
-					break; 
-
+				// If we received a status read ack
 				case constants::CMD::fromServo::StatAck:
-					parseStatusMessage(_servo_registered_for_callback);
+					parseStatMsg();
 					break; 
 
+				// Do nothing for other replies
+				case constants::CMD::fromServo::EEPWriteAck:
+				case constants::CMD::fromServo::RAMWriteAck:
+				case constants::CMD::fromServo::IJOGAck:
+				case constants::CMD::fromServo::SJOGAck:
 				case constants::CMD::fromServo::RollbackAck:
-					break; 
-
 				case constants::CMD::fromServo::RebootAck:
 					break; 
 
@@ -333,117 +118,11 @@ namespace herkulex {
 					_log->printf("Recu un message servo avec une mauvaise CMD\n");
 					break; 
 			}
-
-			// if(_buffer[4] == 0X47) 
-			// {
-			// 	this->parseStatusMessage(_servo_registered_for_callback);
-			// } 
-			// else if(_buffer[4] == 0x46) 
-			// {
-			// 	this->parsePositionMessage(_servo_registered_for_callback);
-			// } 
-			// else 
-			// {
-			// 	debug("Bad CMD");
-			// }
-			_callback_waiting = false;
+			_callback_waiting = false; // TODO - [supprimer], ou utiliser avec un timeout
 		} 
 		else 
 		{
 			debug("Bad ID");
 		}
-	}
-
-	void Bus::parseStatusMessage(Servo* servo) {
-		// Checksum1
-		uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8]) & 0xFE;
-		if(chksum1 != _buffer[5]) {
-			debug("Bad status Checksum #1");
-			servo->setStatus(0xFF);
-		}
-
-		// Checksum2
-		uint8_t chksum2 = (~_buffer[5] & 0xFE);
-		if(chksum2 != _buffer[6]) {
-			debug("Bad status Checksum #2");
-			servo->setStatus(0xFF);
-		}
-
-		servo->setStatus(_buffer[7]); // Status Error
-		                              // status = _buffer[8];  // Status Detail
-	}
-
-	void Bus::parsePositionMessage(Servo* servo) {
-		// Checksum1
-		uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8] ^ _buffer[9] ^ _buffer[10] ^
-		                   _buffer[11] ^ _buffer[12]) &
-		                  0xFE;
-		if(chksum1 != _buffer[5]) {
-			debug("Bad position Checksum #1");
-			servo->setPosition(0xFFFF);
-		}
-
-		// Checksum2
-		uint8_t chksum2 = (~_buffer[5] & 0xFE);
-		if(chksum2 != _buffer[6]) {
-			debug("Bad position Checksum #2");
-			servo->setPosition(0xFFFF);
-		}
-
-		servo->setPosition(((_buffer[10] & 0x03) << 8) | _buffer[9]);
-	}
-
-	void Bus::fetchStatus(Servo* servo) {
-		uint8_t txBuf[7];
-
-		txBuf[0] = constants::header;          // Packet Header (0xFF)
-		txBuf[1] = constants::header;          // Packet Header (0xFF)
-		txBuf[2] = constants::Size::MinPacketSize; // Packet Size
-		txBuf[3] = servo->getId();  // Servo ID
-		txBuf[4] = constants::CMD::toServo::Stat;        // Status Error, Status Detail request
-
-		// Check Sum1 and Check Sum2
-		txBuf[5] = (txBuf[2] ^ txBuf[3] ^ txBuf[4]) & 0xFE;
-		txBuf[6] = (~txBuf[5]) & 0xFE;
-
-		// Wait for a free slot.
-		while(_callback_waiting) {
-		}
-		_callback_waiting = true;
-		_servo_registered_for_callback = servo;
-
-		// Bus::send packet (mbed -> herkulex)
-		this->write(txBuf, 7);
-
-		_ser->read(_buffer, (uint8_t)9, _read_callback, SERIAL_EVENT_RX_COMPLETE);
-	}
-
-	void Bus::fetchPosition(Servo* servo) {
-		uint8_t txBuf[9];
-
-		txBuf[0] = static_cast<uint8_t>(constants::header);                  // Packet Header (0xFF)
-		txBuf[1] = static_cast<uint8_t>(constants::header);                  // Packet Header (0xFF)
-		txBuf[2] = static_cast<uint8_t>(constants::Size::MinPacketSize) + 2;     // Packet Size
-		txBuf[3] = servo->getId();          // Servo ID
-		txBuf[4] = static_cast<uint8_t>(constants::CMD::toServo::RAMRead);            // Status Error, Status Detail request
-		txBuf[5] = 0;                       // Checksum1
-		txBuf[6] = 0;                       // Checksum2
-		txBuf[7] = static_cast<uint8_t>(constants::RAMAddr::CalibratedPosition); // Address 58
-		txBuf[8] = 2;                   // Address 58 and 59
-
-		// Check Sum1 and Check Sum2
-		txBuf[5] = (txBuf[2] ^ txBuf[3] ^ txBuf[4] ^ txBuf[7] ^ txBuf[8]) & 0xFE;
-		txBuf[6] = (~txBuf[5]) & 0xFE;
-
-		// Wait that there is a free slot for us.
-		while(_callback_waiting) {
-		}
-		_callback_waiting = true;
-		_servo_registered_for_callback = servo;
-
-		// Bus::send packet (mbed -> herkulex)
-		this->write(txBuf, 9);
-
-		_ser->read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
 	}
 }

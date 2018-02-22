@@ -47,16 +47,20 @@ namespace herkulex {
 		 * Construit un message pour les servos, et l'envoi immediatement sur le bus. 
 		 * --------------------------------------------------------------------------------------------
 		 */ 
-		void sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data, const uint8_t length);
+		void sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, 
+			const uint8_t* data = nullptr, const uint8_t length = 0);
 
 
+	// - TODO - Optimize Read/Write functions (same operations, duplicated... )
+	// 		  - Maybe templates for length field (optimization && compile-time error generation is bad value)
 		/* --------------------------------------------------------------------------------------------
 		 * sendEEPWriteMsg
 		 * Construit un message d'ecriture dans la ROM, et l'envoie avec Bus::sendMsg.
 		 * len < 2
 		 * --------------------------------------------------------------------------------------------
 		 */
-		void sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+		inline void sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, 
+			uint8_t len = 1, uint8_t msb = 0x00);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendEEPReadMsg
@@ -65,7 +69,7 @@ namespace herkulex {
 		 * !!! Ne realise pas l'operation de lecture !!! 
 		 * --------------------------------------------------------------------------------------------
 		 */		
-		void sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len = 1);
+		inline void sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len = 1);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRAMWriteMsg
@@ -73,7 +77,8 @@ namespace herkulex {
 		 * len < 2
 		 * --------------------------------------------------------------------------------------------
 		 */
-		void sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+		inline void sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, 
+			uint8_t len = 1, uint8_t msb = 0x00);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRAMReadMsg
@@ -82,7 +87,7 @@ namespace herkulex {
 		 * !!! Ne realise pas l'operation de lecture !!! 
 		 * --------------------------------------------------------------------------------------------
 		 */
-		void sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len = 1);
+		inline void sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len = 1);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendIJOGMsg
@@ -90,7 +95,7 @@ namespace herkulex {
 		 * Utiliser des | entre flags de l'enum constants::JOG_CMD::JOG_CMDEnum pour composer SET
 		 * --------------------------------------------------------------------------------------------
 		 */
-		void sendIJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
+		inline void sendIJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendSJOGMsg
@@ -98,7 +103,7 @@ namespace herkulex {
 		 * Utiliser des | entre flags de l'enum constants::JOG_CMD::JOG_CMDEnum pour composer SET
 		 * --------------------------------------------------------------------------------------------
 		 */
-		void sendSJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
+		inline void sendSJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendStatMsg
@@ -107,14 +112,14 @@ namespace herkulex {
 !!! la requete de status
 		 * --------------------------------------------------------------------------------------------
 		 */
-		void sendStatMsg(uint8_t id);
+		inline void sendStatMsg(uint8_t id);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRollbackMsg
 		 * Envoi un message de rollback : remise en parametre d'usine (voir doc. p.49)
 		 * --------------------------------------------------------------------------------------------
 		 */
-		void sendRollbackMsg(uint8_t id, bool skipIDRollback = true, bool skipBaudrateRollback = true);
+		inline void sendRollbackMsg(uint8_t id, bool skipIDRollback = true, bool skipBaudrateRollback = true);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRebootMsg
@@ -123,13 +128,34 @@ namespace herkulex {
 		 */
 		inline void sendRebootMsg(uint8_t id);
 
-		void readEEPAddr(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len, 
-			Callback<void(uint8_t, uint8_t, uint8_t[])>& callback);
+		/* --------------------------------------------------------------------------------------------
+		 * readEEPAddr
+		 * Read at a specified address in a servo's EEP. 
+		 * Callback prototype example : 
+		 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0); 
+		 * --------------------------------------------------------------------------------------------
+		 */
+		inline void readEEPAddr(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len, 
+			Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> * callback);
 
-		void readRAMAddr(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len, 
-			Callback<void(uint8_t, uint8_t, uint8_t, uint8_t)>& callback);
+		/* --------------------------------------------------------------------------------------------
+		 * readRAMAddr
+		 * Read at a specified address in a servo's RAM. 
+		 * Callback prototype example : 
+		 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0); 
+		 * --------------------------------------------------------------------------------------------
+		 */
+		inline void readRAMAddr(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len, 
+			Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> * callback);
 
-		void readStat(uint8_t id, Callback<void(uint8_t, uint8_t, uint8_t)>& callback)
+		/* --------------------------------------------------------------------------------------------
+		 * readStat
+		 * Read the status of a servo. 
+		 * Callback prototype example : 
+		 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail); 
+		 * --------------------------------------------------------------------------------------------
+		 */
+		inline void readStat(uint8_t id, Callback<void(uint8_t, uint8_t, uint8_t)> * callback);
 
 	protected: 
 
@@ -149,19 +175,8 @@ namespace herkulex {
 		 */
 		void cbInterpretBuffer(int event);
 
-		/* You should not call this method directly but prefer Servo::updatePosition. */
-		void fetchPosition(Servo* servo);
-
-		/* You should not call this method directly but prefer Servo::updateStatus. */
-		void fetchStatus(Servo* servo);
-
-
-		void parseStatusMessage(Servo* servo);
-
-		void parsePositionMessage(Servo* servo);
-
-
-
+		inline void parseStatMsg();
+		inline void parseAddrMsg();
 
 	private: 
 		volatile bool _callback_waiting;
@@ -175,7 +190,15 @@ namespace herkulex {
 		uint8_t _buffer[13];
 
 		Servo* _servo_registered_for_callback; // ??? 
+
+		Callback<void(uint8_t, uint8_t, uint8_t)> * 	_callback_read_stat;
+		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> * 	_callback_read_addr; 
+
+		uint8_t 										_expected_reply_id; 
+		constants::CMD::fromServo::fromServoEnum 		_expected_reply_cmd; 
 	};
 }
+
+#include "HerkulexBus.inl"
 
 #endif
