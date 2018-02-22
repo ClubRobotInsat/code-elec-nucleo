@@ -34,10 +34,6 @@ namespace herkulex {
 				// NEW -> DELETE dans ~Manager
 				_servos[_nb_reg_servos - 1] = new Servo(id, _bus, _log);
 
-				// Activate the torque on the servo 
-				// ?? Worth it to put it here ? ?? 
-				_bus.sendRAMWriteMsg(_servos[_nb_reg_servos - 1]->_id, constants::RAMAddr::TorqueControl, 1); 
-
 				// On lance le ticker pour manager les servos !
 				if(_nb_reg_servos == 1)
 				{
