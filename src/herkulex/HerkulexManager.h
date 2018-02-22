@@ -32,23 +32,28 @@ namespace herkulex {
 		// Periode de raffraichissement -> le temps ecoule entre la mise
 		// a jour de deux servos stockes consecutivement dans _servos
 		// sera de _refreshPeriod / N_SERVOS (? ou _nb_reg_servos ? a voir)
-		const us_timestamp_t _refreshPeriod;
+		const us_timestamp_t _refreshPeriod; // TODO : RENAME (naming conv...)
+
+		Callback<void(uint8_t, uint8_t, uint8_t)> _callback_update_servo_status; 
+		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> _callback_update_servo; 
 
 
 	public:
-		Manager(PinName txPin, PinName rxPin, us_timestamp_t _refreshPeriod, Serial* pc);
+		explicit Manager(PinName txPin, PinName rxPin, us_timestamp_t _refreshPeriod, Serial* pc);
 		virtual ~Manager();
 
 		// This function is used to get a reference to a servo object with desired ID
 		Servo* registerNewServo(uint8_t id);
 
 	private:
-		void sendUpdatesToNextServo(); 
+		void cbSendUpdatesToNextServo(); 
 
-		void cbUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail);
-		void cbUpdateServoPosition(uint8_t id, uint8_t calibrated_position); // Checker l'addresse lue dans le Ack coté bus
+		void cbFuncUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail);
+		void cbFuncUpdateServo(uint8_t id, uint8_t status_error, uint8_t status_detail, 
+			uint8_t data0, uint8_t data1 = 0); // Checker l'addresse lue dans le Ack coté bus
 
 		inline void updateServo(uint8_t id); 
+
 		void updateAllServos(); // ??
 	};
 }

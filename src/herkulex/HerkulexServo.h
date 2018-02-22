@@ -22,18 +22,33 @@ namespace herkulex {
 
 	public:
 		/* You should not call this constructor directly, but call Bus::makeNewServo */
-		Servo(uint8_t id, Bus& bus, Serial* log);
+		explicit Servo(uint8_t id, Bus& bus, Serial* log);
 
 		/* Accessors --- */
 
 		/* Return the cached status */
 		uint8_t getStatus() const;
 
+		uint8_t getStatusError() const; 
+		uint8_t getStatusDetail() const;
+
 		/* Return the id of the servo */
 		uint8_t getId() const;
 
 		/* Return the cached position */
+		/*
+		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
+		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
+		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
+		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
+		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!> */
 		uint16_t getPosition() const;
+	/*	<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
+		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
+		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
+		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
+		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
+		*/
 
 		/* Settors ---
 		 * These methods are not meant to be used outside of this library.
@@ -76,6 +91,10 @@ namespace herkulex {
 	private:
 		uint8_t _id;
 		uint8_t _status;
+
+		uint8_t _status_error; 
+		uint8_t _status_detail; 
+
 		uint16_t _position;
 		uint16_t _desired_position; 
 
