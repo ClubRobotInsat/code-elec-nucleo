@@ -166,7 +166,6 @@ namespace herkulex {
 		 */
 		void write(uint8_t* data, uint8_t length);
 
-
 		/* --------------------------------------------------------------------------------------------
 		 * cbInterpretBuffer
 		 * Callback pour lire et interpreter un message recu. Globalement, switch sur le type de 
@@ -175,7 +174,20 @@ namespace herkulex {
 		 */
 		void cbInterpretBuffer(int event);
 
+		/* --------------------------------------------------------------------------------------------
+		 * parseStatMsg
+		 * This function is an helper. It should not be called outside of cbInterpretBuffer. 
+		 * Parses a status ack message received from a servo.
+		 * --------------------------------------------------------------------------------------------
+		 */
 		inline void parseStatMsg();
+
+		/* --------------------------------------------------------------------------------------------
+		 * parseAddrMsg
+		 * This function is an helper. It should not be called outside of cbInterpretBuffer. 
+		 * Parses a addr read (EEP or RAM) ack message received from a servo.
+		 * --------------------------------------------------------------------------------------------
+		 */
 		inline void parseAddrMsg();
 
 	private: 

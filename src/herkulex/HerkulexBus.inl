@@ -257,7 +257,7 @@ namespace herkulex
 		_expected_reply_cmd = constants::CMD::fromServo::StatAck;
 	}
 
-		void Bus::parseAddrMsg() {
+	void Bus::parseAddrMsg() {
 		// Check checksum validity
 		uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8] ^ _buffer[9] ^ _buffer[10] ^
 		    _buffer[11] ^ _buffer[12]) & 0xFE;
