@@ -25,16 +25,35 @@ namespace herkulex {
 		_log->printf("Destruction servo");
 	}
 
+
+	/* MANAGER FUNCTIONS - DO NOT USE OUTSIDE OF MANAGER */ 
+
+
+	/* --------------------------------------------------------------------------------------------
+	 * mgrUpdateId
+	 * Function for the Manager : updates servo's id 
+	 * --------------------------------------------------------------------------------------------
+	 */
 	void Servo::mgrUpdateId(uint8_t new_id)
 	{
 		_id = new_id; 
 	}
 
+	/* --------------------------------------------------------------------------------------------
+	 * mgrUpdatePosition
+	 * Function for the Manager : updates servo's position
+	 * --------------------------------------------------------------------------------------------
+	 */
 	void Servo::mgrUpdatePosition(uint8_t new_position)
 	{
 		_position = new_position; 
 	} 
 
+	/* --------------------------------------------------------------------------------------------
+	 * mgrUpdateStatus
+	 * Function for the Manager : updates servo's status, and torque status (on/off)
+	 * --------------------------------------------------------------------------------------------
+	 */
 	void Servo::mgrUpdateStatus(uint8_t new_status_error, uint8_t new_status_detail)
 	{
 		_status_error = new_status_error; 
@@ -42,48 +61,128 @@ namespace herkulex {
 		_torque_on = static_cast<bool>(_status_detail & constants::StatusDetail::MotorOnFlag);
 	} 
 
-	uint16_t Servo::getPosition() const {
-		return _position;
-	}
 
+	/* GETTERS */ 
+
+
+	/* --------------------------------------------------------------------------------------------
+	 * getStatusError
+	 * Return servo's StatusError. For further informations, refer to herkulex documentation p.39.
+	 * Update rate defined from the refresh period of the manager. 
+	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
+	 * --------------------------------------------------------------------------------------------
+	 */
 	uint8_t Servo::getStatusError() const {
 		return _status_error; 
 	}
 
+	/* --------------------------------------------------------------------------------------------
+	 * getStatusDetail
+	 * Return servo's StatusDetail. For further informations, refer to herkulex documentation p.39.
+	 * Update rate defined from the refresh period of the manager. 
+	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
+	 * --------------------------------------------------------------------------------------------
+	 */
 	uint8_t Servo::getStatusDetail() const {
 		return _status_detail;
 	}
 
+	/* --------------------------------------------------------------------------------------------
+	 * getId
+	 * Return servo's ID.
+	 * --------------------------------------------------------------------------------------------
+	 */
 	uint8_t Servo::getId() const {
 		return _id;
 	}
 
-	void Servo::enableTorque(bool value) {
-		_desired_torque_on = value; 
+	/* --------------------------------------------------------------------------------------------
+	 * getPosition
+	 * Return servo's current position. 
+	 <!> Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!>
+	 * Update rate defined from the refresh period of the manager. 
+	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
+	 * --------------------------------------------------------------------------------------------
+	 */
+	uint16_t Servo::getPosition() const {
+		return _position;
 	}
 
+	/* --------------------------------------------------------------------------------------------
+	 * isTorqueOn
+	 * Return servo's torque mode (on/off). 
+	 * Update rate defined from the refresh period of the manager. 
+	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
+	 * --------------------------------------------------------------------------------------------
+	 */
 	bool Servo::isTorqueOn() const {
 		return _torque_on; 
 	}
 
-	void Servo::setDefaultLedColor(constants::LedColor::LedColorEnum led_color) {
-		_default_led_color = led_color; 
-	}
-
+	/* --------------------------------------------------------------------------------------------
+	 * getDefaultLedColor
+	 * Get the color of the led for a servo in position.
+	 * --------------------------------------------------------------------------------------------
+	 */
 	constants::LedColor::LedColorEnum Servo::getDefaultLedColor() const {
 		return _default_led_color; 
 	}
 
-	void Servo::setMovingLedColor(constants::LedColor::LedColorEnum led_color) {
-		_moving_led_color = led_color; 
-	}
-
+	/* --------------------------------------------------------------------------------------------
+	 * getMovingLedColor
+	 * Get the color of the led for a servo moving.
+	 * --------------------------------------------------------------------------------------------
+	 */
 	constants::LedColor::LedColorEnum Servo::getMovingLedColor() const {
 		return _moving_led_color; 
 	}
 
+
+	/* SETTERS */ 
+
+
+	/* --------------------------------------------------------------------------------------------
+	 * setPosition
+	 * Set a new position for the servo. 
+	 * Sent at a rate defined from the refresh period of the manager. 
+	 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
+	 * --------------------------------------------------------------------------------------------
+	 */
 	void Servo::setPosition(uint16_t newPosition) {
 		_desired_position = newPosition; 
+	}
+	
+	/* --------------------------------------------------------------------------------------------
+	 * enableTorque
+	 * Set a new torque mode for the servo (on/off). 
+	 * Sent at a rate defined from the refresh period of the manager. 
+	 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Servo::enableTorque(bool value) {
+		_desired_torque_on = value; 
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * setDefaultLedColor
+	 * Set the color of the led for a servo in position.
+	 * Sent at a rate defined from the refresh period of the manager. 
+	 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Servo::setDefaultLedColor(constants::LedColor::LedColorEnum led_color) {
+		_default_led_color = led_color; 
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * setMovingLedColor
+	 * Set the color of the led for a servo moving.
+	 * Sent at a rate defined from the refresh period of the manager. 
+	 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
+	 * --------------------------------------------------------------------------------------------
+	 */
+	void Servo::setMovingLedColor(constants::LedColor::LedColorEnum led_color) {
+		_moving_led_color = led_color; 
 	}
 }
 
