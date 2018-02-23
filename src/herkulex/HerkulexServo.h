@@ -20,10 +20,10 @@ namespace herkulex {
 			_log->printf("Destruction servo");
 		};
 
-	public:
 		/* You should not call this constructor directly, but call Bus::makeNewServo */
 		explicit Servo(uint8_t id, Bus& bus, Serial* log);
 
+	public:
 		/* Accessors --- */
 
 		/* Return the cached status */
