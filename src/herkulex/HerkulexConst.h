@@ -86,8 +86,8 @@ namespace herkulex {
 			};
 		};
 
-		namespace Torque_CMD { 
-			enum Torque_CMDEnum : uint8_t { 
+		namespace TorqueControl { 
+			enum TorqueControlEnum : uint8_t { 
 				TorqueFree = 0x00, 
 				BreakOn = 0x40, 
 				TorqueOn = 0x60 
@@ -199,16 +199,19 @@ namespace herkulex {
 			};
 		};
 
-		enum class LedColor {
-			White, 
-			Black, 
-			Red, 
-			Green, 
-			Blue, 
-			Yellow, 
-			Cyan, 
-			Magenta
-		};
+		namespace LedColor
+		{
+			enum LedColorEnum : uint8_t {
+				Black = 0x00, 
+				Red = JOG_CMD::RedLedOn, 
+				Green = JOG_CMD::GreenLedOn, 
+				Blue = JOG_CMD::BlueLedOn, 
+				Yellow = JOG_CMD::RedLedOn | JOG_CMD::GreenLedOn, 
+				Cyan = JOG_CMD::GreenLedOn | JOG_CMD::BlueLedOn, 
+				Magenta = JOG_CMD::BlueLedOn | JOG_CMD::RedLedOn,
+				White = JOG_CMD::RedLedOn | JOG_CMD::GreenLedOn | JOG_CMD::BlueLedOn
+			};
+		}; 
 	};
 };
 

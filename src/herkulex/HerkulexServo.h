@@ -23,7 +23,7 @@ namespace herkulex {
 		inline void mgrUpdateStatus(uint8_t new_status_error, uint8_t new_status_detail); 
 
 		/* You should not call this constructor directly, but call Bus::makeNewServo */
-		explicit Servo(uint8_t id, Bus& bus, Serial* log);
+		explicit inline Servo(uint8_t id, Bus& bus, Serial* log);
 
 		virtual ~Servo() {
 			_log->printf("Destruction servo");
@@ -61,11 +61,11 @@ namespace herkulex {
 		inline void enableTorque(bool value);
 		inline bool isTorqueOn() const;
 
-		inline void setDefaultLedColor(constants::LedColor led_color); 
-		inline constants::LedColor getDefaultLedColor() const;
+		inline void setDefaultLedColor(constants::LedColor::LedColorEnum led_color); 
+		inline constants::LedColor::LedColorEnum getDefaultLedColor() const;
 
-		inline void setMovingLedColor(constants::LedColor led_color); 
-		inline constants::LedColor getMovingLedColor() const;  
+		inline void setMovingLedColor(constants::LedColor::LedColorEnum led_color); 
+		inline constants::LedColor::LedColorEnum getMovingLedColor() const;  
 
 	private:
 		uint8_t _id;
@@ -77,8 +77,8 @@ namespace herkulex {
 		bool _torque_on; 
 		bool _desired_torque_on; 
 
-		constants::LedColor _default_led_color;
-		constants::LedColor _moving_led_color;  
+		constants::LedColor::LedColorEnum _default_led_color;
+		constants::LedColor::LedColorEnum _moving_led_color;  
 
 		uint16_t _position;
 		uint16_t _desired_position; 

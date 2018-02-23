@@ -48,19 +48,19 @@ namespace herkulex {
 		return _torque_on; 
 	}
 
-	void Servo::setDefaultLedColor(constants::LedColor led_color) {
+	void Servo::setDefaultLedColor(constants::LedColor::LedColorEnum led_color) {
 		_default_led_color = led_color; 
 	}
 
-	constants::LedColor Servo::getDefaultLedColor() const {
+	constants::LedColor::LedColorEnum Servo::getDefaultLedColor() const {
 		return _default_led_color; 
 	}
 
-	void Servo::setMovingLedColor(constants::LedColor led_color) {
+	void Servo::setMovingLedColor(constants::LedColor::LedColorEnum led_color) {
 		_moving_led_color = led_color; 
 	}
 
-	constants::LedColor Servo::getMovingLedColor() const {
+	constants::LedColor::LedColorEnum Servo::getMovingLedColor() const {
 		return _moving_led_color; 
 	}
 

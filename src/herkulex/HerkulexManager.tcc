@@ -53,29 +53,43 @@ namespace herkulex {
 	}
 
 	template <uint8_t N_SERVOS>
-		void Manager<N_SERVOS>::cbSendUpdatesToNextServo() {
-			Servo * s = _servos[_num_next_servo]; 
+	void Manager<N_SERVOS>::cbSendUpdatesToNextServo() {
+		Servo * s = _servos[_num_next_servo]; 
 
-			// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
-			_bus.readRAMAddr(s->_id, constants::RAMAddr::AbsolutePosition, 2, &_callback_update_servo); 
+		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
+		_bus.readRAMAddr(s->_id, constants::RAMAddr::AbsolutePosition, 2, &_callback_update_servo); 
 
-			// ?? PLAYTIME ?? 
-			_bus.sendSJOGMsg(s->_id, constants::jog_default_playtime, s->_desired_position, 
-					constants::JOG_CMD::PositionMode | constants::JOG_CMD::GreenLedOn); 
+		// Enable torque if status says torque is off 
+		// (member Servo::_torque_on is updated on mgrUpdateStatus)
+		if( s->_desired_torque_on && !(s->_torque_on) )
+			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::TorqueControl, 
+				constants::TorqueControl::TorqueOn); 
 
-			// Check and clear the status if needed
-			if(s->_status_error != 0x00)
-			{
-				_log->printf("Trying to clear status (%x) of servo #%x\n", s->_status_error, s->_id);
-				_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::StatusError, 0x00);
-			}
+		constants::LedColor::LedColorEnum led_color; 
 
-			// Iterate on each servo
-			if(_num_next_servo < _nb_reg_servos - 1) 
-				++_num_next_servo; 
-			else
-				_num_next_servo = 0;
+		// Select led color
+		if(s->_status_detail & constants::StatusDetail::InpositionFlag) 
+			led_color = s->_default_led_color; 
+		else
+			led_color = s->_moving_led_color; 
+
+		// ?? PLAYTIME ?? 
+		_bus.sendSJOGMsg(s->_id, constants::jog_default_playtime, s->_desired_position, 
+				constants::JOG_CMD::PositionMode | led_color); 
+
+		// Check and clear the status if needed
+		if(s->_status_error != 0x00)
+		{
+			_log->printf("Trying to clear status (%x) of servo #%x\n", s->_status_error, s->_id);
+			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::StatusError, 0x00);
 		}
+
+		// Iterate on each servo
+		if(_num_next_servo < _nb_reg_servos - 1) 
+			++_num_next_servo; 
+		else
+			_num_next_servo = 0;
+	}
 
 	template <uint8_t N_SERVOS>
 	void Manager<N_SERVOS>::cbFuncUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail)
