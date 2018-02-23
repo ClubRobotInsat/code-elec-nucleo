@@ -3,8 +3,26 @@
 
 namespace herkulex {
 
-	Servo::Servo(uint8_t id, Bus& bus, Serial* log) : _id(id), _status(0), _position(0), _bus(bus), _log(log) {
+	Servo::Servo(uint8_t id, Bus& bus, Serial* log) : 
+		_id(id), 
+		_status_error(0), 
+		_status_detail(0), 
+		_torque_on(false), 
+		_desired_torque_on(true), 
+		_default_led_color(constants::LedColor::Green), 
+		_moving_led_color(constants::LedColor::Magenta), 
+		_position(0), 
+		_desired_position(0),
+		_log(log), 
+		_bus(bus)
+
+	{
 		_log->printf("Hello from servo \n");
+	}
+
+	Servo::~Servo()
+	{
+		_log->printf("Destruction servo");
 	}
 
 	void Servo::mgrUpdateId(uint8_t new_id)

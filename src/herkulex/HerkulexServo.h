@@ -25,9 +25,7 @@ namespace herkulex {
 		/* You should not call this constructor directly, but call Bus::makeNewServo */
 		explicit inline Servo(uint8_t id, Bus& bus, Serial* log);
 
-		virtual ~Servo() {
-			_log->printf("Destruction servo");
-		};
+		virtual inline ~Servo();
 
 	public:
 		/* Accessors --- */
@@ -69,7 +67,6 @@ namespace herkulex {
 
 	private:
 		uint8_t _id;
-		uint8_t _status;
 
 		uint8_t _status_error; 
 		uint8_t _status_detail; 
