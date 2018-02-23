@@ -3,6 +3,7 @@
 
 #include "mbed.h"
 #include "HerkulexConst.h"
+#include "HerkulexBus.h"
 
 namespace herkulex {
 	class Bus;
@@ -15,24 +16,26 @@ namespace herkulex {
 		template <uint8_t N_SERVOS>
 		friend class Manager; 
 
-		void mgrUpdateId(uint8_t new_id);
-		void mgrUpdatePosition(uint8_t new_position); 
-		void mgrUpdateStatus(uint8_t new_status_error, uint8_t new_status_detail); 
+		inline void mgrUpdateId(uint8_t new_id);
+
+		inline void mgrUpdatePosition(uint8_t new_position); 
+
+		inline void mgrUpdateStatus(uint8_t new_status_error, uint8_t new_status_detail); 
+
+		/* You should not call this constructor directly, but call Bus::makeNewServo */
+		explicit Servo(uint8_t id, Bus& bus, Serial* log);
 
 		virtual ~Servo() {
 			_log->printf("Destruction servo");
 		};
 
-		/* You should not call this constructor directly, but call Bus::makeNewServo */
-		explicit Servo(uint8_t id, Bus& bus, Serial* log);
-
 	public:
 		/* Accessors --- */
-		uint8_t getStatusError() const; 
-		uint8_t getStatusDetail() const;
+		inline uint8_t getStatusError() const; 
+		inline uint8_t getStatusDetail() const;
 
 		/* Return the id of the servo */
-		uint8_t getId() const;
+		inline uint8_t getId() const;
 
 		/* Return the cached position */
 		/*
@@ -41,7 +44,7 @@ namespace herkulex {
 		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
 		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
 		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!> */
-		uint16_t getPosition() const;
+		inline uint16_t getPosition() const;
 	/*	<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
 		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
 		<!><!><!>  Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!><!><!>
@@ -53,16 +56,16 @@ namespace herkulex {
 		 */
 
 		/* Set the position to `newPosition` */
-		void setPosition(uint16_t newPosition);
+		inline void setPosition(uint16_t newPosition);
 
-		void enableTorque(bool value);
-		bool isTorqueOn() const;
+		inline void enableTorque(bool value);
+		inline bool isTorqueOn() const;
 
-		void setDefaultLedColor(constants::LedColor led_color); 
-		constants::LedColor getDefaultLedColor() const;
+		inline void setDefaultLedColor(constants::LedColor led_color); 
+		inline constants::LedColor getDefaultLedColor() const;
 
-		void setMovingLedColor(constants::LedColor led_color); 
-		constants::LedColor getMovingLedColor() const;  
+		inline void setMovingLedColor(constants::LedColor led_color); 
+		inline constants::LedColor getMovingLedColor() const;  
 
 	private:
 		uint8_t _id;
@@ -85,6 +88,8 @@ namespace herkulex {
 		// The internal bus that communicates in serial with the servo.
 		Bus& _bus;
 	};
-}
+}; 
+
+#include "HerkulexServo.inl"
 
 #endif
