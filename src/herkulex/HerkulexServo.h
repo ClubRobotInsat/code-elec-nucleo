@@ -105,11 +105,11 @@ namespace herkulex {
 		inline bool isTorqueOn() const;
 
 		/* --------------------------------------------------------------------------------------------
-		 * getDefaultLedColor
+		 * getInpositionLedColor
 		 * Get the color of the led for a servo in position.
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline constants::LedColor::LedColorEnum getDefaultLedColor() const;
+		inline constants::LedColor::LedColorEnum getInpositionLedColor() const;
 
 		/* --------------------------------------------------------------------------------------------
 		 * getMovingLedColor
@@ -139,13 +139,13 @@ namespace herkulex {
 		inline void enableTorque(bool value);
 
 		/* --------------------------------------------------------------------------------------------
-		 * setDefaultLedColor
+		 * setInpositionLedColor
 		 * Set the color of the led for a servo in position.
 		 * Sent at a rate defined from the refresh period of the manager. 
 		 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void setDefaultLedColor(constants::LedColor::LedColorEnum led_color); 
+		inline void setInpositionLedColor(constants::LedColor::LedColorEnum led_color); 
 
 
 		/* --------------------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ namespace herkulex {
 		bool _torque_on; 
 		bool _desired_torque_on; 
 
-		constants::LedColor::LedColorEnum _default_led_color;
+		constants::LedColor::LedColorEnum _inposition_led_color;
 		constants::LedColor::LedColorEnum _moving_led_color;  
 
 		uint16_t _position;

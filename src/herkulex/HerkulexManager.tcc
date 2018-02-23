@@ -89,7 +89,7 @@ namespace herkulex {
 
 		// Select led color
 		if(s->_status_detail & constants::StatusDetail::InpositionFlag) 
-			led_color = s->_default_led_color; 
+			led_color = s->_inposition_led_color; 
 		else
 			led_color = s->_moving_led_color; 
 

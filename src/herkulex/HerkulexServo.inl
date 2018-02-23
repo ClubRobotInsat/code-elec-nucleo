@@ -9,7 +9,7 @@ namespace herkulex {
 		_status_detail(0), 
 		_torque_on(false), 
 		_desired_torque_on(true), 
-		_default_led_color(constants::LedColor::Green), 
+		_inposition_led_color(constants::LedColor::Green), 
 		_moving_led_color(constants::LedColor::Magenta), 
 		_position(0), 
 		_desired_position(0),
@@ -120,12 +120,12 @@ namespace herkulex {
 	}
 
 	/* --------------------------------------------------------------------------------------------
-	 * getDefaultLedColor
+	 * getInpositionLedColor
 	 * Get the color of the led for a servo in position.
 	 * --------------------------------------------------------------------------------------------
 	 */
-	constants::LedColor::LedColorEnum Servo::getDefaultLedColor() const {
-		return _default_led_color; 
+	constants::LedColor::LedColorEnum Servo::getInpositionLedColor() const {
+		return _inposition_led_color; 
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -164,14 +164,14 @@ namespace herkulex {
 	}
 
 	/* --------------------------------------------------------------------------------------------
-	 * setDefaultLedColor
+	 * setInpositionLedColor
 	 * Set the color of the led for a servo in position.
 	 * Sent at a rate defined from the refresh period of the manager. 
 	 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Servo::setDefaultLedColor(constants::LedColor::LedColorEnum led_color) {
-		_default_led_color = led_color; 
+	void Servo::setInpositionLedColor(constants::LedColor::LedColorEnum led_color) {
+		_inposition_led_color = led_color; 
 	}
 
 	/* --------------------------------------------------------------------------------------------
