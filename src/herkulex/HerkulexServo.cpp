@@ -6,6 +6,22 @@ namespace herkulex {
 		_log->printf("Hello from servo \n");
 	}
 
+	void Servo::mgrUpdateId(uint8_t new_id)
+	{
+		_id = new_id; 
+	}
+
+	void Servo::mgrUpdatePosition(uint8_t new_position)
+	{
+		_position = new_position; 
+	} 
+
+	void Servo::mgrUpdateStatus(uint8_t new_status_error, uint8_t new_status_detail)
+	{
+		_status_error = new_status_error; 
+		_status_detail = new_status_detail; 
+	} 
+
 	uint16_t Servo::getPosition() const {
 		return _position;
 	}
@@ -169,8 +185,4 @@ namespace herkulex {
 	// void Servo::updateStatus() {
 	// 	// _bus.fetchStatus(this);
 	// }
-
-	void Servo::setId(uint8_t id) {
-		_id = id;
-	}
 }

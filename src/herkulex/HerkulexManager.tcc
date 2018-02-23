@@ -90,8 +90,7 @@ namespace herkulex {
 		}
 		else
 		{
-			_servos[_num_next_servo]->_status_error = status_error; 
-			_servos[_num_next_servo]->_status_detail = status_detail; 
+			_servos[_num_next_servo]->mgrUpdateStatus(status_error, status_detail);
 		}
 	}
 
@@ -106,9 +105,8 @@ namespace herkulex {
 		else
 		{
 			// Position : 2 first bits from msb (data1) + data0 (0~1023)
-			_servos[_num_next_servo]->_position = ( (data1 & 0x03) << 8 ) | data0; 
-			_servos[_num_next_servo]->_status_error = status_error; 
-			_servos[_num_next_servo]->_status_detail = status_detail;
+			_servos[_num_next_servo]->mgrUpdatePosition(( (data1 & 0x03) << 8 ) | data0 );
+			_servos[_num_next_servo]->mgrUpdateStatus(status_error, status_detail); 
 		}
 	}
 }

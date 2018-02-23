@@ -10,11 +10,13 @@ namespace herkulex {
 	class Manager;
 
 	class Servo {
+	private:
 		template <uint8_t N_SERVOS>
 		friend class Manager; 
 
-	private:
-		void setId(uint8_t id);
+		void mgrUpdateId(uint8_t new_id);
+		void mgrUpdatePosition(uint8_t new_position); 
+		void mgrUpdateStatus(uint8_t new_status_error, uint8_t new_status_detail); 
 
 		virtual ~Servo() {
 			_log->printf("Destruction servo");
