@@ -3,7 +3,17 @@
 
 #include "mbed.h"
 
+/* 
+ * -------------------------------------------------------------------------------------------- *
+ * Note : 																					  	*
+ * All above data are extracted from the official Herkulex DRS0101 documentation 				*
+ * One can find further informations at : 														*
+ *    		     http://www.robotshop.com/media/files/PDF/manual-drs-0101.pdf 					*
+ * --------------------------------------------------------------------------------------------	*
+ */ 
+
 namespace herkulex {
+
 	namespace constants {
 		static const uint8_t header = 0xff;
 		static const uint8_t broadcast_id = 0xfe;
