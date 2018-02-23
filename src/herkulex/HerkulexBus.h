@@ -175,6 +175,14 @@ namespace herkulex {
 		void cbInterpretBuffer(int event);
 
 		/* --------------------------------------------------------------------------------------------
+		 * parseAddrMsg
+		 * This function is an helper. It should not be called outside of cbInterpretBuffer. 
+		 * Parses a addr read (EEP or RAM) ack message received from a servo.
+		 * --------------------------------------------------------------------------------------------
+		 */
+		inline void parseAddrMsg();
+
+		/* --------------------------------------------------------------------------------------------
 		 * parseStatMsg
 		 * This function is an helper. It should not be called outside of cbInterpretBuffer. 
 		 * Parses a status ack message received from a servo.
@@ -182,13 +190,6 @@ namespace herkulex {
 		 */
 		inline void parseStatMsg();
 
-		/* --------------------------------------------------------------------------------------------
-		 * parseAddrMsg
-		 * This function is an helper. It should not be called outside of cbInterpretBuffer. 
-		 * Parses a addr read (EEP or RAM) ack message received from a servo.
-		 * --------------------------------------------------------------------------------------------
-		 */
-		inline void parseAddrMsg();
 
 	private: 
 		volatile bool _callback_waiting;
@@ -211,6 +212,7 @@ namespace herkulex {
 	};
 }
 
+// Definitions of the inline functions, included here
 #include "HerkulexBus.inl"
 
 #endif

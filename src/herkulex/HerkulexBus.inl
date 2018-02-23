@@ -257,6 +257,12 @@ namespace herkulex
 		_expected_reply_cmd = constants::CMD::fromServo::StatAck;
 	}
 
+	/* --------------------------------------------------------------------------------------------
+	 * parseAddrMsg
+	 * This function is an helper. It should not be called outside of cbInterpretBuffer. 
+	 * Parses a addr read (EEP or RAM) ack message received from a servo.
+	 * --------------------------------------------------------------------------------------------
+	 */
 	void Bus::parseAddrMsg() {
 		// Check checksum validity
 		uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8] ^ _buffer[9] ^ _buffer[10] ^
@@ -290,6 +296,12 @@ namespace herkulex
 		}
 	}
 
+	/* --------------------------------------------------------------------------------------------
+	 * parseStatMsg
+	 * This function is an helper. It should not be called outside of cbInterpretBuffer. 
+	 * Parses a status ack message received from a servo.
+	 * --------------------------------------------------------------------------------------------
+	 */
 	void Bus::parseStatMsg() {
 		// Check checksum validity
 		uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8]) & 0xFE;
