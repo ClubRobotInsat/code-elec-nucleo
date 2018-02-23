@@ -11,7 +11,7 @@ namespace herkulex {
 
 	class Servo {
 		template <uint8_t N_SERVOS>
-		friend class Manager;
+		friend class Manager; 
 
 	private:
 		void setId(uint8_t id);
@@ -66,27 +66,28 @@ namespace herkulex {
 		 * These methods communicates with the servo.
 		 */
 
-		/* Move the servo to the desired position. */
-		void positionControl(uint16_t position, uint8_t playtime, uint8_t setLED) const;
+		// /* Move the servo to the desired position. */
+		// void positionControl(uint16_t position, uint8_t playtime, uint8_t setLED) const;
 
-		/* Send a clear command to the servo. */
-		void clear() const;
+		// /* Send a clear command to the servo. */
+		// void clear() const;
 
-		/* Send a torque command with `torque` as a parameter. */
-		void setTorque(uint8_t torque) const;
+		//  Send a torque command with `torque` as a parameter. 
+		// void setTorque(uint8_t torque) const;
 
-		/* Control the velocity of the servomotor directly. */
-		void velocityControl(int16_t speed, uint8_t setLED) const;
+		// /* Control the velocity of the servomotor directly. */
+		// void velocityControl(int16_t speed, uint8_t setLED) const;
 
 		/* Enable the LED. */
 		void setLedOn() const;
 
-		/* Send a message to the herkulex servo and update the cached value. This call can be blocking if a previous
-		 * update-style did not receive an answer.		*/
-		void updatePosition();
-		/* Send a message to the herkulex servo and update the cached value. This call can be blocking if a previous
-		 * update-style did not receive an answer.		*/
-		void updateStatus();
+		// /* Send a message to the herkulex servo and update the cached value. This call can be blocking if a previous
+		//  * update-style did not receive an answer.		*/
+		// void updatePosition();
+
+		//  Send a message to the herkulex servo and update the cached value. This call can be blocking if a previous
+		//  * update-style did not receive an answer.		
+		// void updateStatus();
 
 	private:
 		uint8_t _id;
