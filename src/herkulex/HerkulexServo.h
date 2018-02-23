@@ -3,23 +3,18 @@
 
 #include "mbed.h"
 #include "HerkulexConst.h"
-#include "HerkulexBus.h"
 
 namespace herkulex {
-	class Bus;
-
 	template <uint8_t N_SERVOS>
 	class Manager;
 
 	class Servo {
-
-
 	private:
 		template <uint8_t N_SERVOS>
 		friend class Manager; 
 
 		/* You should never call this constructor directly, but call Manager::makeNewServo */
-		explicit inline Servo(uint8_t id, Bus& bus, Serial* log);
+		explicit inline Servo(uint8_t id, Serial* log);
 
 		virtual inline ~Servo();
 		
@@ -173,9 +168,6 @@ namespace herkulex {
 		uint16_t _desired_position; 
 
 		Serial* _log;
-
-		// The internal bus that communicates in serial with the servo.
-		Bus& _bus;
 	};
 }; 
 

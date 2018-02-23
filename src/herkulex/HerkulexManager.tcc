@@ -32,7 +32,7 @@ namespace herkulex {
 
 			// On cree un nouveau servo, que l'on stocke 
 			// NEW -> DELETE dans ~Manager
-			_servos[_nb_reg_servos - 1] = new Servo(id, _bus, _log);
+			_servos[_nb_reg_servos - 1] = new Servo(id, _log);
 
 			// On lance le ticker pour manager les servos !
 			if(_nb_reg_servos == 1)
