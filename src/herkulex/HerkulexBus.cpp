@@ -11,7 +11,7 @@ namespace herkulex {
 	 */
 	Bus::Bus(PinName txPin, PinName rxPin, Serial * log, uint32_t baudrate) : 
 		_callback_waiting(false), 
-		_ser(new Serial(txPin, rxPin, baudrate)), // TODO - Detruire ca ? Changer en value storage ?
+		_ser(txPin, rxPin, baudrate), 
 		_log(log), 
 		_read_callback(Callback<void(int)>(this, &Bus::cbInterpretBuffer)) {}
 
@@ -23,8 +23,6 @@ namespace herkulex {
 	Bus::~Bus() 
 	{
 		_log->printf("Destruction du bus");
-
-		delete _ser; 	
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -35,10 +33,10 @@ namespace herkulex {
 	void Bus::write(uint8_t* data, uint8_t length) {
 		//_log->printf("Writing\n");
 		for(uint8_t i = 0; i < length; i++) {
-			_ser->putc(data[i]);
+			_ser.putc(data[i]);
 		}
 
-		//_ser->write(data, length, 0, 0);
+		//_ser.write(data, length, 0, 0);
 		//_log->printf("Done writing\n");
 	}
 

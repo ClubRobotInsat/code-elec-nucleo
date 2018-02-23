@@ -193,7 +193,7 @@ namespace herkulex {
 	private: 
 		volatile bool _callback_waiting;
 
-		Serial* _ser; // TODO : Changer en value
+		Serial _ser; 
 
 		Serial* _log;
 

@@ -39,10 +39,18 @@ namespace herkulex {
 
 
 	public:
+		/*
+		 * Return a pointer to a Servo if there is a registered Servo with the specified id.
+		 * Otherwise return nullptr.
+		 */
+		Servo* getServoById(uint8_t id);
+
 		explicit Manager(PinName txPin, PinName rxPin, us_timestamp_t _refreshPeriod, Serial* pc);
 		virtual ~Manager();
 
-		// This function is used to get a reference to a servo object with desired ID
+		/*
+		 * Create a new Servo with the given id. If there is alreay N_SERVOS registered on this manager, return nullptr.
+		 */
 		Servo* registerNewServo(uint8_t id);
 
 	private:
