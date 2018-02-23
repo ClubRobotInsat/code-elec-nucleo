@@ -26,9 +26,9 @@ namespace herkulex {
 		return _id;
 	}
 
-	void Servo::setStatus(uint8_t newStatus) {
-		_status = newStatus;
-	}
+	// void Servo::setStatus(uint8_t newStatus) {
+	// 	_status = newStatus;
+	// }
 
 	void Servo::setPosition(uint16_t newPosition) {
 		_desired_position = newPosition; 

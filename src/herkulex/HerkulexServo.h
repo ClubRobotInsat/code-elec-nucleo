@@ -54,8 +54,8 @@ namespace herkulex {
 		 * These methods are not meant to be used outside of this library.
 		 */
 
-		/* Set the status to `newStatus` */
-		void setStatus(uint8_t newStatus);
+		//  Set the status to `newStatus` 
+		// void setStatus(uint8_t newStatus);
 
 		/* Set the position to `newPosition` */
 		void setPosition(uint16_t newPosition);
