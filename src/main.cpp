@@ -18,9 +18,9 @@ int main() {
 	if(sv3 == nullptr) {
 		pc.printf("AIE\n");
 	}
-	sv3->clear();
+	// sv3->clear();
 	pc.printf("3 \n");
-	sv3->setLedOn();
+	// sv3->setLedOn();
 	pc.printf("4 \n");
 	// sv3->setTorque(TORQUE_ON);
 	pc.printf("5 \n");

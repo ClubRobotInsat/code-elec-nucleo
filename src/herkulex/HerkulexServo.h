@@ -2,6 +2,7 @@
 #define HERKULEX_SERVO_H
 
 #include "mbed.h"
+#include "HerkulexConst.h"
 
 namespace herkulex {
 	class Bus;
@@ -75,7 +76,7 @@ namespace herkulex {
 		// void clear() const;
 
 		void enableTorque(bool value);
-		bool Servo::isTorqueOn() const;
+		bool isTorqueOn() const;
 
 		void setDefaultLedColor(constants::LedColor led_color); 
 		constants::LedColor getDefaultLedColor() const;
@@ -105,9 +106,10 @@ namespace herkulex {
 		uint8_t _status_detail; 
 
 		bool _torque_on; 
+		bool _desired_torque_on; 
 
-		constants::LedColor _led_default_color;
-		constants::LedColor _led_moving_color;  
+		constants::LedColor _default_led_color;
+		constants::LedColor _moving_led_color;  
 
 		uint16_t _position;
 		uint16_t _desired_position; 
