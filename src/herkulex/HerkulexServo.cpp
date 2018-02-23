@@ -27,10 +27,6 @@ namespace herkulex {
 		return _position;
 	}
 
-	uint8_t Servo::getStatus() const {
-		return _status;
-	}
-
 	uint8_t Servo::getStatusError() const {
 		return _status_error; 
 	}

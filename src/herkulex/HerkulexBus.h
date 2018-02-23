@@ -8,7 +8,6 @@
 #define HERKULEX_BUS_H
 
 #include "HerkulexConst.h"
-#include "HerkulexServo.h"
 
 namespace herkulex {
 	template <uint8_t N_SERVOS>
@@ -201,8 +200,6 @@ namespace herkulex {
 		event_callback_t _read_callback;
 
 		uint8_t _buffer[13];
-
-		Servo* _servo_registered_for_callback; // ??? 
 
 		Callback<void(uint8_t, uint8_t, uint8_t)> * 	_callback_read_stat;
 		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> * 	_callback_read_addr; 
