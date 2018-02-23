@@ -28,10 +28,6 @@ namespace herkulex {
 
 	public:
 		/* Accessors --- */
-
-		/* Return the cached status */
-		uint8_t getStatus() const;
-
 		uint8_t getStatusError() const; 
 		uint8_t getStatusDetail() const;
 
@@ -54,26 +50,10 @@ namespace herkulex {
 		*/
 
 		/* Settors ---
-		 * These methods are not meant to be used outside of this library.
 		 */
-
-		//  Set the status to `newStatus` 
-		// void setStatus(uint8_t newStatus);
 
 		/* Set the position to `newPosition` */
 		void setPosition(uint16_t newPosition);
-
-		/* Communication --- */
-
-		/*
-		 * These methods communicates with the servo.
-		 */
-
-		// /* Move the servo to the desired position. */
-		// void positionControl(uint16_t position, uint8_t playtime, uint8_t setLED) const;
-
-		// /* Send a clear command to the servo. */
-		// void clear() const;
 
 		void enableTorque(bool value);
 		bool isTorqueOn() const;
@@ -83,20 +63,6 @@ namespace herkulex {
 
 		void setMovingLedColor(constants::LedColor led_color); 
 		constants::LedColor getMovingLedColor() const;  
-
-		// /* Control the velocity of the servomotor directly. */
-		// void velocityControl(int16_t speed, uint8_t setLED) const;
-
-		/* Enable the LED. */
-		void setLedOn() const;
-
-		// /* Send a message to the herkulex servo and update the cached value. This call can be blocking if a previous
-		//  * update-style did not receive an answer.		*/
-		// void updatePosition();
-
-		//  Send a message to the herkulex servo and update the cached value. This call can be blocking if a previous
-		//  * update-style did not receive an answer.		
-		// void updateStatus();
 
 	private:
 		uint8_t _id;
