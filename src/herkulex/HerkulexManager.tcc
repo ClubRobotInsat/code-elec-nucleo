@@ -72,14 +72,13 @@ namespace herkulex {
 		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
 		_bus.readRAMAddr(s->_id, constants::RAMAddr::AbsolutePosition, 2, &_callback_update_servo); 
 
-		// Enable torque if status says torque is off 
-		// (member Servo::_torque_on is updated on mgrUpdateStatus)
-		if( s->_desired_torque_on && !(s->_torque_on) )
+		// Enable/Disable torque to match with s->_desired_torque_on
+		if( s->_desired_torque_on && !(s->isTorqueOn()) )
 		{
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::TorqueControl, 
 				constants::TorqueControl::TorqueOn); 
 		}
-		else if( !(s->_desired_torque_on) && s->_torque_on )
+		else if( !(s->_desired_torque_on) && s->isTorqueOn() )
 		{
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::TorqueControl, 
 				constants::TorqueControl::TorqueFree); 

@@ -50,14 +50,13 @@ namespace herkulex {
 
 	/* --------------------------------------------------------------------------------------------
 	 * mgrUpdateStatus
-	 * Function for the Manager : updates servo's status, and torque status (on/off)
+	 * Function for the Manager : updates servo's status
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Servo::mgrUpdateStatus(uint8_t new_status_error, uint8_t new_status_detail)
 	{
 		_status_error = new_status_error; 
 		_status_detail = new_status_detail; 
-		_torque_on = static_cast<bool>(_status_detail & constants::StatusDetail::MotorOnFlag);
 	} 
 
 
@@ -115,7 +114,27 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	bool Servo::isTorqueOn() const {
-		return _torque_on; 
+		return (_status_detail & constants::StatusDetail::MotorOnFlag) > 0; 
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * isInPosition
+	 * Return servo's in position flag. (cf. status detail doc.). 
+	 * --------------------------------------------------------------------------------------------
+	 */
+	bool Servo::isInPosition() const {
+		return (_status_detail & constants::StatusDetail::InpositionFlag) > 0; 
+	}
+
+	/* --------------------------------------------------------------------------------------------
+	 * isMoving
+	 * Return servo's moving flag. (cf. status detail doc.). 
+	 * Update rate defined from the refresh period of the manager. 
+	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
+	 * --------------------------------------------------------------------------------------------
+	 */
+	bool Servo::isMoving() const {
+		return (_status_detail & constants::StatusDetail::MovingFlag) > 0; 
 	}
 
 	/* --------------------------------------------------------------------------------------------

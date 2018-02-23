@@ -60,7 +60,7 @@ namespace herkulex {
 				UnknownCommand = 0x08,
 				ExceedRegRange = 0x10,
 				GarbageDetected = 0x20,
-				MotorOnFlag = 0x40
+				MotorOnFlag = 0x40 // = TorqueOn
 			};
 		};
 
