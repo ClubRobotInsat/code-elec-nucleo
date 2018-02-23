@@ -6,7 +6,7 @@ namespace herkulex {
 		_log(pc), 
 		_it_ticker(), 
 		_nb_reg_servos(0),
-		_num_next_servo(0), 
+		_num_next_servo(-1), 
 		_refreshPeriod(refreshPeriod), 
 		_callback_update_servo_status(this, &Manager<N_SERVOS>::cbFuncUpdateServoStatus),
 		_callback_update_servo(this, &Manager<N_SERVOS>::cbFuncUpdateServo)
@@ -53,7 +53,20 @@ namespace herkulex {
 	}
 
 	template <uint8_t N_SERVOS>
-	void Manager<N_SERVOS>::cbSendUpdatesToNextServo() {
+	void Manager<N_SERVOS>::cbSendUpdatesToNextServo() 
+	{
+		// Iterate on each servo
+		/* First thing to do in the callback, because incrementation of _num_next_servo 
+		 * has big side effects : all the answers from the previous servo (let say nb. i) 
+		 * will now be ignored. Its time is over, it loses his token and is no listened 
+		 * until the next "loop". 
+		 * The next servo (i + 1) has now the token. 
+		 */ 
+		if(_num_next_servo < _nb_reg_servos - 1) 
+			++_num_next_servo; 
+		else
+			_num_next_servo = 0;
+
 		Servo * s = _servos[_num_next_servo]; 
 
 		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
@@ -90,12 +103,6 @@ namespace herkulex {
 			_log->printf("Trying to clear status (%x) of servo #%x\n", s->_status_error, s->_id);
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::StatusError, 0x00);
 		}
-
-		// Iterate on each servo
-		if(_num_next_servo < _nb_reg_servos - 1) 
-			++_num_next_servo; 
-		else
-			_num_next_servo = 0;
 	}
 
 	template <uint8_t N_SERVOS>
