@@ -74,8 +74,14 @@ namespace herkulex {
 		// /* Send a clear command to the servo. */
 		// void clear() const;
 
-		//  Send a torque command with `torque` as a parameter. 
-		// void setTorque(uint8_t torque) const;
+		void enableTorque(bool value);
+		bool Servo::isTorqueOn() const;
+
+		void setDefaultLedColor(constants::LedColor led_color); 
+		constants::LedColor getDefaultLedColor() const;
+
+		void setMovingLedColor(constants::LedColor led_color); 
+		constants::LedColor getMovingLedColor() const;  
 
 		// /* Control the velocity of the servomotor directly. */
 		// void velocityControl(int16_t speed, uint8_t setLED) const;
@@ -97,6 +103,11 @@ namespace herkulex {
 
 		uint8_t _status_error; 
 		uint8_t _status_detail; 
+
+		bool _torque_on; 
+
+		constants::LedColor _led_default_color;
+		constants::LedColor _led_moving_color;  
 
 		uint16_t _position;
 		uint16_t _desired_position; 

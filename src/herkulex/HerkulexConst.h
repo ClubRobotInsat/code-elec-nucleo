@@ -198,6 +198,17 @@ namespace herkulex {
 				DesiredVelocity = 72,              // 2 bytes
 			};
 		};
+
+		enum class LedColor {
+			White, 
+			Black, 
+			Red, 
+			Green, 
+			Blue, 
+			Yellow, 
+			Cyan, 
+			Magenta
+		};
 	};
 };
 

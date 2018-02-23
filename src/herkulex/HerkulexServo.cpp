@@ -20,6 +20,7 @@ namespace herkulex {
 	{
 		_status_error = new_status_error; 
 		_status_detail = new_status_detail; 
+		_torque_on = static_cast<bool>(_status_detail & constants::StatusDetail::MotorOnFlag);
 	} 
 
 	uint16_t Servo::getPosition() const {
@@ -42,6 +43,30 @@ namespace herkulex {
 		return _id;
 	}
 
+	void Servo::enableTorque(bool value) {
+		_desired_torque_on = value; 
+	}
+
+	bool Servo::isTorqueOn() const {
+		return _torque_on; 
+	}
+
+	void setDefaultLedColor(constants::LedColor led_color) {
+		_default_led_color = led_color; 
+	}
+
+	constants::LedColor getDefaultLedColor() const {
+		return _default_led_color; 
+	}
+
+	void setMovingLedColor(constants::LedColor led_color) {
+		_moving_led_color = led_color; 
+	}
+
+	constants::LedColor getMovingLedColor() const {
+		return _moving_led_color; 
+	}
+
 	// void Servo::setStatus(uint8_t newStatus) {
 	// 	_status = newStatus;
 	// }
@@ -49,6 +74,7 @@ namespace herkulex {
 	void Servo::setPosition(uint16_t newPosition) {
 		_desired_position = newPosition; 
 	}
+
 
 	// void Servo::clear() const {
 	// 	//_log->printf("slt\n");
