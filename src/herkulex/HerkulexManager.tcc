@@ -62,11 +62,15 @@ namespace herkulex {
 		// Enable torque if status says torque is off 
 		// (member Servo::_torque_on is updated on mgrUpdateStatus)
 		if( s->_desired_torque_on && !(s->_torque_on) )
+		{
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::TorqueControl, 
 				constants::TorqueControl::TorqueOn); 
+		}
 		else if( !(s->_desired_torque_on) && s->_torque_on )
+		{
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::TorqueControl, 
 				constants::TorqueControl::TorqueFree); 
+		}
 
 		constants::LedColor::LedColorEnum led_color; 
 
