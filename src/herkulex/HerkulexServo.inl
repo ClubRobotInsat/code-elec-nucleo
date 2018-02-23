@@ -108,7 +108,7 @@ namespace herkulex {
 
 	/* --------------------------------------------------------------------------------------------
 	 * isTorqueOn
-	 * Return servo's torque mode (on/off). 
+	 * Return servo's motor on (= torque on ) flag. (cf. status detail doc.). 
 	 * Update rate defined from the refresh period of the manager. 
 	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
 	 * --------------------------------------------------------------------------------------------
@@ -119,7 +119,9 @@ namespace herkulex {
 
 	/* --------------------------------------------------------------------------------------------
 	 * isInPosition
-	 * Return servo's in position flag. (cf. status detail doc.). 
+	 * Return servo's inposition flag. (cf. status detail doc.). 
+	 * Update rate defined from the refresh period of the manager. 
+	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager). 
 	 * --------------------------------------------------------------------------------------------
 	 */
 	bool Servo::isInPosition() const {
