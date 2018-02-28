@@ -44,6 +44,9 @@ namespace herkulex {
 	public:
 		/* GETTERS */ 
 
+
+		bool shouldReboot() const;
+
 		/* --------------------------------------------------------------------------------------------
 		 * getStatusError
 		 * Return servo's StatusError. For further informations, refer to herkulex documentation p.39.
@@ -133,6 +136,7 @@ namespace herkulex {
 
 		/* SETTERS */ 
 
+		void reboot();
 		/* --------------------------------------------------------------------------------------------
 		 * setPosition
 		 * Set a new position for the servo. 
@@ -178,6 +182,7 @@ namespace herkulex {
 
 		bool _torque_on; 
 		bool _desired_torque_on; 
+		bool _should_reboot;
 
 		constants::LedColor::LedColorEnum _inposition_led_color;
 		constants::LedColor::LedColorEnum _moving_led_color;  

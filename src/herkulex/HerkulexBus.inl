@@ -208,7 +208,7 @@ namespace herkulex
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::sendRebootMsg(uint8_t id) {
-		sendMsg(id, constants::CMD::toServo::Rollback); 
+		sendMsg(id, constants::CMD::toServo::Reboot); 
 	}
 
 	/* --------------------------------------------------------------------------------------------

@@ -71,8 +71,16 @@ namespace herkulex {
 		Servo * s = _servos[_num_next_servo]; 
 
 		_log->printf(" with id %x...\n\r",s->getId());
+
+		if (s->shouldReboot()) {
+			_log->printf("Rebooting (%x).\n\r",s->getId());
+			_bus.sendRebootMsg(s->getId());
+			s->_should_reboot=false;
+			return;
+		}
+
 		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
-		_bus.readRAMAddr(s->_id, constants::RAMAddr::AbsolutePosition, 2, &_callback_update_servo); 
+		/*_bus.readRAMAddr(s->_id, constants::RAMAddr::AbsolutePosition, 2, &_callback_update_servo); 
 
 		// Enable/Disable torque to match with s->_desired_torque_on
 		if( s->_desired_torque_on && !(s->isTorqueOn()) )
@@ -86,6 +94,7 @@ namespace herkulex {
 				constants::TorqueControl::TorqueFree); 
 		}
 
+		*/
 		constants::LedColor::LedColorEnum led_color; 
 
 		// Select led color
@@ -97,6 +106,7 @@ namespace herkulex {
 		// ?? PLAYTIME ?? 
 		_bus.sendSJOGMsg(s->_id, constants::jog_default_playtime, s->_desired_position, 
 				constants::JOG_CMD::PositionMode | led_color); 
+		_bus.sendRAMWriteMsg(s->getId(), constants::RAMAddr::LedControl,static_cast<uint8_t>(led_color),1,0);
 
 		// Check and clear the status if needed
 		if(s->_status_error != 0x00)

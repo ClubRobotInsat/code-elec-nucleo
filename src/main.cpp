@@ -12,6 +12,7 @@ Serial pc(USBTX, USBRX, 9600);
 int main() {
 	Manager<16> mgr(D8, D2, 0.2, &pc);
 	Servo* sv = mgr.registerNewServo(id);
+	sv->reboot();
 	sv->enableTorque(true);
 	sv->setInpositionLedColor(herkulex::constants::LedColor::Red);
 	//sv.positionControl(800, 60, GLED_ON);

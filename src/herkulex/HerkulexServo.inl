@@ -9,6 +9,7 @@ namespace herkulex {
 		_status_detail(0), 
 		_torque_on(false), 
 		_desired_torque_on(true), 
+		_should_reboot(false),
 		_inposition_led_color(constants::LedColor::Green), 
 		_moving_led_color(constants::LedColor::Magenta), 
 		_position(0), 
@@ -22,9 +23,8 @@ namespace herkulex {
 	{
 	}
 
-
+	
 	/* MANAGER FUNCTIONS - DO NOT USE OUTSIDE OF MANAGER */ 
-
 
 	/* --------------------------------------------------------------------------------------------
 	 * mgrUpdateId
@@ -60,7 +60,9 @@ namespace herkulex {
 
 	/* GETTERS */ 
 
-
+	bool Servo::shouldReboot() const {
+		return _should_reboot;
+	}
 	/* --------------------------------------------------------------------------------------------
 	 * getStatusError
 	 * Return servo's StatusError. For further informations, refer to herkulex documentation p.39.
@@ -201,6 +203,10 @@ namespace herkulex {
 	 */
 	void Servo::setMovingLedColor(constants::LedColor::LedColorEnum led_color) {
 		_moving_led_color = led_color; 
+	}
+
+	void Servo::reboot() {
+		_should_reboot = true;
 	}
 }
 

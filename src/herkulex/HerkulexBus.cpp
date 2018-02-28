@@ -60,7 +60,7 @@ namespace herkulex {
 		txBuf[1] = constants::header;
 		txBuf[2] = total_length;
 		txBuf[3] = id;
-		txBuf[4] = cmd;
+		txBuf[4] = static_cast<uint8_t>(cmd);
 
 		// Start construction of checksum
 		txBuf[5] = txBuf[2] ^ txBuf[3] ^ txBuf[4];
@@ -71,10 +71,10 @@ namespace herkulex {
 			for(index = 0; index < length; ++index) {
 				txBuf[constants::Size::MinPacketSize + index] = data[index];
 				// Iteratively construct the checksum
-				txBuf[5] ^= txBuf[index];
+				txBuf[5] ^= data[index];
 			}
 		}
-
+		txBuf[5] = txBuf[5] & 0xFE;
 		txBuf[6] = (~txBuf[5]) & 0xFE;
 
 		write(txBuf, total_length);
