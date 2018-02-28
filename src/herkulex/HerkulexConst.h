@@ -213,13 +213,14 @@ namespace herkulex {
 		{
 			enum LedColorEnum : uint8_t {
 				Black = 0x00, 
-				Red = JOG_CMD::RedLedOn, 
-				Green = JOG_CMD::GreenLedOn, 
-				Blue = JOG_CMD::BlueLedOn, 
-				Yellow = JOG_CMD::RedLedOn | JOG_CMD::GreenLedOn, 
+				Red = 0x04, 
+				Green = 0x01, 
+				Blue = 0x02, 
+				/*Yellow = JOG_CMD::RedLedOn | JOG_CMD::GreenLedOn, 
 				Cyan = JOG_CMD::GreenLedOn | JOG_CMD::BlueLedOn, 
 				Magenta = JOG_CMD::BlueLedOn | JOG_CMD::RedLedOn,
 				White = JOG_CMD::RedLedOn | JOG_CMD::GreenLedOn | JOG_CMD::BlueLedOn
+				*/
 			};
 		}; 
 	};

@@ -11,7 +11,7 @@ namespace herkulex {
 		_desired_torque_on(true), 
 		_should_reboot(false),
 		_inposition_led_color(constants::LedColor::Green), 
-		_moving_led_color(constants::LedColor::Magenta), 
+		_moving_led_color(constants::LedColor::Blue), 
 		_position(0), 
 		_desired_position(0),
 		_log(log)
