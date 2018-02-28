@@ -16,12 +16,10 @@ namespace herkulex {
 		_log(log)
 
 	{
-		_log->printf("Hello from servo \n");
 	}
 
 	Servo::~Servo()
 	{
-		_log->printf("Destruction servo");
 	}
 
 

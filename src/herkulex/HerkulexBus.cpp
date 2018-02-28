@@ -32,9 +32,12 @@ namespace herkulex {
 	 */
 	void Bus::write(uint8_t* data, uint8_t length) {
 		//_log->printf("Writing\n");
+		_log->printf("Sending : [");
 		for(uint8_t i = 0; i < length; i++) {
 			_ser.putc(data[i]);
+			_log->printf("%#x ",data[i]);
 		}
+		_log->printf("]\n\r");
 
 		//_ser.write(data, length, 0, 0);
 		//_log->printf("Done writing\n");

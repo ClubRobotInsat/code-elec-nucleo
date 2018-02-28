@@ -32,7 +32,8 @@ namespace herkulex {
 		// Periode de raffraichissement -> le temps ecoule entre la mise
 		// a jour de deux servos stockes consecutivement dans _servos
 		// sera de _refreshPeriod / N_SERVOS (? ou _nb_reg_servos ? a voir)
-		const us_timestamp_t _refreshPeriod; // TODO : RENAME (naming conv...)
+		// La période est en seconde.
+		const float _refreshPeriod; // TODO : RENAME (naming conv...)
 
 		Callback<void(uint8_t, uint8_t, uint8_t)> _callback_update_servo_status; 
 		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> _callback_update_servo; 
@@ -45,7 +46,7 @@ namespace herkulex {
 		 */
 		Servo* getServoById(uint8_t id);
 
-		explicit Manager(PinName txPin, PinName rxPin, us_timestamp_t _refreshPeriod, Serial* pc);
+		explicit Manager(PinName txPin, PinName rxPin, float _refreshPeriod, Serial* pc);
 		virtual ~Manager();
 
 		/*

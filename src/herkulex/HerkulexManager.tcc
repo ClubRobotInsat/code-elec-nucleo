@@ -1,7 +1,7 @@
 namespace herkulex {
 
 	template <uint8_t N_SERVOS>
-	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, us_timestamp_t refreshPeriod, Serial* pc) : 
+	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, float refreshPeriod, Serial* pc) : 
 		_bus(txPin, rxPin, pc), 
 		_log(pc), 
 		_it_ticker(), 
@@ -24,7 +24,6 @@ namespace herkulex {
 	Servo* Manager<N_SERVOS>::registerNewServo(uint8_t id) {
 		if(_nb_reg_servos < N_SERVOS) 
 		{
-			_log->printf("Tiens voilà un servo\n");
 
 			// On incremente le nombre de servos 
 			_nb_reg_servos++; 
@@ -37,6 +36,7 @@ namespace herkulex {
 			// On lance le ticker pour manager les servos !
 			if(_nb_reg_servos == 1)
 			{
+				_log->printf("Starting ticker for the manager, with speed : %f \n\r",_refreshPeriod/N_SERVOS);
 				_it_ticker.attach(Callback<void()>(this, &Manager<N_SERVOS>::cbSendUpdatesToNextServo), 
 						_refreshPeriod / N_SERVOS);
 			}
@@ -46,7 +46,7 @@ namespace herkulex {
 		} 
 		else 
 		{
-			_log->printf("Trop de servos !!!\n");
+			_log->printf("Trop de servos !!!\n\r");
 			/// FIXME : LE NULLPTR
 			return nullptr;
 		}
@@ -62,6 +62,7 @@ namespace herkulex {
 		 * until the next "loop". 
 		 * The next servo (i + 1) has now the token. 
 		 */ 
+		_log->printf("Updating servo n°%d",_num_next_servo);
 		if(_num_next_servo < _nb_reg_servos - 1) 
 			++_num_next_servo; 
 		else
@@ -69,6 +70,7 @@ namespace herkulex {
 
 		Servo * s = _servos[_num_next_servo]; 
 
+		_log->printf(" with id %x...\n\r",s->getId());
 		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
 		_bus.readRAMAddr(s->_id, constants::RAMAddr::AbsolutePosition, 2, &_callback_update_servo); 
 
