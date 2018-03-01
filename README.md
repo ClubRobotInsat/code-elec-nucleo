@@ -101,6 +101,14 @@ Dans un deuxième terminal, on peut maintenant lancer le script de debug.
 
 Ensuite, une fois le chargement terminé, entrer *c* ou *continue*
 
+Il est aussi possible d'afficher les printf sur notre pc (tout du moins ceux réalisé avec l'appel à `debug`) :
+
+```
+sudo screen /dev/ttyACM0 9600
+```
+
+Pour quitter `screen` il faut taper : `ctrl + a k`.
+
 ## Petite liste de liens utiles pour le développement
 
 ### La base pour trouver des ressources : [MBED Cookbook](https://os.mbed.com/cookbook/Homepage)
