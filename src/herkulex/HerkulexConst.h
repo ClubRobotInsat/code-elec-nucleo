@@ -3,24 +3,24 @@
 
 #include "mbed.h"
 
-/* 
+/*
  * -------------------------------------------------------------------------------------------- *
  * Note : 																					  	*
  * All above data are extracted from the official Herkulex DRS0101 documentation 				*
  * One can find further informations at : 														*
  *    		     http://www.robotshop.com/media/files/PDF/manual-drs-0101.pdf 					*
  * --------------------------------------------------------------------------------------------	*
- */ 
+ */
 
 namespace herkulex {
 
 	namespace constants {
 		static const uint8_t header = 0xff;
 		static const uint8_t broadcast_id = 0xfe;
-		static const uint8_t jog_default_playtime = 0x3c; 
+		static const uint8_t jog_default_playtime = 0x3c;
 
 		namespace CMD {
-			namespace toServo { 
+			namespace toServo {
 				enum toServoEnum : uint8_t {
 					EEPWrite = 0x01,
 					EEPRead = 0x02,
@@ -34,7 +34,7 @@ namespace herkulex {
 				};
 			};
 
-			namespace fromServo { 
+			namespace fromServo {
 				enum fromServoEnum : uint8_t {
 					EEPWriteAck = 0x41,
 					EEPReadAck = 0x42,
@@ -49,7 +49,7 @@ namespace herkulex {
 			};
 		}
 
-		namespace StatusError { 
+		namespace StatusError {
 			enum StatusErrorEnum : uint8_t {
 				OK = 0x00,
 				ExceedInputVoltage = 0x01,
@@ -62,7 +62,7 @@ namespace herkulex {
 			};
 		};
 
-		namespace StatusDetail { 
+		namespace StatusDetail {
 			enum StatusDetailEnum : uint8_t {
 				MovingFlag = 0x01,
 				InpositionFlag = 0x02,
@@ -74,18 +74,18 @@ namespace herkulex {
 			};
 		};
 
-		namespace Size { 
+		namespace Size {
 			enum SizeEnum : uint8_t {
 				MinPacketSize = 7,
 				MinAckPacketSize = 9,
 				WritePacketSize = 13,
 				MaxPacketSize = 223,
 				MaxDataSize = MaxPacketSize - MinPacketSize
-			}; 
+			};
 		};
 
 
-		namespace JOG_CMD { 
+		namespace JOG_CMD {
 			enum JOG_CMDEnum : uint8_t {
 				PositionMode = 0x00,
 				Stop = 0x01,
@@ -96,15 +96,11 @@ namespace herkulex {
 			};
 		};
 
-		namespace TorqueControl { 
-			enum TorqueControlEnum : uint8_t { 
-				TorqueFree = 0x00, 
-				BreakOn = 0x40, 
-				TorqueOn = 0x60 
-			};
+		namespace TorqueControl {
+			enum TorqueControlEnum : uint8_t { TorqueFree = 0x00, BreakOn = 0x40, TorqueOn = 0x60 };
 		};
-		
-		namespace EEPAddr { 
+
+		namespace EEPAddr {
 			enum EEPAddrEnum : uint8_t {
 				ModelNo1 = 0,
 				ModelNo2 = 1,
@@ -150,7 +146,7 @@ namespace herkulex {
 			};
 		};
 
-		namespace RAMAddr { 
+		namespace RAMAddr {
 			enum RAMAddrEnum : uint8_t {
 				ID = 0,
 				AckPolicy = 1,
@@ -209,20 +205,19 @@ namespace herkulex {
 			};
 		};
 
-		namespace LedColor
-		{
+		namespace LedColor {
 			enum LedColorEnum : uint8_t {
-				Black = 0x00, 
-				Red = 0x04, 
-				Green = 0x01, 
-				Blue = 0x02, 
-				/*Yellow = JOG_CMD::RedLedOn | JOG_CMD::GreenLedOn, 
-				Cyan = JOG_CMD::GreenLedOn | JOG_CMD::BlueLedOn, 
-				Magenta = JOG_CMD::BlueLedOn | JOG_CMD::RedLedOn,
-				White = JOG_CMD::RedLedOn | JOG_CMD::GreenLedOn | JOG_CMD::BlueLedOn
-				*/
+				Black = 0x00,
+				Red = 0x04,
+				Green = 0x01,
+				Blue = 0x02,
+				/*Yellow = JOG_CMD::RedLedOn | JOG_CMD::GreenLedOn,
+			    Cyan = JOG_CMD::GreenLedOn | JOG_CMD::BlueLedOn,
+			    Magenta = JOG_CMD::BlueLedOn | JOG_CMD::RedLedOn,
+			    White = JOG_CMD::RedLedOn | JOG_CMD::GreenLedOn | JOG_CMD::BlueLedOn
+			    */
 			};
-		}; 
+		};
 	};
 };
 

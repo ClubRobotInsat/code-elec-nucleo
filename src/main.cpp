@@ -12,7 +12,7 @@ Serial pc(USBTX, USBRX, 9600);
 int main() {
 	pc.printf("---- ! Initialisation de la carte ! ----\n\r");
 	Manager<1> mgr(A0, A1, 0.2, &pc);
-	
+
 	Servo* sv = mgr.registerNewServo(id);
 	sv->reboot();
 	sv->enableTorque(true);
@@ -23,7 +23,7 @@ int main() {
 		wait_ms(500);
 		sv->setPosition(1000);
 		wait_ms(500);
-		//printf("Position : %d | Status : %#x \n\r",sv->getPosition(),sv->getStatusError());
-		//mgr.sendDebugMessage();
+		// printf("Position : %d | Status : %#x \n\r",sv->getPosition(),sv->getStatusError());
+		// mgr.sendDebugMessage();
 	}
 }

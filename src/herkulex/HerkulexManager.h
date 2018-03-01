@@ -29,7 +29,7 @@ namespace herkulex {
 		uint8_t _nb_reg_servos;
 
 		// Le numero du prochain servo a manager
-		uint8_t _num_next_servo; 
+		uint8_t _num_next_servo;
 
 		// Periode de raffraichissement -> le temps ecoule entre la mise
 		// a jour de deux servos stockes consecutivement dans _servos
@@ -37,12 +37,11 @@ namespace herkulex {
 		// La période est en seconde.
 		const float _refreshPeriod; // TODO : RENAME (naming conv...)
 
-		Callback<void(uint8_t, uint8_t, uint8_t)> _callback_update_servo_status; 
-		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> _callback_update_servo; 
+		Callback<void(uint8_t, uint8_t, uint8_t)> _callback_update_servo_status;
+		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> _callback_update_servo;
 
 
 	public:
-
 		void sendDebugMessage();
 
 		/*
@@ -60,13 +59,12 @@ namespace herkulex {
 		Servo* registerNewServo(uint8_t id);
 
 	private:
-		void cbSendUpdatesToNextServo(); 
+		void cbSendUpdatesToNextServo();
 
 		void cbFuncUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail);
-		void cbFuncUpdateServo(uint8_t id, uint8_t status_error, uint8_t status_detail, 
-			uint8_t data0, uint8_t data1 = 0); // Checker l'addresse lue dans le Ack coté bus
+		void cbFuncUpdateServo(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0); // Checker l'addresse lue dans le Ack coté bus
 
-		inline void updateServo(uint8_t id); 
+		inline void updateServo(uint8_t id);
 
 		void updateAllServos(); // ??
 	};
