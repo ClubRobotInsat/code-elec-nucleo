@@ -10,24 +10,21 @@ uint8_t id = 0xFD;
 Serial pc(USBTX, USBRX, 9600);
 
 int main() {
-	Manager<16> mgr(D8, D2, 0.2, &pc);
+	pc.printf("---- ! Initialisation de la carte ! ----\n\r");
+	Manager<1> mgr(A0, A1, 2.0, &pc);
+	
 	Servo* sv = mgr.registerNewServo(id);
 	sv->reboot();
 	sv->enableTorque(true);
-	sv->setInpositionLedColor(herkulex::constants::LedColor::Red);
-	//sv.positionControl(800, 60, GLED_ON);
-	//wait_ms(800);
-	//sv.positionControl(300, 60, BLED_ON);
-
-	//sv.updateStatus();
-
-	//sv.updatePosition();
+	sv->setInpositionLedColor(herkulex::constants::LedColor::Green);
+	sv->setMovingLedColor(herkulex::constants::LedColor::Blue);
+	wait_ms(500);	
 	while(true) {
-		/*		sv3.updateStatus();
-		        sv.updateStatus();
-		        sv.updatePosition();
-		        sv3.updatePosition();
-		        */
-		wait_ms(7);
+		sv->setPosition(200);
+		wait_ms(500);
+		sv->setPosition(1000);
+		wait_ms(500);
+		//printf("Position : %d | Status : %#x \n\r",sv->getPosition(),sv->getStatusError());
+		//mgr.sendDebugMessage();
 	}
 }

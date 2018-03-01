@@ -8,6 +8,7 @@
 #define HERKULEX_BUS_H
 
 #include "HerkulexConst.h"
+#include "platform/CircularBuffer.h"
 
 namespace herkulex {
 	template <uint8_t N_SERVOS>
@@ -40,7 +41,10 @@ namespace herkulex {
 		 */
 		virtual ~Bus();
 
-
+		/*
+		 * Make the write call.
+		 */
+		void flush();
 		/* --------------------------------------------------------------------------------------------
 		 * sendMsg
 		 * Construit un message pour les servos, et l'envoi immediatement sur le bus. 
@@ -156,7 +160,11 @@ namespace herkulex {
 		 */
 		inline void readStat(uint8_t id, Callback<void(uint8_t, uint8_t, uint8_t)> * callback);
 
+		void sendDebugMessage();
+
 	protected: 
+
+		void cbWriteDone(int e);
 
 		/* --------------------------------------------------------------------------------------------
 		 * write
@@ -192,20 +200,30 @@ namespace herkulex {
 
 	private: 
 		volatile bool _callback_waiting;
+		volatile bool _write_done;
 
 		Serial _ser; 
 
 		Serial* _log;
 
 		event_callback_t _read_callback;
+		event_callback_t _write_callback;
 
 		uint8_t _buffer[13];
 
-		Callback<void(uint8_t, uint8_t, uint8_t)> * 	_callback_read_stat;
-		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> * 	_callback_read_addr; 
+		// Hold data that needs to be written.
+		CircularBuffer<uint8_t*,256> _buffer_write_data;
 
-		uint8_t 										_expected_reply_id; 
-		constants::CMD::fromServo::fromServoEnum 		_expected_reply_cmd; 
+		// Hold the length of the data that needs to be written.
+		CircularBuffer<uint8_t,256> _buffer_write_length;
+
+		uint32_t _total_write_length;
+
+		Callback<void(uint8_t, uint8_t, uint8_t)> * _callback_read_stat;
+		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> * _callback_read_addr; 
+
+		uint8_t _expected_reply_id; 
+		constants::CMD::fromServo::fromServoEnum _expected_reply_cmd; 
 	};
 }
 

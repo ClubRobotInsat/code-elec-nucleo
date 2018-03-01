@@ -92,7 +92,7 @@ namespace herkulex {
 				TurnMode = 0x02,
 				GreenLedOn = 0x04,
 				BlueLedOn = 0x08,
-				RedLedOn = 0x10
+				RedLedOn = 0x16
 			};
 		};
 

@@ -2,7 +2,8 @@ namespace herkulex {
 
 	template <uint8_t N_SERVOS>
 	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, float refreshPeriod, Serial* pc) : 
-		_bus(txPin, rxPin, pc), 
+		_already_updating(false),
+		_bus(txPin, rxPin, pc,115200), 
 		_log(pc), 
 		_it_ticker(), 
 		_nb_reg_servos(0),
@@ -41,6 +42,7 @@ namespace herkulex {
 						_refreshPeriod / N_SERVOS);
 			}
 
+
 			// Et on le retourne 
 			return _servos[_nb_reg_servos - 1];
 		} 
@@ -55,6 +57,12 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	void Manager<N_SERVOS>::cbSendUpdatesToNextServo() 
 	{
+		if(_already_updating){
+			return;
+		}
+		else {
+			_already_updating = true;
+		}
 		// Iterate on each servo
 		/* First thing to do in the callback, because incrementation of _num_next_servo 
 		 * has big side effects : all the answers from the previous servo (let say nb. i) 
@@ -75,13 +83,16 @@ namespace herkulex {
 		if (s->shouldReboot()) {
 			_log->printf("Rebooting (%x).\n\r",s->getId());
 			_bus.sendRebootMsg(s->getId());
+			_bus.flush();
+			wait_ms(20);
 			s->_should_reboot=false;
+			_already_updating=false;
 			return;
 		}
 
+		_bus.sendRAMWriteMsg(s->_id,constants::RAMAddr::AckPolicy,0x02);
 		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
-		/*_bus.readRAMAddr(s->_id, constants::RAMAddr::AbsolutePosition, 2, &_callback_update_servo); 
-
+		_bus.readRAMAddr(s->_id, constants::RAMAddr::CalibratedPosition, 2, &_callback_update_servo);
 		// Enable/Disable torque to match with s->_desired_torque_on
 		if( s->_desired_torque_on && !(s->isTorqueOn()) )
 		{
@@ -94,26 +105,25 @@ namespace herkulex {
 				constants::TorqueControl::TorqueFree); 
 		}
 
-		*/
+		
 		constants::LedColor::LedColorEnum led_color; 
-
 		// Select led color
 		if(s->_status_detail & constants::StatusDetail::InpositionFlag) 
 			led_color = s->_inposition_led_color; 
 		else
 			led_color = s->_moving_led_color; 
-
 		// ?? PLAYTIME ?? 
 		_bus.sendSJOGMsg(s->_id, constants::jog_default_playtime, s->_desired_position, 
-				constants::JOG_CMD::PositionMode | led_color); 
+				constants::JOG_CMD::PositionMode | 0x04); 
 		_bus.sendRAMWriteMsg(s->getId(), constants::RAMAddr::LedControl,static_cast<uint8_t>(led_color),1,0);
-
 		// Check and clear the status if needed
 		if(s->_status_error != 0x00)
 		{
-			_log->printf("Trying to clear status (%x) of servo #%x\n", s->_status_error, s->_id);
+			_log->printf("Trying to clear status (%x) of servo #%x\n\r", s->_status_error, s->_id);
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::StatusError, 0x00);
 		}
+		_bus.flush();
+		_already_updating=false;
 	}
 
 	template <uint8_t N_SERVOS>
@@ -122,10 +132,11 @@ namespace herkulex {
 
 		if(_servos[_num_next_servo]->_id != id)
 		{
-			_log->printf("Recu un update pour le mauvais servo...\n");
+			_log->printf("Recu un update pour le mauvais servo...\n\r");
 		}
 		else
 		{
+			_log->printf("Update traitée.\n\r");
 			_servos[_num_next_servo]->mgrUpdateStatus(status_error, status_detail);
 		}
 	}
@@ -136,10 +147,11 @@ namespace herkulex {
 	{
 		if(_servos[_num_next_servo]->_id != id)
 		{
-			_log->printf("Recu un update pour le mauvais servo...\n");
+			_log->printf("Recu un update pour le mauvais servo...\n\r");
 		}
 		else
 		{
+			_log->printf("Update reçu !\n\r");
 			// Position : 2 first bits from msb (data1) + data0 (0~1023)
 			_servos[_num_next_servo]->mgrUpdatePosition(( (data1 & 0x03) << 8 ) | data0 );
 			_servos[_num_next_servo]->mgrUpdateStatus(status_error, status_detail); 
@@ -154,5 +166,10 @@ namespace herkulex {
 			}
 		}
 		return nullptr;
+	}
+	
+	template <uint8_t N_SERVOS>
+	void Manager<N_SERVOS>::sendDebugMessage() {
+		_bus.sendDebugMessage();
 	}
 }

@@ -11,9 +11,15 @@ namespace herkulex {
 	 */
 	Bus::Bus(PinName txPin, PinName rxPin, Serial * log, uint32_t baudrate) : 
 		_callback_waiting(false), 
+		_write_done(true),
 		_ser(txPin, rxPin, baudrate), 
 		_log(log), 
-		_read_callback(Callback<void(int)>(this, &Bus::cbInterpretBuffer)) {}
+		_read_callback(Callback<void(int)>(this, &Bus::cbInterpretBuffer)),
+		_write_callback(Callback<void(int)>(this, &Bus::cbWriteDone)),
+		_buffer_write_data(),
+		_buffer_write_length(),
+		_total_write_length(0)
+	{}
 
 	/* --------------------------------------------------------------------------------------------
 	 * Destructeur 
@@ -25,22 +31,54 @@ namespace herkulex {
 		_log->printf("Destruction du bus");
 	}
 
+	void Bus::flush() {
+		uint8_t message[512];
+		uint32_t index = 0;
+		while(!_buffer_write_length.empty()) {
+			uint8_t length;
+			uint8_t* data;
+			_buffer_write_length.pop(length);
+			_buffer_write_data.pop(data);
+			_log->printf("Sending : (%d) [",length);
+			for (uint8_t i = 0; i < length; i++) {
+				message[index+i] = data[i];
+				_log->printf("%#x ",message[index+i]);
+			}
+			_log->printf("]\n\r");
+			index+=length;
+		}
+		debug("Flushing : %d bytes \n\r",_total_write_length);
+		_ser.write(message,_total_write_length,_write_callback,SERIAL_EVENT_TX_ALL);
+		_total_write_length=0;
+	}
+
+	void Bus::cbWriteDone(int e) {
+		debug("Write done\n\r");
+		_write_done=true;
+	}
+
 	/* --------------------------------------------------------------------------------------------
 	 * write
 	 * Prend un buffer (data), de taille fixe (length), passe par addresse et l'ecoule sur le bus 
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::write(uint8_t* data, uint8_t length) {
-		//_log->printf("Writing\n");
-		_log->printf("Sending : [");
 		for(uint8_t i = 0; i < length; i++) {
-			_ser.putc(data[i]);
-			_log->printf("%#x ",data[i]);
+			//_ser.putc(data[i]);
 		}
-		_log->printf("]\n\r");
 
-		//_ser.write(data, length, 0, 0);
-		//_log->printf("Done writing\n");
+		while(not _write_done) {
+			debug("Waiting for previous write\n\r");
+			wait_ms(1000);
+		}
+
+		_write_done=false;
+
+		if (data==nullptr) {
+			debug("Erreur nullptr data write\n\r");
+		}
+		debug("Write call\n\r");
+		_ser.write(data,length,_write_callback,SERIAL_EVENT_TX_ALL);
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -77,10 +115,13 @@ namespace herkulex {
 		txBuf[5] = txBuf[5] & 0xFE;
 		txBuf[6] = (~txBuf[5]) & 0xFE;
 
-		write(txBuf, total_length);
+		_buffer_write_length.push(total_length);
+		_buffer_write_data.push(txBuf);
+		debug("Added %d bytes to the buffer located @%#x \n\r",total_length,txBuf);
+		_total_write_length+=total_length;
 
 		// DELETE
-		delete txBuf;
+		//delete txBuf;
 	}
 
 
@@ -101,12 +142,12 @@ namespace herkulex {
 					parseAddrMsg();
 					break; 
 
-				// If we received a status read ack
+					// If we received a status read ack
 				case constants::CMD::fromServo::StatAck:
 					parseStatMsg();
 					break; 
 
-				// Do nothing for other replies
+					// Do nothing for other replies
 				case constants::CMD::fromServo::EEPWriteAck:
 				case constants::CMD::fromServo::RAMWriteAck:
 				case constants::CMD::fromServo::IJOGAck:
@@ -126,4 +167,20 @@ namespace herkulex {
 			debug("Bad ID");
 		}
 	}
+
+	void Bus::sendDebugMessage() {
+		_log->printf("Sending debug... \n\r");
+		uint8_t txBuf[9];
+		txBuf[0]=0xFF;
+		txBuf[1]=0xFF;
+		txBuf[2]=0x07;
+		txBuf[3]=0xFD;
+		txBuf[4]=0x07;
+		txBuf[5]=0xFC;
+		txBuf[6]=0x02;
+		txBuf[7]=0x00;
+		txBuf[8]=0x40;
+		write(txBuf,9);
+	}
+
 }

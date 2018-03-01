@@ -9,6 +9,8 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	class Manager {
 	private:
+		volatile bool _already_updating;
+
 		// Stocke le bus
 		Bus _bus;
 
@@ -40,6 +42,9 @@ namespace herkulex {
 
 
 	public:
+
+		void sendDebugMessage();
+
 		/*
 		 * Return a pointer to a Servo if there is a registered Servo with the specified id.
 		 * Otherwise return nullptr.

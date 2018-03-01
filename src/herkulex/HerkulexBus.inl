@@ -30,7 +30,7 @@ namespace herkulex
 			sendMsg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
 
 			// DELETE
-			delete data; 
+			//delete data; 
 		}
 	}
 
@@ -86,7 +86,7 @@ namespace herkulex
 			sendMsg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
 
 			// DELETE
-			delete data;
+			//delete data;
 		}
 	}
 
@@ -114,7 +114,7 @@ namespace herkulex
 			sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
 
 			// DELETE
-			delete data;
+			//delete data;
 		}
 	}
 
@@ -138,7 +138,7 @@ namespace herkulex
 		sendMsg(id, constants::CMD::toServo::IJOG, data, 5); 
 
 		// DELETE
-		delete data; 
+		//delete data; 
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ namespace herkulex
 		uint8_t * data = new uint8_t(5); 
 
 		data[0] = playtime; 
-		data[1] = (jogValue & 0xff); 
+		data[1] = (jogValue & 0x00ff); 
 		data[2] = (jogValue & 0xff00) >> 8; 
 		data[3] = set; 
 		data[4] = id; 
@@ -161,7 +161,7 @@ namespace herkulex
 		sendMsg(id, constants::CMD::toServo::SJOG, data, 5); 
 
 		// DELETE
-		delete data; 
+		//delete data; 
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ namespace herkulex
 		sendMsg(id, constants::CMD::toServo::Stat, data, 2); 
 
 		// DELETE
-		delete data; 
+		//delete data; 
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ namespace herkulex
 		sendMsg(id, constants::CMD::toServo::Rollback, data, 2); 
 
 		// DELETE
-		delete data; 		
+		//delete data; 		
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -240,7 +240,9 @@ namespace herkulex
 		sendRAMReadMsg(id, addr, len); 
 		_callback_read_addr = callback;
 		_expected_reply_id = id; 
-		_expected_reply_cmd = constants::CMD::fromServo::RAMReadAck; 
+		_expected_reply_cmd = constants::CMD::fromServo::RAMReadAck;
+		_ser.read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
+
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -271,11 +273,11 @@ namespace herkulex
 
 		if(chksum1 != _buffer[5] || chksum2 != _buffer[6]) 
 		{
-			debug("Bad position Checksum");
+			debug("Bad position Checksum\n\r");
 		}
 		else if(_callback_read_addr == nullptr) 
 		{
-			debug("Callback for read addr is nullptr.");
+			debug("Callback for read addr is nullptr.\n\r");
 		}
 		else 
 		{
