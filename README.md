@@ -107,7 +107,7 @@ Il est aussi possible d'afficher les printf sur notre pc (tout du moins ceux ré
 sudo screen /dev/ttyACM0 9600
 ```
 
-Pour quitter `screen` il faut taper : `ctrl-a , puis k, puis y`.
+Pour quitter `screen` il faut taper : `ctrl-a` , puis k, puis y.
 
 ## Petite liste de liens utiles pour le développement
 
