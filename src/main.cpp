@@ -3,11 +3,26 @@
 #include "HerkulexManager.h"
 #include "mbed.h"
 
+#include <trame.h>
+
 using namespace herkulex;
 // set serial port and baudrate, (mbed <-> HerculexX)
 uint8_t id = 0xFD;
 
 Serial pc(USBTX, USBRX, 9600);
+
+Trame lire_trame(Serial pc) {
+	
+	if (pc.getc()==0xAC) {
+		if (pc.getc()==0xDC) {
+			if (pc.getc()==0xAC) {
+				if (pc.getc()==0xAC) {
+							
+				}
+			}
+		}
+	}
+}
 
 int main() {
 	pc.printf("---- ! Initialisation de la carte ! ----\n\r");
