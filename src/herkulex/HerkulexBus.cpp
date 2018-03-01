@@ -9,8 +9,9 @@ namespace herkulex {
 	 * Le baudrate de la com. peut etre specifie.
 	 * --------------------------------------------------------------------------------------------
 	 */
-	Bus::Bus(PinName txPin, PinName rxPin, Serial* log, uint32_t baudrate)
-	        : _callback_waiting(false)
+	Bus::Bus(PinName txPin, PinName rxPin, Serial* log, uint32_t baudrate, float flush_frequency)
+	        : _ticker_flush()
+	        , _callback_waiting(false)
 	        , _write_done(true)
 	        , _ser(txPin, rxPin, baudrate)
 	        , _log(log)
@@ -18,7 +19,9 @@ namespace herkulex {
 	        , _write_callback(Callback<void(int)>(this, &Bus::cbWriteDone))
 	        , _buffer_write_data()
 	        , _buffer_write_length()
-	        , _total_write_length(0) {}
+	        , _total_write_length(0) {
+		//		_ticker_flush.attach(Callback<void()>(this,&Bus::flush),flush_frequency);
+	}
 
 	/* --------------------------------------------------------------------------------------------
 	 * Destructeur
@@ -32,11 +35,13 @@ namespace herkulex {
 	void Bus::flush() {
 		if(not _write_done) {
 			return;
-		} else {
-			_write_done = false;
+		}
+		if(_total_write_length == 0) {
+			return;
 		}
 		uint8_t* message = new uint8_t[_total_write_length];
 		uint32_t index = 0;
+		debug("Flushing\n\r");
 		while(!_buffer_write_length.empty()) {
 			uint8_t length;
 			uint8_t* data;
@@ -51,11 +56,10 @@ namespace herkulex {
 			_log->printf("] in the next flush\n\r");
 			index += length;
 		}
-		if(_total_write_length != 0) {
-			debug("Flushing : %d bytes \n\r", _total_write_length);
-			_ser.write(message, _total_write_length, _write_callback, SERIAL_EVENT_TX_ALL);
-			_total_write_length = 0;
-		}
+		debug("Flushing : %d bytes \n\r", _total_write_length);
+		_ser.write(message, _total_write_length, _write_callback, SERIAL_EVENT_TX_ALL);
+		_write_done = false;
+		_total_write_length = 0;
 	}
 
 	void Bus::cbWriteDone(int e) {
@@ -64,7 +68,7 @@ namespace herkulex {
 	}
 
 	bool Bus::needFlush() {
-		return not _buffer_write_data.empty();
+		return _buffer_write_data.full();
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -125,7 +129,6 @@ namespace herkulex {
 
 		_buffer_write_length.push(total_length);
 		_buffer_write_data.push(txBuf);
-		debug("Added %d bytes to the buffer located @%#x \n\r", total_length, txBuf);
 		_total_write_length += total_length;
 
 		// DELETE

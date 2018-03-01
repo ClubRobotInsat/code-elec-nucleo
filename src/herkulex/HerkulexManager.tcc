@@ -2,8 +2,7 @@ namespace herkulex {
 
 	template <uint8_t N_SERVOS>
 	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, float refreshPeriod, Serial* pc)
-	        : _already_updating(false)
-	        , _bus(txPin, rxPin, pc, 115200)
+	        : _bus(txPin, rxPin, pc, 115200, 0.02)
 	        , _log(pc)
 	        , _it_ticker()
 	        , _nb_reg_servos(0)
@@ -50,14 +49,9 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	void Manager<N_SERVOS>::cbSendUpdatesToNextServo() {
 		if(_bus.needFlush()) {
-			debug("Bus need to be flushed, flushing \n\r");
-			_bus.flush();
+			debug("Bus need to be flushed\n\r");
+			//_bus.flush();
 			return;
-		}
-		if(_already_updating) {
-			return;
-		} else {
-			_already_updating = true;
 		}
 		// Iterate on each servo
 		/* First thing to do in the callback, because incrementation of _num_next_servo
@@ -67,10 +61,12 @@ namespace herkulex {
 		 * The next servo (i + 1) has now the token.
 		 */
 		_log->printf("Updating servo n°%d", _num_next_servo);
-		if(_num_next_servo < _nb_reg_servos - 1)
+		if(_num_next_servo < _nb_reg_servos - 1) {
 			++_num_next_servo;
-		else
+		} else {
 			_num_next_servo = 0;
+			_bus.flush();
+		}
 
 		Servo* s = _servos[_num_next_servo];
 
@@ -82,11 +78,10 @@ namespace herkulex {
 			_bus.flush();
 			wait_ms(20);
 			s->_should_reboot = false;
-			_already_updating = false;
 			return;
 		}
 
-		//_bus.sendRAMWriteMsg(s->_id,constants::RAMAddr::AckPolicy,0x02);
+		_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::AckPolicy, 0x02);
 		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
 		//_bus.readRAMAddr(s->_id, constants::RAMAddr::CalibratedPosition, 2, &_callback_update_servo);
 		// Enable/Disable torque to match with s->_desired_torque_on
@@ -113,8 +108,6 @@ namespace herkulex {
 		    _bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::StatusError, 0x00);
 		}
 		*/
-		_bus.flush();
-		_already_updating = false;
 	}
 
 	template <uint8_t N_SERVOS>

@@ -32,7 +32,7 @@ namespace herkulex {
 		 * Le baudrate de la com. peut etre specifie.
 		 * --------------------------------------------------------------------------------------------
 		 */
-		explicit Bus(PinName txPin, PinName rxPin, Serial* log, uint32_t baudrate = 115200);
+		explicit Bus(PinName txPin, PinName rxPin, Serial* log, uint32_t baudrate = 115200, float flush_frequency = 0.2);
 
 		/* --------------------------------------------------------------------------------------------
 		 * Destructeur
@@ -204,6 +204,8 @@ namespace herkulex {
 
 
 	private:
+		Ticker _ticker_flush;
+
 		volatile bool _callback_waiting;
 		volatile bool _write_done;
 
