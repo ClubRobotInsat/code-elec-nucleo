@@ -32,7 +32,13 @@ namespace herkulex {
 	}
 
 	void Bus::flush() {
-		uint8_t message[512];
+		if (not _write_done) {
+			return;
+		}
+		else {
+			_write_done = false;
+		}
+		uint8_t* message= new uint8_t[_total_write_length];
 		uint32_t index = 0;
 		while(!_buffer_write_length.empty()) {
 			uint8_t length;
@@ -44,17 +50,24 @@ namespace herkulex {
 				message[index+i] = data[i];
 				_log->printf("%#x ",message[index+i]);
 			}
-			_log->printf("]\n\r");
+			delete data;
+			_log->printf("] in the next flush\n\r");
 			index+=length;
 		}
-		debug("Flushing : %d bytes \n\r",_total_write_length);
-		_ser.write(message,_total_write_length,_write_callback,SERIAL_EVENT_TX_ALL);
-		_total_write_length=0;
+		if (_total_write_length != 0) {
+			debug("Flushing : %d bytes \n\r",_total_write_length);
+			_ser.write(message,_total_write_length,_write_callback,SERIAL_EVENT_TX_ALL);
+			_total_write_length=0;
+		}
 	}
 
 	void Bus::cbWriteDone(int e) {
 		debug("Write done\n\r");
 		_write_done=true;
+	}
+
+	bool Bus::needFlush() {
+		return not _buffer_write_data.empty();
 	}
 
 	/* --------------------------------------------------------------------------------------------

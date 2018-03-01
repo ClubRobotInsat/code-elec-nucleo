@@ -57,6 +57,11 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	void Manager<N_SERVOS>::cbSendUpdatesToNextServo() 
 	{
+		if (_bus.needFlush()) {
+			debug("Bus need to be flushed, flushing \n\r");
+			_bus.flush();
+			return;
+		}
 		if(_already_updating){
 			return;
 		}
@@ -90,9 +95,9 @@ namespace herkulex {
 			return;
 		}
 
-		_bus.sendRAMWriteMsg(s->_id,constants::RAMAddr::AckPolicy,0x02);
+		//_bus.sendRAMWriteMsg(s->_id,constants::RAMAddr::AckPolicy,0x02);
 		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
-		_bus.readRAMAddr(s->_id, constants::RAMAddr::CalibratedPosition, 2, &_callback_update_servo);
+		//_bus.readRAMAddr(s->_id, constants::RAMAddr::CalibratedPosition, 2, &_callback_update_servo);
 		// Enable/Disable torque to match with s->_desired_torque_on
 		if( s->_desired_torque_on && !(s->isTorqueOn()) )
 		{
@@ -104,10 +109,10 @@ namespace herkulex {
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::TorqueControl, 
 				constants::TorqueControl::TorqueFree); 
 		}
-
 		
 		constants::LedColor::LedColorEnum led_color; 
 		// Select led color
+		
 		if(s->_status_detail & constants::StatusDetail::InpositionFlag) 
 			led_color = s->_inposition_led_color; 
 		else
@@ -115,13 +120,14 @@ namespace herkulex {
 		// ?? PLAYTIME ?? 
 		_bus.sendSJOGMsg(s->_id, constants::jog_default_playtime, s->_desired_position, 
 				constants::JOG_CMD::PositionMode | 0x04); 
-		_bus.sendRAMWriteMsg(s->getId(), constants::RAMAddr::LedControl,static_cast<uint8_t>(led_color),1,0);
+		//_bus.sendRAMWriteMsg(s->getId(), constants::RAMAddr::LedControl,static_cast<uint8_t>(led_color),1,0);
 		// Check and clear the status if needed
-		if(s->_status_error != 0x00)
+		/*if(s->_status_error != 0x00)
 		{
 			_log->printf("Trying to clear status (%x) of servo #%x\n\r", s->_status_error, s->_id);
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::StatusError, 0x00);
 		}
+		*/
 		_bus.flush();
 		_already_updating=false;
 	}

@@ -11,14 +11,13 @@ Serial pc(USBTX, USBRX, 9600);
 
 int main() {
 	pc.printf("---- ! Initialisation de la carte ! ----\n\r");
-	Manager<1> mgr(A0, A1, 2.0, &pc);
+	Manager<1> mgr(A0, A1, 0.2, &pc);
 	
 	Servo* sv = mgr.registerNewServo(id);
 	sv->reboot();
 	sv->enableTorque(true);
 	sv->setInpositionLedColor(herkulex::constants::LedColor::Green);
 	sv->setMovingLedColor(herkulex::constants::LedColor::Blue);
-	wait_ms(500);	
 	while(true) {
 		sv->setPosition(200);
 		wait_ms(500);

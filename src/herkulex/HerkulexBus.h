@@ -42,12 +42,17 @@ namespace herkulex {
 		virtual ~Bus();
 
 		/*
-		 * Make the write call.
+		 * Return true if there is some message that need to be flushed.
+		 */
+		bool needFlush();
+
+		/*
+		 * This function will issue a call to write.
 		 */
 		void flush();
 		/* --------------------------------------------------------------------------------------------
 		 * sendMsg
-		 * Construit un message pour les servos, et l'envoi immediatement sur le bus. 
+		 * Construct a message and add it to the list of message to be sent with the next flush. 
 		 * --------------------------------------------------------------------------------------------
 		 */ 
 		void sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, 
