@@ -9,6 +9,8 @@ public:
 	Trame(uint8_t id, uint8_t cmd, uint8_t data_length, uint8_t* data);
 	Trame();
 
+	static uint8_t* makeAck(uint8_t num_packet);
+
 	uint8_t getData() const;
 	uint8_t getId() const;
 	uint8_t getDataLength() const;

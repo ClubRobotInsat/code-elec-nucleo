@@ -16,3 +16,9 @@ void Trame::appendData(uint8_t data) {
 	delete this->_data;
 	this->_data = new_data;
 }
+
+uint8_t* Trame::makeAck(uint8_t num_packet) {
+	uint8_t* trame = new uint8_t[12];
+	// TODO créer la trame de ACK
+	return trame;
+}
