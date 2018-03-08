@@ -11,49 +11,60 @@ uint8_t id = 0xFD;
 
 Serial pc(USBTX, USBRX, 9600);
 
-CircularBuffer<Trame,256> file_attente;
+CircularBuffer<Trame, 256> file_attente;
 
 Trame lire_trame(Serial* pc) {
-	
-	if (pc->getc()==0xAC) {
-		if (pc->getc()==0xDC) {
-			if (pc->getc()==0xAC) {
-				if (pc->getc()==0xAC) {
+	uint8_t numPaquet, id, cmd, data_length;
+	uint8_t* data;
+	bool done = false;
+	while(not done) {
+		if(pc->getc() == 0xAC) {
+			if(pc->getc() == 0xDC) {
+				if(pc->getc() == 0xAB) {
+					if(pc->getc() == 0xBA) {
+						numPaquet = pc->getc();
+						uint8_t aux1 = pc->getc();
+						uint8_t aux2 = pc->getc();
+						id = Trame::demultiplexId(aux1, aux2);
+						cmd = Trame::demultiplexCmd(aux1, aux2);
+						data_length = pc->getc();
+						data = new uint8_t[data_length];
+						for(int j = 0; j < data_length; j++) {
+							*data = pc->getc();
+						}
+						done = true;
+					}
 				}
 			}
 		}
 	}
-	return Trame();	
+	pc->write(Trame::makeAck(numPaquet), 15, NULL, 0);
+	return Trame(id, cmd, data_length, data);
 }
 
-void mafonction() {
+void mettreTrameDansFileAttente() {
 	while(true) {
 		file_attente.push(lire_trame(&pc));
 	}
 }
 
-int main() {
-	pc.printf("---- ! Initialisation de la carte ! ----\n\r");
-	Manager<2> mgr(A0, A1, 1, &pc);
+void afficherTrame() {
+	if(not file_attente.empty()) {
+		Trame trame;
+		file_attente.pop(trame);
+		debug("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
+		uint8_t* data = trame.getData();
+		for(int i = 0; i < trame.getDataLength(); i++) {
+			debug("%#x ", data[i]);
+		}
+		debug("\n\r");
+	}
+}
 
-	Servo* sv = mgr.registerNewServo(id);
-	Servo* sv3 = mgr.registerNewServo(0x03);
-	sv3->reboot();
-	sv->reboot();
-	sv->enableTorque(true);
-	sv3->enableTorque(true);
-	sv->setInpositionLedColor(herkulex::constants::LedColor::Green);
-	sv3->setInpositionLedColor(herkulex::constants::LedColor::Green);
-	sv->setMovingLedColor(herkulex::constants::LedColor::Blue);
-	sv3->setMovingLedColor(herkulex::constants::LedColor::Blue);
+int main() {
+	mettreTrameDansFileAttente();
+	Ticker ticker;
+	ticker.attach(afficherTrame, 0.005);
 	while(true) {
-		sv->setPosition(200);
-		sv3->setPosition(200);
-		wait(3);
-		sv->setPosition(1000);
-		sv3->setPosition(1000);
-		wait(3);
-		// printf("Position : %d | Status : %#x \n\r",sv->getPosition(),sv->getStatusError());
-		// mgr.sendDebugMessage();
 	}
 }
