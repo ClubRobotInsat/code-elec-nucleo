@@ -11,16 +11,24 @@ uint8_t id = 0xFD;
 
 Serial pc(USBTX, USBRX, 9600);
 
-Trame lire_trame(Serial pc) {
+CircularBuffer<Trame,256> file_attente;
+
+Trame lire_trame(Serial* pc) {
 	
-	if (pc.getc()==0xAC) {
-		if (pc.getc()==0xDC) {
-			if (pc.getc()==0xAC) {
-				if (pc.getc()==0xAC) {
-							
+	if (pc->getc()==0xAC) {
+		if (pc->getc()==0xDC) {
+			if (pc->getc()==0xAC) {
+				if (pc->getc()==0xAC) {
 				}
 			}
 		}
+	}
+	return Trame();	
+}
+
+void mafonction() {
+	while(true) {
+		file_attente.push(lire_trame(&pc));
 	}
 }
 
