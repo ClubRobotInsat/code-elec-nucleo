@@ -2,7 +2,7 @@ namespace herkulex {
 
 	template <uint8_t N_SERVOS>
 	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, float refreshPeriod, Serial* pc)
-	        : _bus(txPin, rxPin, pc, 115200, 0.02)
+	        : _bus(txPin, rxPin, pc, 115200, 0.001)
 	        , _log(pc)
 	        , _it_ticker()
 	        , _nb_reg_servos(0)
@@ -48,11 +48,11 @@ namespace herkulex {
 
 	template <uint8_t N_SERVOS>
 	void Manager<N_SERVOS>::cbSendUpdatesToNextServo() {
-		if(_bus.needFlush()) {
+		/*if(_bus.needFlush()) {
 			debug("Bus need to be flushed\n\r");
 			//_bus.flush();
 			return;
-		}
+		}*/
 		// Iterate on each servo
 		/* First thing to do in the callback, because incrementation of _num_next_servo
 		 * has big side effects : all the answers from the previous servo (let say nb. i)
@@ -65,7 +65,7 @@ namespace herkulex {
 			++_num_next_servo;
 		} else {
 			_num_next_servo = 0;
-			_bus.flush();
+			//_bus.flush();
 		}
 
 		Servo* s = _servos[_num_next_servo];
@@ -75,7 +75,7 @@ namespace herkulex {
 		if(s->shouldReboot()) {
 			_log->printf("Rebooting (%x).\n\r", s->getId());
 			_bus.sendRebootMsg(s->getId());
-			_bus.flush();
+			//_bus.flush();
 			wait_ms(20);
 			s->_should_reboot = false;
 			return;
