@@ -14,25 +14,26 @@ Serial pc(USBTX, USBRX, 9600);
 
 CircularBuffer<Trame, 256> file_attente;
 
-herkulex::Manager<6> servo_manager (D8,D2,500,&pc);
+herkulex::Manager<6> servo_manager(A0, A1, 0.5, &pc);
 
 void traiterTrameServo(Trame trame_servo);
 
 // Forme un uint16_t avec 2 uint8_t
-uint16_t paquetage(uint8_t msb,uint8_t lsb)
-{
+uint16_t paquetage(uint8_t msb, uint8_t lsb) {
 	uint16_t resultat = 0x0000;
 	resultat = msb;
-	resultat << 8;
+	resultat = resultat << 8;
 	resultat |= lsb;
 	return resultat;
 }
 
-void init_servo()
-{
+void init_servo() {
+	debug("Initialisation des servos\n\r");
 	Servo* servo_fd = servo_manager.registerNewServo(0xFD);
+	servo_fd->setPosition(512);
 	servo_fd->reboot();
 	Servo* servo_03 = servo_manager.registerNewServo(0x03);
+	servo_03->setPosition(512);
 	servo_03->reboot();
 }
 
@@ -84,88 +85,74 @@ void afficherTrame() {
 	}
 }
 
-void traiterTrame(){
+void traiterTrame() {
 	Trame trame_traitee;
 	uint8_t id;
 	// Si une trame est dans le buffer on la recupere
-	if(file_attente.pop(trame_traitee))
-	{
+	if(file_attente.pop(trame_traitee)) {
 		id = trame_traitee.getId();
-		if(id == 1)
-		{
-			// traiter can
-		}
-		else if(id == 2)
-		{
+		if(id == 1) {
+			debug("Trame can reçue");
+		} else if(id == 2) {
+			debug("Trame servo reçue");
 			traiterTrameServo(trame_traitee);
-		}
-		else
-		{
-			// erreur
+		} else {
+			debug("Id de trame invalide");
 		}
 	}
 }
 
-void traiterTrameServo(Trame trame_servo)
-{
+void traiterTrameServo(Trame trame_servo) {
 	uint8_t id_servo = 0;
 	uint16_t angle = 0;
-	
+
 	// longueur generique d'une trame servo
 	uint8_t longueur_trame_servo = 3;
-
-	herkulex::Servo * servo_commande = NULL;
 
 	// valeurs recuperees dans la trame
 	uint8_t angle_lsb = 0;
 	uint8_t angle_msb = 0;
 
 	// Si la trame fait la bonne taille (3 octets)
-	if(trame_servo.getDataLength() == longueur_trame_servo)
-	{
-		switch(trame_servo.getCmd())
-		{
-		case 0x05 :
-		// 1er octet = id
-		// octets 2 et 3 = angle (position)
+	if(trame_servo.getDataLength() == longueur_trame_servo) {
+		switch(trame_servo.getCmd()) {
+			case 0x05: {
+				// 1er octet = id
+				// octets 2 et 3 = angle (position)
 
-		// Recuperer l'id de la trame
-		id_servo = (trame_servo.getData())[0];
+				// Recuperer l'id de la trame
+				id_servo = (trame_servo.getData())[0];
 
-		// Concatener les 2 octets du champs data de la trame
-		angle_msb = (trame_servo.getData())[1];
-		angle_lsb = (trame_servo.getData())[2];
-		angle = paquetage(angle_msb,angle_lsb);
+				// Concatener les 2 octets du champs data de la trame
+				angle_msb = (trame_servo.getData())[1];
+				angle_lsb = (trame_servo.getData())[2];
+				angle = paquetage(angle_msb, angle_lsb);
 
-		// Faire tourner le servo concerne
-		if((servo_commande = servo_manager.getServoById(id_servo)) != NULL)
-		{
-			servo_commande->setPosition(angle);
+				// Faire tourner le servo concerne
+				herkulex::Servo* servo_commande = servo_manager.getServoById(id_servo);
+				if(servo_commande != nullptr) {
+					debug("Déplacement du servo %#x", id_servo);
+					servo_commande->setPosition(angle);
+				} else {
+					debug("idServo non trouve\n");
+				}
+				break;
+			}
+
+			default:
+				debug("Erreur commande trame\n");
+				break;
 		}
-		else
-		{
-			debug("idServo non trouve\n");
-		}
-		break;
-
-		default:
-		debug("Erreur commande trame\n");
-		break;
-		}
-	}
-	else
-	{
+	} else {
 		debug("Erreur longueur de trame\n");
 	}
-	
 }
 
 int main() {
 	init_servo();
 	Ticker ticker;
-	ticker.attach(traiterTrame, 0.005);
-	while(true) 
-	{
+	ticker.attach(traiterTrame, 0.05);
+	while(true) {
 		mettreTrameDansFileAttente();
 	}
 }

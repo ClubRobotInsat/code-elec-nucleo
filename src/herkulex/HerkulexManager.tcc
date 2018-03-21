@@ -36,6 +36,8 @@ namespace herkulex {
 				_it_ticker.attach(Callback<void()>(this, &Manager<N_SERVOS>::cbSendUpdatesToNextServo), _refreshPeriod / N_SERVOS);
 			}
 
+			debug("Registering : ID %#x (%d/%d) \n\r", id, _nb_reg_servos, N_SERVOS);
+
 
 			// Et on le retourne
 			return _servos[_nb_reg_servos - 1];
@@ -81,7 +83,8 @@ namespace herkulex {
 			return;
 		}
 
-		//_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::AckPolicy, 0x02);
+		// Enable ACK policy
+		_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::AckPolicy, 0x02);
 		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
 		//_bus.readRAMAddr(s->_id, constants::RAMAddr::CalibratedPosition, 2, &_callback_update_servo);
 		// Enable/Disable torque to match with s->_desired_torque_on
