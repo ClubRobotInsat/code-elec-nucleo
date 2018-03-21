@@ -154,8 +154,8 @@ namespace herkulex {
 	/* --------------------------------------------------------------------------------------------
 	 * sendStatMsg
 	 * Envoi un message de demande de status
-!!! NB: Ambiguite dans la documentation (6.7 p.49) sur la contenance de data[0] et data[1] pour
-!!! la requete de status
+	 !!! NB: Ambiguite dans la documentation (6.7 p.49) sur la contenance de data[0] et data[1] pour
+	 !!! la requete de status
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::sendStatMsg(uint8_t id) {
@@ -226,11 +226,12 @@ namespace herkulex {
 	                      constants::RAMAddr::RAMAddrEnum addr,
 	                      uint8_t len,
 	                      Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)>* callback) {
+		_ser.read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
 		sendRAMReadMsg(id, addr, len);
 		_callback_read_addr = callback;
 		_expected_reply_id = id;
 		_expected_reply_cmd = constants::CMD::fromServo::RAMReadAck;
-		_ser.read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
+		debug("Read called\n\r");
 	}
 
 	/* --------------------------------------------------------------------------------------------

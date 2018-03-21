@@ -2,7 +2,7 @@ namespace herkulex {
 
 	template <uint8_t N_SERVOS>
 	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, float refreshPeriod, Serial* pc)
-	        : _bus(txPin, rxPin, pc, 115200, 0.001)
+	        : _bus(txPin, rxPin, pc, 115200, 0.01)
 	        , _log(pc)
 	        , _it_ticker()
 	        , _nb_reg_servos(0)
@@ -49,9 +49,9 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	void Manager<N_SERVOS>::cbSendUpdatesToNextServo() {
 		/*if(_bus.needFlush()) {
-			debug("Bus need to be flushed\n\r");
-			//_bus.flush();
-			return;
+		    debug("Bus need to be flushed\n\r");
+		    //_bus.flush();
+		    return;
 		}*/
 		// Iterate on each servo
 		/* First thing to do in the callback, because incrementation of _num_next_servo
@@ -81,7 +81,7 @@ namespace herkulex {
 			return;
 		}
 
-		_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::AckPolicy, 0x02);
+		//_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::AckPolicy, 0x02);
 		// !!! TODO !!! See if it is better to use Calibrated or AbsolutePosition
 		//_bus.readRAMAddr(s->_id, constants::RAMAddr::CalibratedPosition, 2, &_callback_update_servo);
 		// Enable/Disable torque to match with s->_desired_torque_on
@@ -91,23 +91,22 @@ namespace herkulex {
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueFree);
 		}
 
-		constants::LedColor::LedColorEnum led_color;
+		/*constants::LedColor::LedColorEnum led_color;
 		// Select led color
 
 		if(s->_status_detail & constants::StatusDetail::InpositionFlag)
-			led_color = s->_inposition_led_color;
+		    led_color = s->_inposition_led_color;
 		else
-			led_color = s->_moving_led_color;
+		    led_color = s->_moving_led_color;
+		    */
 		// ?? PLAYTIME ??
 		_bus.sendSJOGMsg(s->_id, constants::jog_default_playtime, s->_desired_position, constants::JOG_CMD::PositionMode | 0x04);
 		//_bus.sendRAMWriteMsg(s->getId(), constants::RAMAddr::LedControl,static_cast<uint8_t>(led_color),1,0);
 		// Check and clear the status if needed
-		/*if(s->_status_error != 0x00)
-		{
-		    _log->printf("Trying to clear status (%x) of servo #%x\n\r", s->_status_error, s->_id);
-		    _bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::StatusError, 0x00);
+		if(s->_status_error != 0x00) {
+			_log->printf("Trying to clear status (%x) of servo #%x\n\r", s->_status_error, s->_id);
+			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::StatusError, 0x00);
 		}
-		*/
 	}
 
 	template <uint8_t N_SERVOS>
