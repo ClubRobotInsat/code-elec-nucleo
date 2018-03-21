@@ -169,6 +169,10 @@ namespace herkulex {
 		void sendDebugMessage();
 
 	protected:
+		/* This method send one message from the buffer to the bus.
+		 */
+		void flushOneMessage();
+
 		void cbWriteDone(int e);
 
 		/* --------------------------------------------------------------------------------------------

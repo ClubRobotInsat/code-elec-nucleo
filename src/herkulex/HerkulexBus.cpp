@@ -20,7 +20,7 @@ namespace herkulex {
 	        , _buffer_write_data()
 	        , _buffer_write_length()
 	        , _total_write_length(0) {
-		//		_ticker_flush.attach(Callback<void()>(this,&Bus::flush),flush_frequency);
+		_ticker_flush.attach(Callback<void()>(this, &Bus::flushOneMessage), flush_frequency);
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -30,6 +30,20 @@ namespace herkulex {
 	 */
 	Bus::~Bus() {
 		_log->printf("Destruction du bus");
+	}
+
+	void Bus::flushOneMessage() {
+		if(not _write_done or _buffer_write_data.empty()) {
+			return;
+		}
+		uint8_t message_length = 0;
+		_buffer_write_length.pop(message_length);
+		uint8_t* message;
+		_buffer_write_data.pop(message);
+		_ser.write(message, message_length, _write_callback, SERIAL_EVENT_TX_ALL);
+		;
+		_write_done = false;
+		_total_write_length -= message_length;
 	}
 
 	void Bus::flush() {
@@ -143,11 +157,14 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::cbInterpretBuffer(int event) {
+		debug("Callback \n\r");
 		if(_buffer[3] == _expected_reply_id && _buffer[4] == _expected_reply_cmd) {
 			switch(_buffer[4]) {
 				// If we received an addr read ack
 				case constants::CMD::fromServo::EEPReadAck:
+					break;
 				case constants::CMD::fromServo::RAMReadAck:
+					debug("Received RAMREAD\n\r");
 					parseAddrMsg();
 					break;
 
@@ -158,10 +175,15 @@ namespace herkulex {
 
 				// Do nothing for other replies
 				case constants::CMD::fromServo::EEPWriteAck:
+					break;
 				case constants::CMD::fromServo::RAMWriteAck:
+					break;
 				case constants::CMD::fromServo::IJOGAck:
+					break;
 				case constants::CMD::fromServo::SJOGAck:
+					break;
 				case constants::CMD::fromServo::RollbackAck:
+					break;
 				case constants::CMD::fromServo::RebootAck:
 					break;
 
