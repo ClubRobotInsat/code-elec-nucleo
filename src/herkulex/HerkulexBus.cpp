@@ -55,7 +55,7 @@ namespace herkulex {
 		}
 		uint8_t* message = new uint8_t[_total_write_length];
 		uint32_t index = 0;
-		debug("Flushing\n\r");
+		_log->printf("Flushing\n\r");
 		while(!_buffer_write_length.empty()) {
 			uint8_t length;
 			uint8_t* data;
@@ -70,14 +70,14 @@ namespace herkulex {
 			_log->printf("] in the next flush\n\r");
 			index += length;
 		}
-		debug("Flushing : %d bytes \n\r", _total_write_length);
+		_log->printf("Flushing : %d bytes \n\r", _total_write_length);
 		_ser.write(message, _total_write_length, _write_callback, SERIAL_EVENT_TX_ALL);
 		_write_done = false;
 		_total_write_length = 0;
 	}
 
 	void Bus::cbWriteDone(int e) {
-		debug("Write done\n\r");
+		_log->printf("Write done\n\r");
 		_write_done = true;
 	}
 
@@ -96,16 +96,16 @@ namespace herkulex {
 		}
 
 		while(not _write_done) {
-			debug("Waiting for previous write\n\r");
+			_log->printf("Waiting for previous write\n\r");
 			wait_ms(1000);
 		}
 
 		_write_done = false;
 
 		if(data == nullptr) {
-			debug("Erreur nullptr data write\n\r");
+			_log->printf("Erreur nullptr data write\n\r");
 		}
-		debug("Write call\n\r");
+		_log->printf("Write call\n\r");
 		_ser.write(data, length, _write_callback, SERIAL_EVENT_TX_ALL);
 	}
 
@@ -157,14 +157,14 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::cbInterpretBuffer(int event) {
-		debug("Callback \n\r");
+		_log->printf("Callback \n\r");
 		if(_buffer[3] == _expected_reply_id && _buffer[4] == _expected_reply_cmd) {
 			switch(_buffer[4]) {
 				// If we received an addr read ack
 				case constants::CMD::fromServo::EEPReadAck:
 					break;
 				case constants::CMD::fromServo::RAMReadAck:
-					debug("Received RAMREAD\n\r");
+					_log->printf("Received RAMREAD\n\r");
 					parseAddrMsg();
 					break;
 
@@ -193,12 +193,12 @@ namespace herkulex {
 			}
 			_callback_waiting = false; // TODO - [supprimer], ou utiliser avec un timeout
 		} else {
-			debug("Bad ID");
+			_log->printf("Bad ID");
 		}
 	}
 
 	void Bus::sendDebugMessage() {
-		_log->printf("Sending debug... \n\r");
+		_log->printf("Sending _log->printf... \n\r");
 		uint8_t txBuf[9];
 		txBuf[0] = 0xFF;
 		txBuf[1] = 0xFF;

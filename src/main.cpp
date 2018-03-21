@@ -11,10 +11,11 @@ using namespace herkulex;
 uint8_t id = 0xFD;
 
 Serial pc(USBTX, USBRX, 9600);
+Serial logger(D8,D2,9600);
 
 CircularBuffer<Trame, 256> file_attente;
 
-herkulex::Manager<6> servo_manager(A0, A1, 0.5, &pc);
+herkulex::Manager<6> servo_manager(A0, A1, 0.5, &logger);
 
 void traiterTrameServo(Trame trame_servo);
 
@@ -28,7 +29,7 @@ uint16_t paquetage(uint8_t msb, uint8_t lsb) {
 }
 
 void init_servo() {
-	debug("Initialisation des servos\n\r");
+	logger.printf("Initialisation des servos\n\r");
 	Servo* servo_fd = servo_manager.registerNewServo(0xFD);
 	servo_fd->setPosition(512);
 	servo_fd->reboot();
@@ -76,12 +77,12 @@ void afficherTrame() {
 	if(not file_attente.empty()) {
 		Trame trame;
 		file_attente.pop(trame);
-		debug("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
+		logger.printf("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
 		uint8_t* data = trame.getData();
 		for(int i = 0; i < trame.getDataLength(); i++) {
-			debug("%#x ", data[i]);
+			logger.printf("%#x ", data[i]);
 		}
-		debug("\n\r");
+		logger.printf("\n\r");
 	}
 }
 
@@ -92,12 +93,12 @@ void traiterTrame() {
 	if(file_attente.pop(trame_traitee)) {
 		id = trame_traitee.getId();
 		if(id == 1) {
-			debug("Trame can reçue");
+			logger.printf("Trame can reçue\n\r");
 		} else if(id == 2) {
-			debug("Trame servo reçue");
+			logger.printf("Trame servo reçue\n\r");
 			traiterTrameServo(trame_traitee);
 		} else {
-			debug("Id de trame invalide");
+			logger.printf("Id de trame invalide\n\r");
 		}
 	}
 }
@@ -131,20 +132,20 @@ void traiterTrameServo(Trame trame_servo) {
 				// Faire tourner le servo concerne
 				herkulex::Servo* servo_commande = servo_manager.getServoById(id_servo);
 				if(servo_commande != nullptr) {
-					debug("Déplacement du servo %#x", id_servo);
+					logger.printf("Déplacement du servo %#x \n\r", id_servo);
 					servo_commande->setPosition(angle);
 				} else {
-					debug("idServo non trouve\n");
+					logger.printf("idServo non trouve\n\r");
 				}
 				break;
 			}
 
 			default:
-				debug("Erreur commande trame\n");
+				logger.printf("Erreur commande trame\n\r");
 				break;
 		}
 	} else {
-		debug("Erreur longueur de trame\n");
+		logger.printf("Erreur longueur de trame\n\r");
 	}
 }
 

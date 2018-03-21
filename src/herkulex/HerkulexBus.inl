@@ -231,7 +231,7 @@ namespace herkulex {
 		_callback_read_addr = callback;
 		_expected_reply_id = id;
 		_expected_reply_cmd = constants::CMD::fromServo::RAMReadAck;
-		debug("Read called\n\r");
+		_log->printf("Read called\n\r");
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -262,9 +262,9 @@ namespace herkulex {
 		uint8_t chksum2 = (~_buffer[5] & 0xFE);
 
 		if(chksum1 != _buffer[5] || chksum2 != _buffer[6]) {
-			debug("Bad position Checksum\n\r");
+			_log->printf("Bad position Checksum\n\r");
 		} else if(_callback_read_addr == nullptr) {
-			debug("Callback for read addr is nullptr.\n\r");
+			_log->printf("Callback for read addr is nullptr.\n\r");
 		} else {
 			// Check carried data length
 			if(_buffer[8] == 1) {
@@ -292,9 +292,9 @@ namespace herkulex {
 		uint8_t chksum2 = (~_buffer[5] & 0xFE);
 
 		if(chksum1 != _buffer[5] || chksum2 != _buffer[6]) {
-			debug("Bad status checksum.");
+			_log->printf("Bad status checksum.");
 		} else if(_callback_read_stat == nullptr) {
-			debug("Callback for read status is nullptr.");
+			_log->printf("Callback for read status is nullptr.");
 		} else {
 			// Call the callback with status error and status detail - id allready checked
 			_callback_read_stat->call(_expected_reply_id, _buffer[7], _buffer[8]);

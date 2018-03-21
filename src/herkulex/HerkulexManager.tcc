@@ -36,7 +36,7 @@ namespace herkulex {
 				_it_ticker.attach(Callback<void()>(this, &Manager<N_SERVOS>::cbSendUpdatesToNextServo), _refreshPeriod / N_SERVOS);
 			}
 
-			debug("Registering : ID %#x (%d/%d) \n\r", id, _nb_reg_servos, N_SERVOS);
+			_log->printf("Registering : ID %#x (%d/%d) \n\r", id, _nb_reg_servos, N_SERVOS);
 
 
 			// Et on le retourne
@@ -51,7 +51,7 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	void Manager<N_SERVOS>::cbSendUpdatesToNextServo() {
 		/*if(_bus.needFlush()) {
-		    debug("Bus need to be flushed\n\r");
+		    _log->printf("Bus need to be flushed\n\r");
 		    //_bus.flush();
 		    return;
 		}*/
