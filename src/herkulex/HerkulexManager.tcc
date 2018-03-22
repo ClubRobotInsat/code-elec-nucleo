@@ -2,7 +2,7 @@ namespace herkulex {
 
 	template <uint8_t N_SERVOS>
 	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, float refreshPeriod, Serial* pc)
-	        : _bus(txPin, rxPin, pc, 115200, 0.01)
+	        : _bus(txPin, rxPin, pc, 115200, 0.05)
 	        , _log(pc)
 	        , _it_ticker()
 	        , _nb_reg_servos(0)

@@ -135,11 +135,11 @@ namespace herkulex {
 			for(index = 0; index < length; ++index) {
 				txBuf[constants::Size::MinPacketSize + index] = data[index];
 				// Iteratively construct the checksum
-				txBuf[5] ^= data[index];
+				txBuf[5] = txBuf[5] ^ data[index];
 			}
 		}
-		txBuf[5] = txBuf[5] & 0xFE;
 		txBuf[6] = (~txBuf[5]) & 0xFE;
+		txBuf[5] = txBuf[5] & 0xFE;
 
 		_buffer_write_length.push(total_length);
 		_buffer_write_data.push(txBuf);
