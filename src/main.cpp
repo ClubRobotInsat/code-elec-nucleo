@@ -11,9 +11,7 @@ using namespace herkulex;
 uint8_t id = 0xFD;
 
 Serial pc(USBTX, USBRX, 9600);
-Serial logger(D8,D2,9600);
-
-CircularBuffer<Trame, 256> file_attente;
+Serial logger(D8, D2, 9600);
 
 herkulex::Manager<6> servo_manager(A0, A1, 0.5, &logger);
 
@@ -67,39 +65,26 @@ Trame lire_trame(Serial* pc) {
 	return Trame(id, cmd, data_length, data);
 }
 
-void mettreTrameDansFileAttente() {
-	while(true) {
-		file_attente.push(lire_trame(&pc));
+void afficherTrame(Trame trame) {
+	logger.printf("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
+	uint8_t* data = trame.getData();
+	for(int i = 0; i < trame.getDataLength(); i++) {
+		logger.printf("%#x ", data[i]);
 	}
+	logger.printf("\n\r");
 }
 
-void afficherTrame() {
-	if(not file_attente.empty()) {
-		Trame trame;
-		file_attente.pop(trame);
-		logger.printf("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
-		uint8_t* data = trame.getData();
-		for(int i = 0; i < trame.getDataLength(); i++) {
-			logger.printf("%#x ", data[i]);
-		}
-		logger.printf("\n\r");
-	}
-}
-
-void traiterTrame() {
-	Trame trame_traitee;
+void traiterTrame(Trame trame) {
 	uint8_t id;
 	// Si une trame est dans le buffer on la recupere
-	if(file_attente.pop(trame_traitee)) {
-		id = trame_traitee.getId();
-		if(id == 1) {
-			logger.printf("Trame can reçue\n\r");
-		} else if(id == 2) {
-			logger.printf("Trame servo reçue\n\r");
-			traiterTrameServo(trame_traitee);
-		} else {
-			logger.printf("Id de trame invalide\n\r");
-		}
+	id = trame.getId();
+	if(id == 1) {
+		logger.printf("Trame can reçue\n\r");
+	} else if(id == 2) {
+		logger.printf("Trame servo reçue\n\r");
+		traiterTrameServo(trame);
+	} else {
+		logger.printf("Id de trame invalide\n\r");
 	}
 }
 
@@ -151,9 +136,8 @@ void traiterTrameServo(Trame trame_servo) {
 
 int main() {
 	init_servo();
-	Ticker ticker;
-	ticker.attach(traiterTrame, 0.05);
 	while(true) {
-		mettreTrameDansFileAttente();
+		Trame trame = lire_trame(&pc);
+		traiterTrame(trame);
 	}
 }
