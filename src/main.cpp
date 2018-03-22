@@ -13,7 +13,7 @@ uint8_t id = 0xFD;
 Serial pc(USBTX, USBRX, 9600);
 Serial logger(D8, D2, 9600);
 
-herkulex::Manager<6> servo_manager(A0, A1, 0.5, &logger);
+herkulex::Manager<6> servo_manager(A0, A1, 2, &pc);
 
 void traiterTrameServo(Trame trame_servo);
 
@@ -27,7 +27,7 @@ uint16_t paquetage(uint8_t msb, uint8_t lsb) {
 }
 
 void init_servo() {
-	logger.printf("Initialisation des servos\n\r");
+	pc.printf("Initialisation des servos\n\r");
 	Servo* servo_fd = servo_manager.registerNewServo(0xFD);
 	servo_fd->setPosition(512);
 	servo_fd->reboot();
@@ -61,17 +61,17 @@ Trame lire_trame(Serial* pc) {
 			}
 		}
 	}
-	pc->write(Trame::makeAck(numPaquet), 15, NULL, 0);
+	//pc->write(Trame::makeAck(numPaquet), 15, NULL, 0);
 	return Trame(id, cmd, data_length, data);
 }
 
 void afficherTrame(Trame trame) {
-	logger.printf("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
+	pc.printf("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
 	uint8_t* data = trame.getData();
 	for(int i = 0; i < trame.getDataLength(); i++) {
-		logger.printf("%#x ", data[i]);
+		pc.printf("%#x ", data[i]);
 	}
-	logger.printf("\n\r");
+	pc.printf("\n\r");
 }
 
 void traiterTrame(Trame trame) {
@@ -79,12 +79,12 @@ void traiterTrame(Trame trame) {
 	// Si une trame est dans le buffer on la recupere
 	id = trame.getId();
 	if(id == 1) {
-		logger.printf("Trame can reçue\n\r");
+		pc.printf("Trame can reçue\n\r");
 	} else if(id == 2) {
-		logger.printf("Trame servo reçue\n\r");
+		pc.printf("Trame servo reçue\n\r");
 		traiterTrameServo(trame);
 	} else {
-		logger.printf("Id de trame invalide\n\r");
+		pc.printf("Id de trame invalide\n\r");
 	}
 }
 
@@ -117,20 +117,20 @@ void traiterTrameServo(Trame trame_servo) {
 				// Faire tourner le servo concerne
 				herkulex::Servo* servo_commande = servo_manager.getServoById(id_servo);
 				if(servo_commande != nullptr) {
-					logger.printf("Déplacement du servo %#x \n\r", id_servo);
+					pc.printf("Déplacement du servo %#x \n\r", id_servo);
 					servo_commande->setPosition(angle);
 				} else {
-					logger.printf("idServo non trouve\n\r");
+					pc.printf("idServo non trouve\n\r");
 				}
 				break;
 			}
 
 			default:
-				logger.printf("Erreur commande trame\n\r");
+				pc.printf("Erreur commande trame\n\r");
 				break;
 		}
 	} else {
-		logger.printf("Erreur longueur de trame\n\r");
+		pc.printf("Erreur longueur de trame\n\r");
 	}
 }
 
