@@ -61,8 +61,8 @@ Trame lire_trame(Serial* pc) {
 			}
 		}
 	}
-	//pc->write(Trame::makeAck(numPaquet), 15, NULL, 0);
-	return Trame(id, cmd, data_length, data);
+	// pc->write(Trame::makeAck(numPaquet), 15, NULL, 0);
+	return Trame(id, cmd, data_length, data, numPaquet);
 }
 
 void afficherTrame(Trame trame) {
