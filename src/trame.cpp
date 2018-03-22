@@ -22,11 +22,10 @@ void Trame::appendData(uint8_t data) {
 }
 
 void Trame::deleteDataWrite(int event) {
-	free(_data_to_delete);
+	delete[] _data_to_delete;
 }
 
-void Trame::sendToCanAck(Serial* pc) const {
-	// int size = HEADER_SIZE + _data_length;
+void Trame::sendToCanAck(Serial* pc) {
 	int size = 5;
 	uint8_t* tab = new uint8_t[size];
 
@@ -37,14 +36,12 @@ void Trame::sendToCanAck(Serial* pc) const {
 	tab[3] = 0xBB;
 	tab[4] = _packet_number;
 
-	// tab[size-1] = _packet_number;
-
+	_data_to_delete = tab;
 	pc->write(tab, size, _write_callback, SERIAL_EVENT_TX_ALL);
 }
 
 
-void Trame::sendToCan(Serial* pc) const {
-	// int size = HEADER_SIZE + _data_length;
+void Trame::sendToCan(Serial* pc) {
 	int size = 8 + _data_length;
 	uint8_t* tab = new uint8_t[size];
 
@@ -61,8 +58,7 @@ void Trame::sendToCan(Serial* pc) const {
 		tab[8 + j] = _data[j];
 	}
 
-	// tab[size-1] = _packet_number;
-
+	_data_to_delete = tab;
 	pc->write(tab, size, _write_callback, SERIAL_EVENT_TX_ALL);
 }
 

@@ -102,7 +102,7 @@ void traiterTrameServo(Trame trame_servo) {
 	// Si la trame fait la bonne taille (3 octets)
 	if(trame_servo.getDataLength() == longueur_trame_servo) {
 		switch(trame_servo.getCmd()) {
-			case 0x05: {
+			case 0x01: {
 				// 1er octet = id
 				// octets 2 et 3 = angle (position)
 

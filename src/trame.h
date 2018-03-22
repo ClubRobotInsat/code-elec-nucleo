@@ -32,9 +32,9 @@ public:
 	}
 
 	// Envoie la trame sur la connexion série.
-	void sendToCanAck(Serial* pc) const;
+	void sendToCanAck(Serial* pc);
 
-	void sendToCan(Serial* pc) const;
+	void sendToCan(Serial* pc);
 
 	// Envoie la trame a la carte CAN-USB
 	static uint8_t demultiplexId(uint8_t const& first, uint8_t const& second);
