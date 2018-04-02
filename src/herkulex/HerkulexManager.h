@@ -15,10 +15,6 @@ namespace herkulex {
 		// Logger
 		Serial* _log;
 
-		// The ticker calls a callback when the period is elapsed
-		// Used to update all servos at a defined rate
-		Ticker _it_ticker;
-
 		// The manager stores servos
 		Servo* _servos[N_SERVOS];
 
@@ -56,15 +52,17 @@ namespace herkulex {
 		 */
 		Servo* registerNewServo(uint8_t id);
 
+		void flushBus();
+
+		void sendUpdatesToNextServo();
+
 	private:
-		void cbSendUpdatesToNextServo();
 
 		void cbFuncUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail);
 		void cbFuncUpdateServo(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0); // Checker l'addresse lue dans le Ack coté bus
 
 		inline void updateServo(uint8_t id);
 
-		void updateAllServos(); // ??
 	};
 }
 

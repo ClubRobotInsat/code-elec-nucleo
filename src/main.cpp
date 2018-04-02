@@ -34,13 +34,18 @@ void init_servo() {
 	Servo* servo_03 = servo_manager.registerNewServo(0x03);
 	servo_03->setPosition(512);
 	servo_03->reboot();
+	servo_manager.sendUpdatesToNextServo();
+	servo_manager.sendUpdatesToNextServo();
+	servo_manager.flushBus();
+	wait_ms(50);
+	servo_manager.sendUpdatesToNextServo();
+	servo_manager.sendUpdatesToNextServo();
+	servo_manager.flushBus();
 }
 
-Trame lire_trame(Serial* pc) {
+Trame * lire_trame(Serial* pc) {
 	uint8_t numPaquet, id, cmd, data_length;
 	uint8_t* data;
-	bool done = false;
-	while(not done) {
 		if(pc->getc() == 0xAC) {
 			if(pc->getc() == 0xDC) {
 				if(pc->getc() == 0xAB) {
@@ -55,14 +60,13 @@ Trame lire_trame(Serial* pc) {
 						for(int j = 0; j < data_length; j++) {
 							data[j] = pc->getc();
 						}
-						done = true;
+						// pc->write(Trame::makeAck(numPaquet), 15, NULL, 0);
+						return new Trame(id, cmd, data_length, data, numPaquet);
 					}
 				}
 			}
 		}
-	}
-	// pc->write(Trame::makeAck(numPaquet), 15, NULL, 0);
-	return Trame(id, cmd, data_length, data, numPaquet);
+		return nullptr;
 }
 
 void afficherTrame(Trame trame) {
@@ -102,7 +106,7 @@ void traiterTrameServo(Trame trame_servo) {
 	// Si la trame fait la bonne taille (3 octets)
 	if(trame_servo.getDataLength() == longueur_trame_servo) {
 		switch(trame_servo.getCmd()) {
-			case 0x01: {
+			case 0x05: {
 				// 1er octet = id
 				// octets 2 et 3 = angle (position)
 
@@ -136,8 +140,14 @@ void traiterTrameServo(Trame trame_servo) {
 
 int main() {
 	init_servo();
-	while(true) {
-		Trame trame = lire_trame(&pc);
-		traiterTrame(trame);
+while(true) {
+		Trame* trame = lire_trame(&pc);
+		if (trame != nullptr) {
+			traiterTrame(*trame);
+			delete trame;
+		}
+		servo_manager.sendUpdatesToNextServo();
+		servo_manager.flushBus();
+		wait_ms(50);
 	}
 }
