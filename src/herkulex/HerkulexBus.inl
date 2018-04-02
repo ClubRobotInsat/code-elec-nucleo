@@ -11,7 +11,7 @@ namespace herkulex {
 	void Bus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
 		// Check valid length
 		if(len < 1 || len > 2) {
-			_log->printf("Utilisation de Bus::sendEEPWriteMsg avec une longueur erronee !\n");
+			debug("Utilisation de Bus::sendEEPWriteMsg avec une longueur erronee !\n");
 		} else {
 			// NEW
 			uint8_t* data = new uint8_t(2 + len);
@@ -40,7 +40,7 @@ namespace herkulex {
 	void Bus::sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len) {
 		// Check valid length
 		if(len < 1 || len > 2) {
-			_log->printf("Utilisation de Bus::sendEEPReadMsg avec une longueur erronee !\n");
+			debug("Utilisation de Bus::sendEEPReadMsg avec une longueur erronee !\n");
 		} else {
 			uint8_t data[2];
 
@@ -61,7 +61,7 @@ namespace herkulex {
 	void Bus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
 		// Check valid length
 		if(len < 1 || len > 2) {
-			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
+			debug("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
 		} else {
 			// NEW
 			uint8_t* data = new uint8_t(2 + len);
@@ -90,7 +90,7 @@ namespace herkulex {
 	void Bus::sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len) {
 		// Check valid length
 		if(len < 1 || len > 2) {
-			_log->printf("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
+			debug("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
 		} else {
 			// NEW
 			uint8_t* data = new uint8_t(2 + len);
@@ -231,7 +231,7 @@ namespace herkulex {
 		_callback_read_addr = callback;
 		_expected_reply_id = id;
 		_expected_reply_cmd = constants::CMD::fromServo::RAMReadAck;
-		_log->printf("Read called\n\r");
+		debug("Read called\n\r");
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -262,9 +262,9 @@ namespace herkulex {
 		uint8_t chksum2 = (~_buffer[5] & 0xFE);
 
 		if(chksum1 != _buffer[5] || chksum2 != _buffer[6]) {
-			_log->printf("Bad position Checksum\n\r");
+			debug("Bad position Checksum\n\r");
 		} else if(_callback_read_addr == nullptr) {
-			_log->printf("Callback for read addr is nullptr.\n\r");
+			debug("Callback for read addr is nullptr.\n\r");
 		} else {
 			// Check carried data length
 			if(_buffer[8] == 1) {
@@ -292,9 +292,9 @@ namespace herkulex {
 		uint8_t chksum2 = (~_buffer[5] & 0xFE);
 
 		if(chksum1 != _buffer[5] || chksum2 != _buffer[6]) {
-			_log->printf("Bad status checksum.");
+			debug("Bad status checksum.");
 		} else if(_callback_read_stat == nullptr) {
-			_log->printf("Callback for read status is nullptr.");
+			debug("Callback for read status is nullptr.");
 		} else {
 			// Call the callback with status error and status detail - id allready checked
 			_callback_read_stat->call(_expected_reply_id, _buffer[7], _buffer[8]);

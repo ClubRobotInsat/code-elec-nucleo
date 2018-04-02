@@ -22,6 +22,7 @@ void Trame::appendData(uint8_t data) {
 }
 
 void Trame::deleteDataWrite(int event) {
+	debug("COUCOCUCOUCOUC ----------- \n\r");
 	delete[] _data_to_delete;
 }
 

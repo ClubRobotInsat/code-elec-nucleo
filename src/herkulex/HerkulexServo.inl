@@ -3,7 +3,7 @@
 
 namespace herkulex {
 
-	Servo::Servo(uint8_t id, Serial* log)
+	Servo::Servo(uint8_t id)
 	        : _id(id)
 	        , _status_error(0)
 	        , _status_detail(0)
@@ -14,7 +14,6 @@ namespace herkulex {
 	        , _moving_led_color(constants::LedColor::Blue)
 	        , _position(0)
 	        , _desired_position(0)
-	        , _log(log)
 
 	{}
 

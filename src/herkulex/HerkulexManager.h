@@ -12,9 +12,6 @@ namespace herkulex {
 		// Stocke le bus
 		Bus _bus;
 
-		// Logger
-		Serial* _log;
-
 		// The manager stores servos
 		Servo* _servos[N_SERVOS];
 
@@ -44,7 +41,7 @@ namespace herkulex {
 		 */
 		Servo* getServoById(uint8_t id);
 
-		explicit Manager(PinName txPin, PinName rxPin, float _refreshPeriod, Serial* pc);
+		explicit Manager(PinName txPin, PinName rxPin, float _refreshPeriod);
 		virtual ~Manager();
 
 		/*

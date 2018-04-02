@@ -2,6 +2,7 @@
 #include "HerkulexConst.h"
 #include "HerkulexManager.h"
 #include "HerkulexServo.h"
+#define NDEBUG 1
 #include "mbed.h"
 
 #include <trame.h>
@@ -13,7 +14,7 @@ uint8_t id = 0xFD;
 Serial pc(USBTX, USBRX, 9600);
 Serial logger(D8, D2, 9600);
 
-herkulex::Manager<6> servo_manager(A0, A1, 2, &pc);
+herkulex::Manager<6> servo_manager(A0, A1, 2);
 
 void traiterTrameServo(Trame trame_servo);
 
@@ -27,7 +28,7 @@ uint16_t paquetage(uint8_t msb, uint8_t lsb) {
 }
 
 void init_servo() {
-	pc.printf("Initialisation des servos\n\r");
+	debug("Initialisation des servos\n\r");
 	Servo* servo_fd = servo_manager.registerNewServo(0xFD);
 	servo_fd->setPosition(512);
 	servo_fd->reboot();
@@ -60,8 +61,10 @@ Trame * lire_trame(Serial* pc) {
 						for(int j = 0; j < data_length; j++) {
 							data[j] = pc->getc();
 						}
-						// pc->write(Trame::makeAck(numPaquet), 15, NULL, 0);
-						return new Trame(id, cmd, data_length, data, numPaquet);
+						Trame* result = new Trame(id, cmd, data_length, data, numPaquet);
+						result->sendToCanAck(pc);
+						wait_ms(10);
+						return result;
 					}
 				}
 			}
@@ -70,12 +73,12 @@ Trame * lire_trame(Serial* pc) {
 }
 
 void afficherTrame(Trame trame) {
-	pc.printf("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
+	debug("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
 	uint8_t* data = trame.getData();
 	for(int i = 0; i < trame.getDataLength(); i++) {
-		pc.printf("%#x ", data[i]);
+		debug("%#x ", data[i]);
 	}
-	pc.printf("\n\r");
+	debug("\n\r");
 }
 
 void traiterTrame(Trame trame) {
@@ -83,12 +86,12 @@ void traiterTrame(Trame trame) {
 	// Si une trame est dans le buffer on la recupere
 	id = trame.getId();
 	if(id == 1) {
-		pc.printf("Trame can reçue\n\r");
+		debug("Trame can reçue\n\r");
 	} else if(id == 2) {
-		pc.printf("Trame servo reçue\n\r");
+		debug("Trame servo reçue\n\r");
 		traiterTrameServo(trame);
 	} else {
-		pc.printf("Id de trame invalide\n\r");
+		debug("Id de trame invalide\n\r");
 	}
 }
 
@@ -121,20 +124,20 @@ void traiterTrameServo(Trame trame_servo) {
 				// Faire tourner le servo concerne
 				herkulex::Servo* servo_commande = servo_manager.getServoById(id_servo);
 				if(servo_commande != nullptr) {
-					pc.printf("Déplacement du servo %#x \n\r", id_servo);
+					debug("Déplacement du servo %#x \n\r", id_servo);
 					servo_commande->setPosition(angle);
 				} else {
-					pc.printf("idServo non trouve\n\r");
+					debug("idServo non trouve\n\r");
 				}
 				break;
 			}
 
 			default:
-				pc.printf("Erreur commande trame\n\r");
+				debug("Erreur commande trame\n\r");
 				break;
 		}
 	} else {
-		pc.printf("Erreur longueur de trame\n\r");
+		debug("Erreur longueur de trame\n\r");
 	}
 }
 
@@ -144,7 +147,7 @@ while(true) {
 		Trame* trame = lire_trame(&pc);
 		if (trame != nullptr) {
 			traiterTrame(*trame);
-			delete trame;
+			//delete trame;
 		}
 		servo_manager.sendUpdatesToNextServo();
 		servo_manager.flushBus();
