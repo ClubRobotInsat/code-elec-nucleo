@@ -27,7 +27,7 @@ void Trame::deleteDataWrite(int event) {
 }
 
 void Trame::sendToCanAck(Serial* pc) {
-	int size = 5;
+	int size = 8;
 	uint8_t* tab = new uint8_t[size];
 
 	// Remplir le tableau contenant la trame
@@ -36,6 +36,9 @@ void Trame::sendToCanAck(Serial* pc) {
 	tab[2] = 0xAB;
 	tab[3] = 0xBB;
 	tab[4] = _packet_number;
+	tab[5] = 0;
+	tab[6] = 0;
+	tab[7] = 0;
 
 	_data_to_delete = tab;
 	pc->write(tab, size, _write_callback, SERIAL_EVENT_TX_ALL);

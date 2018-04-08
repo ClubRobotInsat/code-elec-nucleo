@@ -15,6 +15,14 @@ public:
 
 	static uint8_t* makeAck(uint8_t num_packet);
 
+	void print() const {
+		debug("ID : %#x | CMD : %#x | N° : %#x | DL : %#x \n\r", _id, _cmd, _packet_number, _data_length);
+	}
+
+	void delete_data() {
+		delete[] _data;
+	}
+
 	uint8_t* getData() const {
 		return _data;
 	}

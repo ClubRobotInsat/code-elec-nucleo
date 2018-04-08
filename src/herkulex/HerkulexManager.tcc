@@ -28,13 +28,13 @@ namespace herkulex {
 			// NEW -> DELETE dans ~Manager
 			_servos[_nb_reg_servos - 1] = new Servo(id);
 
-			debug("Registering : ID %#x (%d/%d) \n\r", id, _nb_reg_servos, N_SERVOS);
+			//debug("Registering : ID %#x (%d/%d) \n\r", id, _nb_reg_servos, N_SERVOS);
 
 
 			// Et on le retourne
 			return _servos[_nb_reg_servos - 1];
 		} else {
-			debug("Trop de servos !!!\n\r");
+			//debug("Trop de servos !!!\n\r");
 			/// FIXME : LE NULLPTR
 			return nullptr;
 		}
@@ -43,7 +43,7 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	void Manager<N_SERVOS>::sendUpdatesToNextServo() {
 		/*if(_bus.needFlush()) {
-		    debug("Bus need to be flushed\n\r");
+		    //debug("Bus need to be flushed\n\r");
 		    //_bus.flush();
 		    return;
 		}*/
@@ -54,7 +54,7 @@ namespace herkulex {
 		 * until the next "loop".
 		 * The next servo (i + 1) has now the token.
 		 */
-		debug("Updating servo n°%d", _num_next_servo);
+		//debug("Updating servo n°%d", _num_next_servo);
 		if(_num_next_servo < _nb_reg_servos - 1) {
 			++_num_next_servo;
 		} else {
@@ -63,10 +63,10 @@ namespace herkulex {
 
 		Servo* s = _servos[_num_next_servo];
 
-		debug(" with id %x...\n\r", s->getId());
+		//debug(" with id %x...\n\r", s->getId());
 
 		if(s->shouldReboot()) {
-			debug("Rebooting (%x).\n\r", s->getId());
+			//debug("Rebooting (%x).\n\r", s->getId());
 			_bus.sendRebootMsg(s->getId());
 			//_bus.flush();
 			wait_ms(20);
@@ -98,7 +98,7 @@ namespace herkulex {
 		// Check and clear the status if needed
 		/*
 		if(s->_status_error != 0x00) {
-			debug("Trying to clear status (%x) of servo #%x\n\r", s->_status_error, s->_id);
+			//debug("Trying to clear status (%x) of servo #%x\n\r", s->_status_error, s->_id);
 			_bus.sendRAMWriteMsg(s->_id, constants::RAMAddr::StatusError, 0x00);
 		}
 		*/
@@ -108,9 +108,9 @@ namespace herkulex {
 	void Manager<N_SERVOS>::cbFuncUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail) {
 
 		if(_servos[_num_next_servo]->_id != id) {
-			debug("Recu un update pour le mauvais servo...\n\r");
+			//debug("Recu un update pour le mauvais servo...\n\r");
 		} else {
-			debug("Update traitée.\n\r");
+			//debug("Update traitée.\n\r");
 			_servos[_num_next_servo]->mgrUpdateStatus(status_error, status_detail);
 		}
 	}
@@ -118,9 +118,9 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	void Manager<N_SERVOS>::cbFuncUpdateServo(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1) {
 		if(_servos[_num_next_servo]->_id != id) {
-			debug("Recu un update pour le mauvais servo...\n\r");
+			//debug("Recu un update pour le mauvais servo...\n\r");
 		} else {
-			debug("Update reçu !\n\r");
+			//debug("Update reçu !\n\r");
 			// Position : 2 first bits from msb (data1) + data0 (0~1023)
 			_servos[_num_next_servo]->mgrUpdatePosition(((data1 & 0x03) << 8) | data0);
 			_servos[_num_next_servo]->mgrUpdateStatus(status_error, status_detail);
