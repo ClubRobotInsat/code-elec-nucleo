@@ -6,7 +6,6 @@ DigitalOut led2(LED2);
 CAN can1(PA_11, PA_12,100000);
 //CAN can2(PB_5, PB_13,100000);
 char counter = 0;
-/*
 void send() {
 	printf("send()\n\r");
 	if(can1.write(CANMessage(1337, &counter, 1))) {
@@ -19,14 +18,13 @@ void send() {
 	}
 	led1 = !led1;
 }
-*/
 
 int main() {
 	printf("main()---------------------------\n\r");
-	//ticker.attach(&send, 1);
-	CANMessage msg;
+	ticker.attach(&send, 1);
+//	CANMessage msg;
 	while(1) {
-		printf("loop()\n\r");
+/*		printf("loop()\n\r");
 		
 		if(can1.read(msg)) {
 			if (msg.len == 1) {
@@ -39,7 +37,7 @@ int main() {
 		} else {
 			printf("Erreur de lecture : %d", can1.rderror());
 		}
-		
+		*/
 		wait(0.2);
 	}
 }
