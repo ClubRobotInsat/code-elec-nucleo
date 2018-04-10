@@ -1,133 +1,45 @@
-#include "HerkulexBus.h"
-#include "HerkulexConst.h"
-#include "HerkulexManager.h"
-#include "HerkulexServo.h"
-#define NDEBUG 1
 #include "mbed.h"
+Ticker ticker;
+DigitalOut led1(LED1);
+DigitalOut led2(LED2);
 
-#include "TrameReader.h"
-#include "trame.h"
-
-using namespace herkulex;
-// set serial port and baudrate, (mbed <-> HerculexX)
-uint8_t id = 0xFD;
-
-Serial pc(USBTX, USBRX, 9600);
-Serial logger(D8, D2, 9600);
-
-herkulex::Manager<6> servo_manager(A0, A1, 2);
-
-void traiterTrameServo(Trame trame_servo);
-
-// Forme un uint16_t avec 2 uint8_t
-uint16_t paquetage(uint8_t msb, uint8_t lsb) {
-	uint16_t resultat = 0x0000;
-	resultat = msb;
-	resultat = resultat << 8;
-	resultat |= lsb;
-	return resultat;
-}
-
-void init_servo() {
-	debug("Initialisation des servos\n\r");
-	Servo* servo_fd = servo_manager.registerNewServo(0xFD);
-	servo_fd->setPosition(512);
-	servo_fd->reboot();
-	Servo* servo_03 = servo_manager.registerNewServo(0x03);
-	servo_03->setPosition(512);
-	servo_03->reboot();
-	servo_manager.sendUpdatesToNextServo();
-	servo_manager.sendUpdatesToNextServo();
-	servo_manager.flushBus();
-	wait_ms(50);
-	servo_manager.sendUpdatesToNextServo();
-	servo_manager.sendUpdatesToNextServo();
-	servo_manager.flushBus();
-}
-
-void afficherTrame(Trame trame) {
-	debug("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
-	uint8_t* data = trame.getData();
-	for(int i = 0; i < trame.getDataLength(); i++) {
-		debug("%#x ", data[i]);
+CAN can1(PA_11, PA_12,100000);
+//CAN can2(PB_5, PB_13,100000);
+char counter = 0;
+/*
+void send() {
+	printf("send()\n\r");
+	if(can1.write(CANMessage(1337, &counter, 1))) {
+		printf("wloop()\n\r");
+		counter++;
+		printf("Message sent: %d\n\r", counter);
+	} 
+	else {
+		printf("Erreur d'envoi : %d", can1.tderror());
 	}
-	debug("\n\r");
+	led1 = !led1;
 }
-
-void traiterTrame(Trame trame) {
-	uint8_t id;
-	// Si une trame est dans le buffer on la recupere
-	id = trame.getId();
-	if(id == 1) {
-		debug("Trame can reçue\n\r");
-	} else if(id == 2) {
-		debug("Trame servo reçue\n\r");
-		traiterTrameServo(trame);
-	} else {
-		debug("Id de trame invalide\n\r");
-	}
-}
-
-void traiterTrameServo(Trame trame_servo) {
-	uint8_t id_servo = 0;
-	uint16_t angle = 0;
-
-	// longueur generique d'une trame servo
-	uint8_t longueur_trame_servo = 3;
-
-	// valeurs recuperees dans la trame
-	uint8_t angle_lsb = 0;
-	uint8_t angle_msb = 0;
-
-	// Si la trame fait la bonne taille (3 octets)
-	if(trame_servo.getDataLength() == longueur_trame_servo) {
-		switch(trame_servo.getCmd()) {
-			case 0x05: {
-				// 1er octet = id
-				// octets 2 et 3 = angle (position)
-
-				// Recuperer l'id de la trame
-				id_servo = (trame_servo.getData())[0];
-
-				// Concatener les 2 octets du champs data de la trame
-				angle_msb = (trame_servo.getData())[1];
-				angle_lsb = (trame_servo.getData())[2];
-				angle = paquetage(angle_msb, angle_lsb);
-
-				// Faire tourner le servo concerne
-				herkulex::Servo* servo_commande = servo_manager.getServoById(id_servo);
-				if(servo_commande != nullptr) {
-					debug("Déplacement du servo %#x \n\r", id_servo);
-					servo_commande->setPosition(angle);
-				} else {
-					debug("idServo non trouve\n\r");
-				}
-				break;
-			}
-
-			default:
-				debug("Erreur commande trame\n\r");
-				break;
-		}
-	} else {
-		debug("Erreur longueur de trame\n\r");
-	}
-}
-
+*/
 
 int main() {
-	TrameReader reader;
-	init_servo();
-	reader.attach_to_serial(&pc);
-	while(true) {
-		Trame* trame = reader.get_trame();
-		if(trame != nullptr) {
-			traiterTrame(*trame);
-			trame->delete_data();
-			delete trame;
+	printf("main()---------------------------\n\r");
+	//ticker.attach(&send, 1);
+	CANMessage msg;
+	while(1) {
+		printf("loop()\n\r");
+		
+		if(can1.read(msg)) {
+			if (msg.len == 1) {
+			printf("Message received: %d\n\r", msg.data[0]);
+			}
+			else {
+				printf("slt : %d \n\r", msg.len);
+			}
+			led2 = !led2;
+		} else {
+			printf("Erreur de lecture : %d", can1.rderror());
 		}
-		servo_manager.sendUpdatesToNextServo();
-		servo_manager.flushBus();
-		wait_ms(50);
+		
+		wait(0.2);
 	}
 }
