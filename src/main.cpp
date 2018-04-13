@@ -12,7 +12,7 @@ using namespace herkulex;
 // set serial port and baudrate, (mbed <-> HerculexX)
 uint8_t id = 0xFD;
 
-Serial pc(USBTX, USBRX, 9600);
+Serial pc(PC_10, PC_11, 9600);
 Serial logger(D8, D2, 9600);
 
 herkulex::Manager<6> servo_manager(A0, A1, 2);
