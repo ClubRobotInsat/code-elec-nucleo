@@ -77,6 +77,12 @@ Pour compiler, se mettre dans le dossier cloné plus tôt (depuis https://github
 mbed compile --profile debug_robot.json
 ```
 
+***ATTENTION*** : quand on compile du code qui lis des trames via la connexion au PC, il faut utiliser la ligne suivante qui va désactiver les printf (sinon il ya des conflits) :
+
+```
+mbed compile --profile debug_robot.json -DNDEBUG
+```
+
 On spécifie un profil de compilation qui fait plusieurs choses :
 
 * il active les symboles de debug pour que gdb ait des choses à nous montrer

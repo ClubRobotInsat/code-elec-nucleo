@@ -47,7 +47,7 @@ TrameReader::TrameReader()
 }
 
 void TrameReader::attach_to_serial(Serial* ser) {
-	ser->attach(Callback<void()>(this, &TrameReader::handle_buffer));
+	ser->attach(Callback<void()>(this, &TrameReader::handle_buffer),Serial::RxIrq);
 	_ser = ser;
 }
 
