@@ -2,11 +2,9 @@
 #include "HerkulexConst.h"
 #include "HerkulexManager.h"
 #include "HerkulexServo.h"
-#define NDEBUG 1
-#include "mbed.h"
-
 #include "TrameReader.h"
 #include "trame.h"
+#include "mbed.h"
 
 using namespace herkulex;
 // set serial port and baudrate, (mbed <-> HerculexX)
@@ -46,12 +44,12 @@ void init_servo() {
 }
 
 void afficherTrame(Trame trame) {
-	debug("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
+	printf("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
 	uint8_t* data = trame.getData();
 	for(int i = 0; i < trame.getDataLength(); i++) {
-		debug("%#x ", data[i]);
+		printf("%#x ", data[i]);
 	}
-	debug("\n\r");
+	printf("\n\r");
 }
 
 void traiterTrame(Trame trame) {
@@ -116,18 +114,19 @@ void traiterTrameServo(Trame trame_servo) {
 
 
 int main() {
+	printf("Start\n\r");
 	TrameReader reader;
 	init_servo();
 	reader.attach_to_serial(&pc);
 	while(true) {
-		Trame* trame = reader.get_trame();
-		if(trame != nullptr) {
-			traiterTrame(*trame);
-			trame->delete_data();
-			delete trame;
+		if (reader.trame_ready()) {
+		Trame trame = reader.get_trame();
+			trame->sendToCanAck(&pc);
+			afficherTrame(trame);
+			traiterTrame(trame);
 		}
-		servo_manager.sendUpdatesToNextServo();
-		servo_manager.flushBus();
+		//servo_manager.sendUpdatesToNextServo();
+		//servo_manager.flushBus();
 		wait_ms(50);
 	}
 }

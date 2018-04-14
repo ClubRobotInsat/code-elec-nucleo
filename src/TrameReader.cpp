@@ -41,8 +41,9 @@ TrameReader::TrameReader()
         , _state(TrameReaderState::WAITING_FOR_H1)
         , _data_received(0)
         , _ser(nullptr)
-        , _trame_in_build() {
-	_trame_buffer = new Trame*[_trame_buffer_size];
+        , _trame_in_build()
+	{
+	_trame_buffer = new Trame[_trame_buffer_size];
 	_byte_buffer = new uint8_t[_byte_buffer_size];
 }
 
@@ -134,18 +135,18 @@ void TrameReader::parse_byte(uint8_t byte) {
 				_byte_buffer[_data_received] = byte;
 				_data_received++;
 				debug("Recevied data. More to come... \n\r");
+				break;
 			}
 			/* On reçois le dernier octet */
 			else {
 				_byte_buffer[_data_received] = byte;
 				uint8_t id = Trame::demultiplexId(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
 				uint8_t cmd = Trame::demultiplexCmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
-				uint8_t* data = new uint8_t[_trame_in_build.data_length];
-				memcpy(&data, &_byte_buffer, _trame_in_build.data_length);
 				debug("Received all data, new trame created \n\r");
 				if(_trame_buffer_position < _trame_buffer_size) {
+					debug("Trame successfully read.\n\r");
 					_trame_buffer[_trame_buffer_position] =
-					    new Trame(id, cmd, _trame_in_build.data_length, data, _trame_in_build.num_paquet);
+					    Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
 				}
 
 				/* The buffer is full we dump all the Trame */
@@ -153,14 +154,14 @@ void TrameReader::parse_byte(uint8_t byte) {
 					debug("Trame buffer is full, dumping ... \n\r");
 					_trame_buffer_position = 0;
 					_trame_buffer[_trame_buffer_position] =
-					    new Trame(id, cmd, _trame_in_build.data_length, data, _trame_in_build.num_paquet);
+					    Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
 				}
 
 				_trame_buffer_position++;
 				_state = TrameReaderState::WAITING_FOR_H1;
 				_data_received = 0;
+				break;
 			}
-			break;
 		}
 
 		default:
@@ -168,12 +169,16 @@ void TrameReader::parse_byte(uint8_t byte) {
 	}
 }
 
-Trame* TrameReader::get_trame() {
+Trame TrameReader::get_trame() {
 	if(_trame_buffer_position == 0) {
-		return nullptr;
+		error("Empty Trame Buffer \n\r");
+		return Trame();
 	} else {
 		debug("Renvoi d'une bonne trame : \n\r");
 		_trame_buffer_position--;
 		return _trame_buffer[_trame_buffer_position];
 	}
 }
+bool TrameReader::trame_ready() const {
+		return _trame_buffer_position > 0;
+	}

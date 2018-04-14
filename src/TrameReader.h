@@ -34,12 +34,15 @@ public:
 	TrameReader();
 
 	~TrameReader() {
-		debug("DESTURCTION \n\r");
-	};
+		delete[] _byte_buffer;
+		delete[] _trame_buffer;
+	}
 
 	void attach_to_serial(Serial* ser);
 
-	Trame* get_trame();
+	Trame get_trame();
+
+	bool trame_ready() const;
 
 private:
 	void handle_buffer();
@@ -47,7 +50,7 @@ private:
 	void parse_byte(uint8_t byte);
 
 
-	Trame** _trame_buffer;
+	Trame* _trame_buffer;
 	uint8_t _trame_buffer_size;
 	uint8_t _trame_buffer_position;
 	uint8_t* _byte_buffer;

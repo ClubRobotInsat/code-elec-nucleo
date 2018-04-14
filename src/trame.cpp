@@ -5,26 +5,18 @@ Trame::Trame(uint8_t id, uint8_t cmd, uint8_t data_length, uint8_t* data, uint8_
         , _cmd(cmd)
         , _data_length(data_length)
         , _packet_number(packet_number)
-        , _data(data)
-        , _write_callback(Callback<void(int)>(this, &Trame::deleteDataWrite))
-        , _data_to_delete(NULL) {}
-
-Trame::Trame() : _id(0), _cmd(0), _data_length(0), _packet_number(0), _data(nullptr) {}
-
-void Trame::appendData(uint8_t data) {
-	this->_data_length += 1;
-	uint8_t* new_data = new uint8_t[this->_data_length];
-	for(uint8_t i = 0; i < this->_data_length - 1; i++) {
-		new_data[i] = this->_data[i];
+        , _data{0}
+{
+	if (data_length < 16) {
+		memcpy(_data,data,data_length);
 	}
-	delete this->_data;
-	this->_data = new_data;
+	else {
+		error("Invalid trame data length \n\r");
+	}	
+
 }
 
-void Trame::deleteDataWrite(int event) {
-	debug("COUCOCUCOUCOUC ----------- \n\r");
-	delete[] _data_to_delete;
-}
+Trame::Trame() : _id(0), _cmd(0), _data_length(0), _packet_number(0), _data{0} {}
 
 void Trame::sendToCanAck(Serial* pc) {
 	int size = 8;
@@ -39,9 +31,8 @@ void Trame::sendToCanAck(Serial* pc) {
 	tab[5] = 0;
 	tab[6] = 0;
 	tab[7] = 0;
-
-	_data_to_delete = tab;
-	pc->write(tab, size, _write_callback, SERIAL_EVENT_TX_ALL);
+	Buffer* buffer = new Buffer(tab,size);
+	buffer->write(pc);
 }
 
 
@@ -61,9 +52,8 @@ void Trame::sendToCan(Serial* pc) {
 	for(int j = 0; j < _data_length; j++) {
 		tab[8 + j] = _data[j];
 	}
-
-	_data_to_delete = tab;
-	pc->write(tab, size, _write_callback, SERIAL_EVENT_TX_ALL);
+	Buffer* buffer = new Buffer(tab, size);
+	buffer->write(pc);
 }
 
 uint8_t Trame::demultiplexId(uint8_t const& first, uint8_t const& second) {
