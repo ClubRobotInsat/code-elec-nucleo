@@ -1,133 +1,90 @@
-#include "HerkulexBus.h"
-#include "HerkulexConst.h"
-#include "HerkulexManager.h"
-#include "HerkulexServo.h"
-#define NDEBUG 1
 #include "mbed.h"
+#include "QEI.h"
 
-#include "TrameReader.h"
-#include "trame.h"
+#define PPR 4096
 
-using namespace herkulex;
-// set serial port and baudrate, (mbed <-> HerculexX)
-uint8_t id = 0xFD;
+Serial pc(USBTX, USBRX);
 
-Serial pc(USBTX, USBRX, 9600);
-Serial logger(D8, D2, 9600);
-
-herkulex::Manager<6> servo_manager(A0, A1, 2);
-
-void traiterTrameServo(Trame trame_servo);
-
-// Forme un uint16_t avec 2 uint8_t
-uint16_t paquetage(uint8_t msb, uint8_t lsb) {
-	uint16_t resultat = 0x0000;
-	resultat = msb;
-	resultat = resultat << 8;
-	resultat |= lsb;
-	return resultat;
-}
-
-void init_servo() {
-	debug("Initialisation des servos\n\r");
-	Servo* servo_fd = servo_manager.registerNewServo(0xFD);
-	servo_fd->setPosition(512);
-	servo_fd->reboot();
-	Servo* servo_03 = servo_manager.registerNewServo(0x03);
-	servo_03->setPosition(512);
-	servo_03->reboot();
-	servo_manager.sendUpdatesToNextServo();
-	servo_manager.sendUpdatesToNextServo();
-	servo_manager.flushBus();
-	wait_ms(50);
-	servo_manager.sendUpdatesToNextServo();
-	servo_manager.sendUpdatesToNextServo();
-	servo_manager.flushBus();
-}
-
-void afficherTrame(Trame trame) {
-	debug("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
-	uint8_t* data = trame.getData();
-	for(int i = 0; i < trame.getDataLength(); i++) {
-		debug("%#x ", data[i]);
-	}
-	debug("\n\r");
-}
-
-void traiterTrame(Trame trame) {
-	uint8_t id;
-	// Si une trame est dans le buffer on la recupere
-	id = trame.getId();
-	if(id == 1) {
-		debug("Trame can reçue\n\r");
-	} else if(id == 2) {
-		debug("Trame servo reçue\n\r");
-		traiterTrameServo(trame);
-	} else {
-		debug("Id de trame invalide\n\r");
-	}
-}
-
-void traiterTrameServo(Trame trame_servo) {
-	uint8_t id_servo = 0;
-	uint16_t angle = 0;
-
-	// longueur generique d'une trame servo
-	uint8_t longueur_trame_servo = 3;
-
-	// valeurs recuperees dans la trame
-	uint8_t angle_lsb = 0;
-	uint8_t angle_msb = 0;
-
-	// Si la trame fait la bonne taille (3 octets)
-	if(trame_servo.getDataLength() == longueur_trame_servo) {
-		switch(trame_servo.getCmd()) {
-			case 0x05: {
-				// 1er octet = id
-				// octets 2 et 3 = angle (position)
-
-				// Recuperer l'id de la trame
-				id_servo = (trame_servo.getData())[0];
-
-				// Concatener les 2 octets du champs data de la trame
-				angle_msb = (trame_servo.getData())[1];
-				angle_lsb = (trame_servo.getData())[2];
-				angle = paquetage(angle_msb, angle_lsb);
-
-				// Faire tourner le servo concerne
-				herkulex::Servo* servo_commande = servo_manager.getServoById(id_servo);
-				if(servo_commande != nullptr) {
-					debug("Déplacement du servo %#x \n\r", id_servo);
-					servo_commande->setPosition(angle);
-				} else {
-					debug("idServo non trouve\n\r");
-				}
-				break;
+class Motor
+{
+	public:
+		Motor(PinName pin_qei_1, PinName pin_qei_2, PinName pin_motor_control,PinName pin_direction_control,float period_asserv) : 
+			_pulse_wanted(0)
+			,_encoder(pin_qei_1, pin_qei_2, NC, PPR, QEI::X4_ENCODING)
+			, _motor_speed_control(pin_motor_control)
+			, _motor_direction_control(pin_direction_control)
+			, _prev_error(0.0)
+			  {
+				_motor_speed_control.period(0.0001);
+				_motor_speed_control.write(0);
+				_motor_direction_control.write(0);
 			}
 
-			default:
-				debug("Erreur commande trame\n\r");
-				break;
+
+		/* L'angle est en degré entre 0 et 360 !!!! */
+		void set_position(float angle) {
+			// Reduction : 11.6 tours de codeur pour 1 tour de moteur
+			float reduction = 11.6;
+			float pulses = reduction * (float)PPR;
+			_pulse_wanted = static_cast<int>((pulses/360.0)*angle);
 		}
-	} else {
-		debug("Erreur longueur de trame\n\r");
-	}
+
+
+		void asserv() {
+
+			int pulses = _encoder.getPulses();
+			if(_pulse_wanted != pulses) {
+
+				float error = abs(pulses - _pulse_wanted);
+				float delta_error = fabs(error - _prev_error);
+				_prev_error = error;
+
+				float pwm_value = static_cast<float>(error * Kp)/10000.0 + static_cast<float>(delta_error*Kd)/10000.0;
+				debug("Je veut être en %d et je suis en %d => déplacement avec pour consigne %f\n\r",_pulse_wanted,pulses,pwm_value);
+				if (_pulse_wanted < pulses) {
+					debug("Je recule ! \n\r");
+					_motor_speed_control.write(pwm_value);
+					_motor_direction_control.write(1);
+				} else {
+					debug("J'avance  ! \n\r");
+					_motor_speed_control.write(pwm_value);
+					_motor_direction_control.write(0);
+				}
+			}
+			else {
+				debug("Je suis en position ! \n\r");
+				_motor_speed_control.write(0);
+			}
+		}
+
+	private :
+		constexpr static float Kp = 0.125;
+		constexpr static float Kd = 0.08;
+		int32_t _pulse_wanted;
+		QEI _encoder;
+		PwmOut _motor_speed_control;
+		DigitalOut _motor_direction_control;
+		float _prev_error;
+
+};
+
+int i = 0;
+
+Motor motor(D3,D5,D9,D10,0.04);
+void avancer() {
+	//motor.set_position( ((float) (i % 4)) * 90.0);q7
+	motor.set_position( ((float) (i % 2)) * 180.0);
+	i++;
 }
 
-
 int main() {
-	TrameReader reader;
-	init_servo();
-	reader.attach_to_serial(&pc);
-	while(true) {
-		Trame* trame = reader.get_trame();
-		if(trame != nullptr) {
-			traiterTrame(*trame);
-			trame->delete_data();
-			delete trame;
-		}
-		servo_manager.sendUpdatesToNextServo();
-		servo_manager.flushBus();
-		wait_ms(50);
+
+	Ticker av;
+	av.attach(&avancer,3.0);
+
+	while(1) {
+		wait_ms(1);
+		motor.asserv();
 	}
+
 }
