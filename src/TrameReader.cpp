@@ -42,47 +42,39 @@ TrameReader::TrameReader()
         , _data_received(0)
         , _ser(nullptr)
         , _trame_in_build()
+	, _input_buffer{0}
+	, _read_done(Callback<void(int)>(this,&TrameReader::handle_buffer))
 	{
 	_trame_buffer = new Trame[_trame_buffer_size];
 	_byte_buffer = new uint8_t[_byte_buffer_size];
 }
 
 void TrameReader::attach_to_serial(Serial* ser) {
-	ser->attach(Callback<void()>(this, &TrameReader::handle_buffer),Serial::RxIrq);
+	ser->read((uint8_t *)&_input_buffer,16,_read_done,SERIAL_EVENT_RX_ALL);
 	_ser = ser;
 }
 
-void TrameReader::handle_buffer() {
-	debug("Handling serial buffer\n\r");
-	while(_ser->readable()) {
-		debug("STATE : ");
-		print_state(_state);
-		this->parse_byte(_ser->getc());
-		debug("NEW STATE : ");
-		print_state(_state);
+void TrameReader::handle_buffer(int e) {
+	for (uint8_t byte : _input_buffer) {
+		this->parse_byte(byte);
 	}
+	_ser->read((uint8_t *)&_input_buffer,16,_read_done,SERIAL_EVENT_RX_ALL);
 }
 
 void TrameReader::parse_byte(uint8_t byte) {
-	debug("Handling byte(%#x)\n\r", byte);
 	switch(_state) {
 		case TrameReaderState::WAITING_FOR_H1: {
 			if(byte == 0xAC) {
-				debug("H1 RECEIVED | New state :");
 				this->_state = TrameReaderState::WAITING_FOR_H2;
-				print_state(_state);
 			} else {
-				debug("Aborting receive \n\r");
 				_state = TrameReaderState::WAITING_FOR_H1;
 			}
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_H2: {
 			if(byte == 0xDC) {
-				debug("H2 RECEIVED\n\r");
 				_state = TrameReaderState::WAITING_FOR_H3;
 			} else {
-				debug("Aborting receive \n\r");
 				_state = TrameReaderState::WAITING_FOR_H1;
 			}
 			break;
@@ -91,7 +83,6 @@ void TrameReader::parse_byte(uint8_t byte) {
 			if(byte == 0xAB)
 				_state = TrameReaderState::WAITING_FOR_TRAME_TYPE;
 			else {
-				debug("Aborting receive \n\r");
 				_state = TrameReaderState::WAITING_FOR_H1;
 			}
 			break;
@@ -100,7 +91,6 @@ void TrameReader::parse_byte(uint8_t byte) {
 			if(byte == 0xBA)
 				_state = TrameReaderState::WAITING_FOR_NUMPAQUET;
 			else {
-				debug("Aborting receive \n\r");
 				_state = TrameReaderState::WAITING_FOR_H1;
 			}
 			break;
@@ -108,25 +98,21 @@ void TrameReader::parse_byte(uint8_t byte) {
 		case TrameReaderState::WAITING_FOR_NUMPAQUET: {
 			_trame_in_build.num_paquet = byte;
 			_state = TrameReaderState::WAITING_FOR_BYTE_1_ID_CMD;
-			debug("Received packet number\n\r");
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_BYTE_1_ID_CMD: {
 			_trame_in_build.byte_1_id_and_cmd = byte;
 			_state = TrameReaderState::WAITING_FOR_BYTE_2_ID_CMD;
-			debug("Received first byte of id \n\r");
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_BYTE_2_ID_CMD: {
 			_trame_in_build.byte_2_id_and_cmd = byte;
 			_state = TrameReaderState::WAITING_FOR_DATA_LENGTH;
-			debug("Received second byte of id \n\r");
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_DATA_LENGTH: {
 			_trame_in_build.data_length = byte;
 			_state = TrameReaderState::WAITING_FOR_DATA;
-			debug("Received data length \n\r");
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_DATA: {
@@ -134,7 +120,6 @@ void TrameReader::parse_byte(uint8_t byte) {
 			if(not _trame_in_build.data_length == 0 and _data_received < _trame_in_build.data_length - 1) {
 				_byte_buffer[_data_received] = byte;
 				_data_received++;
-				debug("Recevied data. More to come... \n\r");
 				break;
 			}
 			/* On reçois le dernier octet */
@@ -142,16 +127,13 @@ void TrameReader::parse_byte(uint8_t byte) {
 				_byte_buffer[_data_received] = byte;
 				uint8_t id = Trame::demultiplexId(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
 				uint8_t cmd = Trame::demultiplexCmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
-				debug("Received all data, new trame created \n\r");
 				if(_trame_buffer_position < _trame_buffer_size) {
-					debug("Trame successfully read.\n\r");
 					_trame_buffer[_trame_buffer_position] =
 					    Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
 				}
 
 				/* The buffer is full we dump all the Trame */
 				else {
-					debug("Trame buffer is full, dumping ... \n\r");
 					_trame_buffer_position = 0;
 					_trame_buffer[_trame_buffer_position] =
 					    Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);

@@ -32,12 +32,12 @@ public:
 	uint8_t getCmd() const {
 		return _cmd;
 	}
-	uint8_t getPacketNumber() const {
+	uint8_t get_packet_number() const {
 		return _packet_number;
 	}
 
 	// Envoie la trame sur la connexion série.
-	void sendToCanAck(Serial* pc);
+	static void send_ack(uint8_t packet_number, Serial* pc);
 
 	// Envoie la trame a la carte CAN-USB
 	void sendToCan(Serial* pc);

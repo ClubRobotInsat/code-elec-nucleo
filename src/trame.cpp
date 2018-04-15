@@ -18,7 +18,7 @@ Trame::Trame(uint8_t id, uint8_t cmd, uint8_t data_length, uint8_t* data, uint8_
 
 Trame::Trame() : _id(0), _cmd(0), _data_length(0), _packet_number(0), _data{0} {}
 
-void Trame::sendToCanAck(Serial* pc) {
+void Trame::send_ack(uint8_t packet_number,Serial* pc) {
 	int size = 8;
 	uint8_t* tab = new uint8_t[size];
 
@@ -27,7 +27,7 @@ void Trame::sendToCanAck(Serial* pc) {
 	tab[1] = 0xDC;
 	tab[2] = 0xAB;
 	tab[3] = 0xBB;
-	tab[4] = _packet_number;
+	tab[4] = packet_number;
 	tab[5] = 0;
 	tab[6] = 0;
 	tab[7] = 0;

@@ -10,10 +10,9 @@ using namespace herkulex;
 // set serial port and baudrate, (mbed <-> HerculexX)
 uint8_t id = 0xFD;
 
-Serial pc(PC_10, PC_11, 9600);
-Serial logger(D8, D2, 9600);
+Serial pc(PC_6, PC_7, 9600);
 
-herkulex::Manager<6> servo_manager(A0, A1, 2);
+//herkulex::Manager<6> servo_manager(A0, A1, 2);
 
 void traiterTrameServo(Trame trame_servo);
 
@@ -27,6 +26,7 @@ uint16_t paquetage(uint8_t msb, uint8_t lsb) {
 }
 
 void init_servo() {
+	/*
 	debug("Initialisation des servos\n\r");
 	Servo* servo_fd = servo_manager.registerNewServo(0xFD);
 	servo_fd->setPosition(512);
@@ -41,6 +41,7 @@ void init_servo() {
 	servo_manager.sendUpdatesToNextServo();
 	servo_manager.sendUpdatesToNextServo();
 	servo_manager.flushBus();
+	*/
 }
 
 void afficherTrame(Trame trame) {
@@ -93,13 +94,14 @@ void traiterTrameServo(Trame trame_servo) {
 				angle = paquetage(angle_msb, angle_lsb);
 
 				// Faire tourner le servo concerne
-				herkulex::Servo* servo_commande = servo_manager.getServoById(id_servo);
+				/*herkulex::Servo* servo_commande = servo_manager.getServoById(id_servo);
 				if(servo_commande != nullptr) {
 					debug("Déplacement du servo %#x \n\r", id_servo);
 					servo_commande->setPosition(angle);
 				} else {
 					debug("idServo non trouve\n\r");
 				}
+				*/
 				break;
 			}
 
@@ -113,20 +115,26 @@ void traiterTrameServo(Trame trame_servo) {
 }
 
 
+uint8_t test[8] = {1,2,3,4,5,6,7,8};
+
 int main() {
-	printf("Start\n\r");
+	printf("\n\rStart\n\r");
 	TrameReader reader;
 	init_servo();
 	reader.attach_to_serial(&pc);
 	while(true) {
 		if (reader.trame_ready()) {
-		Trame trame = reader.get_trame();
-			trame->sendToCanAck(&pc);
+			Trame trame = reader.get_trame();
 			afficherTrame(trame);
-			traiterTrame(trame);
+			//traiterTrame(trame);
+			//	printf("sending ack\n\r");
+			Trame::send_ack(trame.get_packet_number(),&pc);
+			//	printf("ack sent\n\r");
 		}
+		//printf("Send\n\r");
+		//pc.write((uint8_t *)&test,8,0,0);
 		//servo_manager.sendUpdatesToNextServo();
 		//servo_manager.flushBus();
-		wait_ms(50);
+		wait_ms(150);
 	}
 }

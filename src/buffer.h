@@ -6,6 +6,7 @@ class Buffer {
 	public :
 		Buffer(uint8_t* data, uint8_t size) : _data(data) , _size(size), _destroy(Callback<void(int)>(this,&Buffer::destroy)) {}
 		~Buffer() {
+			printf("Call ~Buffer\n\r");
 			delete[] _data;
 		}
 
@@ -14,12 +15,10 @@ class Buffer {
 		}
 
 		void destroy(int) {
-			printf("Destruction d'un buffer\n\r");
 			delete this;
 		}
 
 		void write(Serial* ser) {
-
 			ser->write(_data,_size,_destroy,SERIAL_EVENT_TX_ALL);
 		}
 

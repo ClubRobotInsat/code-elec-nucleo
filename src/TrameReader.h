@@ -19,6 +19,7 @@ enum class TrameReaderState {
 void print_state(TrameReaderState state);
 
 /* Une machine à état qui lis des trames depuis une connexion série */
+/* TODO : Utiliser un buffer circulaire */
 class TrameReader {
 	/* Contiens une trame en cours de construction */
 	class WIPTrame {
@@ -45,7 +46,7 @@ public:
 	bool trame_ready() const;
 
 private:
-	void handle_buffer();
+	void handle_buffer(int e);
 
 	void parse_byte(uint8_t byte);
 
@@ -59,5 +60,7 @@ private:
 	uint8_t _data_received;
 	Serial* _ser;
 	WIPTrame _trame_in_build;
+	uint8_t _input_buffer[16];
+	event_callback_t _read_done;
 };
 #endif
