@@ -119,13 +119,15 @@ uint8_t test[8] = {1,2,3,4,5,6,7,8};
 
 int main() {
 	printf("\n\rStart\n\r");
+	pc.set_dma_usage_tx(DMA_USAGE_OPPORTUNISTIC);
+	pc.set_dma_usage_rx(DMA_USAGE_OPPORTUNISTIC);
 	TrameReader reader;
 	init_servo();
 	reader.attach_to_serial(&pc);
 	while(true) {
 		if (reader.trame_ready()) {
 			Trame trame = reader.get_trame();
-			afficherTrame(trame);
+			//afficherTrame(trame);
 			//traiterTrame(trame);
 			//	printf("sending ack\n\r");
 			Trame::send_ack(trame.get_packet_number(),&pc);

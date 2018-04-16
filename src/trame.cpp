@@ -32,11 +32,11 @@ void Trame::send_ack(uint8_t packet_number,Serial* pc) {
 	tab[6] = 0;
 	tab[7] = 0;
 
-	printf("Envoi du ack : ");
+	//printf("Envoi du ack : ");
 	for (uint8_t k; k < 8; k++) {
-		printf("%#x ",tab[k]);
+		//printf("%#x ",tab[k]);
 	}
-	printf("\n\r");
+	//printf("\n\r");
 
 	Buffer* buffer = new Buffer(tab,size);
 	buffer->write(pc);
