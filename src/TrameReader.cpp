@@ -50,7 +50,7 @@ TrameReader::TrameReader()
 }
 
 void TrameReader::attach_to_serial(Serial* ser) {
-	ser->read((uint8_t *)&_input_buffer,16,_read_done,SERIAL_EVENT_RX_ALL);
+	ser->read((uint8_t *)&_input_buffer,READ_BUFFER_SIZE,_read_done,SERIAL_EVENT_RX_ALL);
 	_ser = ser;
 }
 
@@ -58,7 +58,7 @@ void TrameReader::handle_buffer(int e) {
 	for (uint8_t byte : _input_buffer) {
 		this->parse_byte(byte);
 	}
-	_ser->read((uint8_t *)&_input_buffer,16,_read_done,SERIAL_EVENT_RX_ALL);
+	_ser->read((uint8_t *)&_input_buffer,READ_BUFFER_SIZE,_read_done,SERIAL_EVENT_RX_ALL);
 }
 
 void TrameReader::parse_byte(uint8_t byte) {

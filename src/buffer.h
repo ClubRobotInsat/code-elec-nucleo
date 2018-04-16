@@ -6,7 +6,6 @@ class Buffer {
 	public :
 		Buffer(uint8_t* data, uint8_t size) : _data(data) , _size(size), _destroy(Callback<void(int)>(this,&Buffer::destroy)) {}
 		~Buffer() {
-			printf("Call ~Buffer\n\r");
 			delete[] _data;
 		}
 

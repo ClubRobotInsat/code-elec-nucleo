@@ -45,7 +45,7 @@ void init_servo() {
 }
 
 void afficherTrame(Trame trame) {
-	printf("Trame reçue : id %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.getCmd(), trame.getDataLength());
+	printf("Trame reçue : id %#x | n° %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.get_packet_number(), trame.getCmd(), trame.getDataLength());
 	uint8_t* data = trame.getData();
 	for(int i = 0; i < trame.getDataLength(); i++) {
 		printf("%#x ", data[i]);
@@ -135,6 +135,6 @@ int main() {
 		//pc.write((uint8_t *)&test,8,0,0);
 		//servo_manager.sendUpdatesToNextServo();
 		//servo_manager.flushBus();
-		wait_ms(150);
+		//	wait_ms(150);
 	}
 }

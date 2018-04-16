@@ -4,6 +4,9 @@
 
 #ifndef DEF_TRAME_READER
 #define DEF_TRAME_READER
+
+#define READ_BUFFER_SIZE 8
+
 enum class TrameReaderState {
 	WAITING_FOR_H1,
 	WAITING_FOR_H2,
@@ -60,7 +63,7 @@ private:
 	uint8_t _data_received;
 	Serial* _ser;
 	WIPTrame _trame_in_build;
-	uint8_t _input_buffer[16];
+	uint8_t _input_buffer[READ_BUFFER_SIZE];
 	event_callback_t _read_done;
 };
 #endif
