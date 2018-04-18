@@ -88,6 +88,17 @@ On spécifie un profil de compilation qui fait plusieurs choses :
 * il active les symboles de debug pour que gdb ait des choses à nous montrer
 * il active le standard C++11
 
+#### Compilation pour la coupe
+
+```
+mbed compile --profile release.json -DNDEBUG
+```
+
+Explication :
+
+* `--profile release.json` profil de compilation (arguments donnés au compilateur) qui active les optimisations et retire les symboles de debug
+* `-DNDEBUG` definit la variable `NDEBUG` qui sera donné au préprocesseur C et permet de désactiver l'affichage des `debug()`.
+
 #### Openocd
 
 Il faut maintenant brancher la carte au pc, et toujours dans le dossier cloné plus tôt lancer `openocd` dans un terminal séparé.
