@@ -26,7 +26,7 @@ namespace herkulex {
 
 			// On cree un nouveau servo, que l'on stocke
 			// NEW -> DELETE dans ~Manager
-			_servos[_nb_reg_servos - 1] = new Servo(id);
+			_servos[_nb_reg_servos - 1] = new Servo(id, &_bus);
 
 			//debug("Registering : ID %#x (%d/%d) \n\r", id, _nb_reg_servos, N_SERVOS);
 

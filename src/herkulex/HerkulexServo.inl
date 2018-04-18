@@ -3,7 +3,7 @@
 
 namespace herkulex {
 
-	Servo::Servo(uint8_t id)
+	Servo::Servo(uint8_t id, Bus* bus)
 	        : _id(id)
 	        , _status_error(0)
 	        , _status_detail(0)
@@ -14,6 +14,7 @@ namespace herkulex {
 	        , _moving_led_color(constants::LedColor::Blue)
 	        , _position(0)
 	        , _desired_position(0)
+		, _bus(bus)
 
 	{}
 
@@ -162,6 +163,7 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Servo::setPosition(uint16_t newPosition) {
+		_bus->sendSJOGMsg(_id, constants::jog_default_playtime, newPosition, constants::JOG_CMD::PositionMode | 0x04);
 		_desired_position = newPosition;
 	}
 
@@ -173,6 +175,11 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Servo::enableTorque(bool value) {
+		if (value) {
+		_bus->sendRAMWriteMsg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueOn);
+		}else {
+		_bus->sendRAMWriteMsg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueFree);
+		}
 		_desired_torque_on = value;
 	}
 
@@ -199,6 +206,7 @@ namespace herkulex {
 	}
 
 	void Servo::reboot() {
+		_bus->sendRebootMsg(_id);
 		_should_reboot = true;
 	}
 }

@@ -14,7 +14,7 @@ namespace herkulex {
 		friend class Manager;
 
 		/* You should never call this constructor directly, but call Manager::makeNewServo */
-		explicit inline Servo(uint8_t id);
+		explicit inline Servo(uint8_t id, Bus* bus);
 
 		virtual inline ~Servo();
 
@@ -189,6 +189,8 @@ namespace herkulex {
 
 		uint16_t _position;
 		uint16_t _desired_position;
+
+		Bus* _bus;
 
 	};
 };
