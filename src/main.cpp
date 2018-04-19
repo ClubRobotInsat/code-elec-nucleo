@@ -10,7 +10,7 @@ using namespace herkulex;
 // set serial port and baudrate, (mbed <-> HerculexX)
 uint8_t id = 0xFD;
 
-Serial pc(PC_6, PC_7, 115200);
+Serial pc(USBTX, USBRX, 921600);
 
 herkulex::Manager<6> servo_manager(A0, A1, 2);
 
@@ -32,7 +32,7 @@ void init_servo() {
 	Servo* servo_03 = servo_manager.registerNewServo(0x03);
 	servo_03->reboot();
 	servo_manager.flushBus();
-	wait_ms(50);
+	wait_ms(250);
 	servo_03->setPosition(512);
 	servo_fd->setPosition(512);
 	servo_manager.flushBus();
@@ -75,7 +75,7 @@ void traiterTrameServo(Trame trame_servo) {
 	// Si la trame fait la bonne taille (3 octets)
 	if(trame_servo.getDataLength() == longueur_trame_servo) {
 		switch(trame_servo.getCmd()) {
-			case 0x05: {
+			case 0x01: {
 				// 1er octet = id
 				// octets 2 et 3 = angle (position)
 
@@ -120,15 +120,9 @@ int main() {
 	while(true) {
 		if (reader.trame_ready()) {
 			Trame trame = reader.get_trame();
-			//afficherTrame(trame);
 			traiterTrame(trame);
-			//	printf("sending ack\n\r");
 			Trame::send_ack(trame.get_packet_number(),&pc);
-			//	printf("ack sent\n\r");
 		}
-		//printf("Send\n\r");
-		//pc.write((uint8_t *)&test,8,0,0);
 		servo_manager.flushBus();
-		wait_ms(1);
 	}
 }

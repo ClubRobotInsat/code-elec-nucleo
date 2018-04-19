@@ -233,6 +233,8 @@ namespace herkulex {
 
 		uint8_t _expected_reply_id;
 		constants::CMD::fromServo::fromServoEnum _expected_reply_cmd;
+
+		uint8_t* _data_written;
 	};
 }
 

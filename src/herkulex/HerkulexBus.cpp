@@ -18,7 +18,9 @@ namespace herkulex {
 	        , _write_callback(Callback<void(int)>(this, &Bus::cbWriteDone))
 	        , _buffer_write_data()
 	        , _buffer_write_length()
-	        , _total_write_length(0) {
+	        , _total_write_length(0)
+       		, _data_written(nullptr)	
+	{
 		_ticker_flush.attach(Callback<void()>(this, &Bus::flushOneMessage), flush_frequency);
 	}
 
@@ -40,7 +42,6 @@ namespace herkulex {
 		uint8_t* message;
 		_buffer_write_data.pop(message);
 		_ser.write(message, message_length, _write_callback, SERIAL_EVENT_TX_ALL);
-		;
 		_write_done = false;
 		_total_write_length -= message_length;
 	}
@@ -54,7 +55,6 @@ namespace herkulex {
 		}
 		uint8_t* message = new uint8_t[_total_write_length];
 		uint32_t index = 0;
-		//debug("Flushing\n\r");
 		while(!_buffer_write_length.empty()) {
 			uint8_t length;
 			uint8_t* data;
@@ -63,21 +63,19 @@ namespace herkulex {
 			//debug("Sending : (%d) [", length);
 			for(uint8_t i = 0; i < length; i++) {
 				message[index + i] = data[i];
-				//debug("%#x ", message[index + i]);
 			}
 			delete data;
-			//debug("] in the next flush\n\r");
 			index += length;
 		}
-		//debug("Flushing : %d bytes \n\r", _total_write_length);
 		_ser.write(message, _total_write_length, _write_callback, SERIAL_EVENT_TX_ALL);
 		_write_done = false;
 		_total_write_length = 0;
+		_data_written = message;
 	}
 
 	void Bus::cbWriteDone(int e) {
-		//debug("Write done\n\r");
 		_write_done = true;
+		delete[] _data_written;
 	}
 
 	bool Bus::needFlush() {
