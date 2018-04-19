@@ -31,6 +31,13 @@ class Motor
 			_pulse_wanted = static_cast<int>((pulses/360.0)*angle);
 		}
 
+		void turn_N(int nb_turns)
+		{
+			float reduction = 11.6;
+			float pulses = reduction * (float)PPR*(float)nb_turns;
+			_pulse_wanted += static_cast<int>(pulses);
+		}
+
 		static void afficher_coeff() {
 			printf("Kp : %f | Ki : %f | Kd : %f\n\r",Kp*10000,Ki*10000,Kd*10000);
 		}
@@ -48,7 +55,7 @@ class Motor
 
 
 				// /!\ PWM >= MIN_PWM sinon le moteur ne tourne pas
-				float pwm_value = static_cast<float>(error * Kp) + static_cast<float>(delta_error*Kd) + static_cast<float>(_error_sum*Ki);
+				float pwm_value = static_cast<float>(error * Kp) + static_cast<float>(_error_sum*Ki) + static_cast<float>(delta_error*Kd) ;
 
 				if(pwm_value < MIN_PWM)
 				{
@@ -64,8 +71,6 @@ class Motor
 					_motor_speed_control.write(pwm_value);
 					_motor_direction_control.write(0);
 				}
-
-
 				
 			}
 			else {
@@ -82,7 +87,6 @@ class Motor
 
 	private :
 
-
 		int32_t _pulse_wanted;
 		QEI _encoder;
 		PwmOut _motor_speed_control;
@@ -93,10 +97,13 @@ class Motor
 };
 
 
-float Motor::Kp = 0.157/10000;
-float Motor::Ki = 0.006471/10000;
-float Motor::Kd = 0.005000/10000;
+// float Motor::Kp = 0.157/10000;
+// float Motor::Ki = 0.006471/10000;
+// float Motor::Kd = 0.005000/10000;
 
+float Motor::Kp = 0.200/10000;
+float Motor::Ki = 0.000/10000;
+float Motor::Kd = 0.000/10000;
 
 int i = 0;
 
@@ -123,11 +130,23 @@ void update_pid() {
 	float ki = aki.read() * max_ki;
 	float kd = akd.read() * max_kd;
 
-	Motor::Kp = kp;
-	Motor::Ki = ki;
-	Motor::Kd = kd;
+	if(kp < 0.0009/10000)
+		kp = 0.0;
+	if(ki < 0.0009/10000)
+		ki = 0.0;
+	if(kd < 0.0009/10000)
+		kd = 0.0;
 
-	//Motor::afficher_coeff();
+	//Motor::Kp = kp;
+	//Motor::Ki = ki;
+	//Motor::Kd = kd;
+
+	Motor::afficher_coeff();
+}
+
+void test_turn_N()
+{
+	motor.turn_N(-1);
 }
 
 int main() {
@@ -135,10 +154,13 @@ int main() {
 	Ticker av;
 	//av.attach(&avancer,4.0);
 
+	Ticker turn;
+	turn.attach(&test_turn_N,5.0);
+
 	while(1) {
 		wait_ms(1);
 		motor.asserv();
-		//update_pid();
+		update_pid();
 	}
 
 }
