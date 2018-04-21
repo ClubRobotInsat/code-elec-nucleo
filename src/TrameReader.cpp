@@ -42,23 +42,22 @@ TrameReader::TrameReader()
         , _data_received(0)
         , _ser(nullptr)
         , _trame_in_build()
-	, _input_buffer{0}
-	, _read_done(Callback<void(int)>(this,&TrameReader::handle_buffer))
-	{
+        , _input_buffer{0}
+        , _read_done(Callback<void(int)>(this, &TrameReader::handle_buffer)) {
 	_trame_buffer = new Trame[_trame_buffer_size];
 	_byte_buffer = new uint8_t[_byte_buffer_size];
 }
 
 void TrameReader::attach_to_serial(Serial* ser) {
-	ser->read((uint8_t *)&_input_buffer,READ_BUFFER_SIZE,_read_done,SERIAL_EVENT_RX_ALL);
+	ser->read((uint8_t*)&_input_buffer, READ_BUFFER_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
 	_ser = ser;
 }
 
 void TrameReader::handle_buffer(int e) {
-	for (uint8_t byte : _input_buffer) {
+	for(uint8_t byte : _input_buffer) {
 		this->parse_byte(byte);
 	}
-	_ser->read((uint8_t *)&_input_buffer,READ_BUFFER_SIZE,_read_done,SERIAL_EVENT_RX_ALL);
+	_ser->read((uint8_t*)&_input_buffer, READ_BUFFER_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
 }
 
 void TrameReader::parse_byte(uint8_t byte) {
@@ -162,5 +161,5 @@ Trame TrameReader::get_trame() {
 	}
 }
 bool TrameReader::trame_ready() const {
-		return _trame_buffer_position > 0;
-	}
+	return _trame_buffer_position > 0;
+}

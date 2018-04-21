@@ -191,7 +191,6 @@ namespace herkulex {
 		uint16_t _desired_position;
 
 		Bus* _bus;
-
 	};
 };
 

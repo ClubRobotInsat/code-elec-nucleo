@@ -6,14 +6,7 @@
 class Robot {
 
 
-
-
-	private :
-
-
-
-
-
+private:
 }
 
 

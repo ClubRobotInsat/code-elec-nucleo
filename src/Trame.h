@@ -1,8 +1,8 @@
 #ifndef TRAME_H
 #define TRAME_H
 
+#include "Buffer.h"
 #include "mbed.h"
-#include "buffer.h"
 
 #define BITS_CMD_TRAME 4
 #define BITS_ID_TRAME 7

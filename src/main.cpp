@@ -2,8 +2,8 @@
 #include "HerkulexConst.h"
 #include "HerkulexManager.h"
 #include "HerkulexServo.h"
+#include "Trame.h"
 #include "TrameReader.h"
-#include "trame.h"
 #include "mbed.h"
 
 using namespace herkulex;
@@ -39,7 +39,11 @@ void init_servo() {
 }
 
 void afficherTrame(Trame trame) {
-	printf("Trame reçue : id %#x | n° %#x | cmd %#x | data_length %#x | data ", trame.getId(), trame.get_packet_number(), trame.getCmd(), trame.getDataLength());
+	printf("Trame reçue : id %#x | n° %#x | cmd %#x | data_length %#x | data ",
+	       trame.getId(),
+	       trame.get_packet_number(),
+	       trame.getCmd(),
+	       trame.getDataLength());
 	uint8_t* data = trame.getData();
 	for(int i = 0; i < trame.getDataLength(); i++) {
 		printf("%#x ", data[i]);
@@ -108,7 +112,7 @@ void traiterTrameServo(Trame trame_servo) {
 }
 
 
-uint8_t test[8] = {1,2,3,4,5,6,7,8};
+uint8_t test[8] = {1, 2, 3, 4, 5, 6, 7, 8};
 
 int main() {
 	printf("\n\rStart\n\r");
@@ -118,10 +122,10 @@ int main() {
 	init_servo();
 	reader.attach_to_serial(&pc);
 	while(true) {
-		if (reader.trame_ready()) {
+		if(reader.trame_ready()) {
 			Trame trame = reader.get_trame();
 			traiterTrame(trame);
-			Trame::send_ack(trame.get_packet_number(),&pc);
+			Trame::send_ack(trame.get_packet_number(), &pc);
 		}
 		servo_manager.flushBus();
 	}

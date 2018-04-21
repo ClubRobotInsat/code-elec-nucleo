@@ -54,12 +54,10 @@ namespace herkulex {
 		void sendUpdatesToNextServo();
 
 	private:
-
 		void cbFuncUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail);
 		void cbFuncUpdateServo(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0); // Checker l'addresse lue dans le Ack coté bus
 
 		inline void updateServo(uint8_t id);
-
 	};
 }
 

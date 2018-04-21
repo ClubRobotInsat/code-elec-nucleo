@@ -1,24 +1,17 @@
-#include "trame.h"
+#include "Trame.h"
 
 Trame::Trame(uint8_t id, uint8_t cmd, uint8_t data_length, uint8_t* data, uint8_t packet_number)
-        : _id(id)
-        , _cmd(cmd)
-        , _data_length(data_length)
-        , _packet_number(packet_number)
-        , _data{0}
-{
-	if (data_length < 16) {
-		memcpy(_data,data,data_length);
-	}
-	else {
+        : _id(id), _cmd(cmd), _data_length(data_length), _packet_number(packet_number), _data{0} {
+	if(data_length < 16) {
+		memcpy(_data, data, data_length);
+	} else {
 		error("Invalid trame data length \n\r");
-	}	
-
+	}
 }
 
 Trame::Trame() : _id(0), _cmd(0), _data_length(0), _packet_number(0), _data{0} {}
 
-void Trame::send_ack(uint8_t packet_number,Serial* pc) {
+void Trame::send_ack(uint8_t packet_number, Serial* pc) {
 	int size = 8;
 	uint8_t* tab = new uint8_t[size];
 
@@ -32,13 +25,13 @@ void Trame::send_ack(uint8_t packet_number,Serial* pc) {
 	tab[6] = 0;
 	tab[7] = 0;
 
-	//printf("Envoi du ack : ");
-	for (uint8_t k; k < 8; k++) {
-		//printf("%#x ",tab[k]);
+	// printf("Envoi du ack : ");
+	for(uint8_t k; k < 8; k++) {
+		// printf("%#x ",tab[k]);
 	}
-	//printf("\n\r");
+	// printf("\n\r");
 
-	Buffer* buffer = new Buffer(tab,size);
+	Buffer* buffer = new Buffer(tab, size);
 	buffer->write(pc);
 }
 
@@ -75,10 +68,9 @@ void Trame::send_pong(uint8_t id, Serial* pc) {
 	tab[5] = Trame::multiplexCmd(id, 0x00);
 	tab[6] = 0x01;
 	tab[7] = 0xAA;
-	
-	Buffer* buffer = new Buffer(tab,8);	
-	buffer->write(pc);
 
+	Buffer* buffer = new Buffer(tab, 8);
+	buffer->write(pc);
 }
 
 bool Trame::is_ping() const {
@@ -104,4 +96,3 @@ uint8_t Trame::multiplexCmd(uint8_t id, uint8_t cmd) {
 	uint16_t muxedVal = (uint16_t(id) << BITS_CMD_TRAME) | uint16_t(cmd);
 	return ((muxedVal >> 8) & 0xFF);
 }
-

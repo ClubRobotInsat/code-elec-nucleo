@@ -14,7 +14,7 @@ namespace herkulex {
 	        , _moving_led_color(constants::LedColor::Blue)
 	        , _position(0)
 	        , _desired_position(0)
-		, _bus(bus)
+	        , _bus(bus)
 
 	{}
 
@@ -175,10 +175,10 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Servo::enableTorque(bool value) {
-		if (value) {
-		_bus->sendRAMWriteMsg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueOn);
-		}else {
-		_bus->sendRAMWriteMsg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueFree);
+		if(value) {
+			_bus->sendRAMWriteMsg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueOn);
+		} else {
+			_bus->sendRAMWriteMsg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueFree);
 		}
 		_desired_torque_on = value;
 	}
