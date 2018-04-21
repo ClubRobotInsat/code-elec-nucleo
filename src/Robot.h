@@ -8,8 +8,11 @@
 #include <mbed.h>
 
 class Robot {
-
+public:
 	Robot();
+
+	/* Initialise la partie mécanique du robot */
+	void initialize_meca();
 
 	/* Appelle toutes les fonctions pour gérer le robot */
 	void manage_robot();
