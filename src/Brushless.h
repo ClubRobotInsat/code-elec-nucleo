@@ -15,7 +15,7 @@ public:
 	void set_brushless_state(BrushlessState state);
 
 private:
-	Servo _motor;
+	brushless::Servo _motor;
 };
 
 #endif
