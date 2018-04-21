@@ -36,7 +36,7 @@ void Trame::send_ack(uint8_t packet_number, Serial* pc) {
 }
 
 
-void Trame::sendToCan(Serial* pc) {
+void Trame::send_to_can(Serial* pc) {
 	int size = 8 + _data_length;
 	uint8_t* tab = new uint8_t[size];
 
@@ -46,8 +46,8 @@ void Trame::sendToCan(Serial* pc) {
 	tab[2] = 0xAB;
 	tab[3] = 0xBA;
 	tab[4] = _packet_number; // FIXME
-	tab[5] = Trame::multiplexId(_id, _cmd);
-	tab[6] = Trame::multiplexCmd(_id, _cmd);
+	tab[5] = Trame::multiplex_id(_id, _cmd);
+	tab[6] = Trame::multiplex_cmd(_id, _cmd);
 	tab[7] = _data_length;
 	for(int j = 0; j < _data_length; j++) {
 		tab[8 + j] = _data[j];
@@ -64,8 +64,8 @@ void Trame::send_pong(uint8_t id, Serial* pc) {
 	tab[1] = 0xDC;
 	tab[2] = 0xAB;
 	tab[3] = 0xBA;
-	tab[4] = Trame::multiplexId(id, 0x00);
-	tab[5] = Trame::multiplexCmd(id, 0x00);
+	tab[4] = Trame::multiplex_id(id, 0x00);
+	tab[5] = Trame::multiplex_cmd(id, 0x00);
 	tab[6] = 0x01;
 	tab[7] = 0xAA;
 
@@ -77,22 +77,22 @@ bool Trame::is_ping() const {
 	return _data_length == 1 && _cmd == 0x00 && _data[0] == 0x55;
 }
 
-uint8_t Trame::demultiplexId(uint8_t const& first, uint8_t const& second) {
+uint8_t Trame::demultiplex_id(uint8_t const& first, uint8_t const& second) {
 	uint16_t muxedVal = (uint16_t(second) << 8) | uint16_t(first);
 	return uint8_t((muxedVal >> BITS_CMD_TRAME) & ~(1 << BITS_ID_TRAME));
 }
 
-uint8_t Trame::demultiplexCmd(uint8_t const& first, uint8_t const& second) {
+uint8_t Trame::demultiplex_cmd(uint8_t const& first, uint8_t const& second) {
 	uint16_t muxedVal = (uint16_t(second) << 8) | uint16_t(first);
 	return uint8_t(muxedVal & 0xF);
 }
 
-uint8_t Trame::multiplexId(uint8_t id, uint8_t cmd) {
+uint8_t Trame::multiplex_id(uint8_t id, uint8_t cmd) {
 	uint16_t muxedVal = (uint16_t(id) << BITS_CMD_TRAME) | uint16_t(cmd);
 	return (muxedVal & 0xFF);
 }
 
-uint8_t Trame::multiplexCmd(uint8_t id, uint8_t cmd) {
+uint8_t Trame::multiplex_cmd(uint8_t id, uint8_t cmd) {
 	uint16_t muxedVal = (uint16_t(id) << BITS_CMD_TRAME) | uint16_t(cmd);
 	return ((muxedVal >> 8) & 0xFF);
 }

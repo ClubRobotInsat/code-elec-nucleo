@@ -124,8 +124,8 @@ void TrameReader::parse_byte(uint8_t byte) {
 			/* On reçois le dernier octet */
 			else {
 				_byte_buffer[_data_received] = byte;
-				uint8_t id = Trame::demultiplexId(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
-				uint8_t cmd = Trame::demultiplexCmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
+				uint8_t id = Trame::demultiplex_id(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
+				uint8_t cmd = Trame::demultiplex_cmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
 				if(_trame_buffer_position < _trame_buffer_size) {
 					_trame_buffer[_trame_buffer_position] =
 					    Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
