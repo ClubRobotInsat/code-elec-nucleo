@@ -33,13 +33,13 @@ namespace herkulex {
 
 
 	public:
-		void sendDebugMessage();
+		void send_debug_message();
 
 		/*
 		 * Return a pointer to a Servo if there is a registered Servo with the specified id.
 		 * Otherwise return nullptr.
 		 */
-		Servo* getServoById(uint8_t id);
+		Servo* get_servo_by_id(uint8_t id);
 
 		explicit Manager(PinName txPin, PinName rxPin, float _refreshPeriod);
 		virtual ~Manager();
@@ -47,13 +47,13 @@ namespace herkulex {
 		/*
 		 * Create a new Servo with the given id. If there is alreay N_SERVOS registered on this manager, return nullptr.
 		 */
-		Servo* registerNewServo(uint8_t id);
+		Servo* register_new_servo(uint8_t id);
 
-		void flushBus();
+		void flush_bus();
 
-		void sendUpdatesToNextServo();
 
 	private:
+		void sendUpdatesToNextServo();
 		void cbFuncUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail);
 		void cbFuncUpdateServo(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0); // Checker l'addresse lue dans le Ack coté bus
 

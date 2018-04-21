@@ -17,7 +17,7 @@ namespace herkulex {
 	}
 
 	template <uint8_t N_SERVOS>
-	Servo* Manager<N_SERVOS>::registerNewServo(uint8_t id) {
+	Servo* Manager<N_SERVOS>::register_new_servo(uint8_t id) {
 		if(_nb_reg_servos < N_SERVOS) {
 
 			// On incremente le nombre de servos
@@ -128,7 +128,7 @@ namespace herkulex {
 	}
 
 	template <uint8_t N_SERVOS>
-	Servo* Manager<N_SERVOS>::getServoById(uint8_t id) {
+	Servo* Manager<N_SERVOS>::get_servo_by_id(uint8_t id) {
 		for(uint8_t i = 0; i < _nb_reg_servos; i++) {
 			if(_servos[i]->_id == id) {
 				return _servos[i];
@@ -138,12 +138,12 @@ namespace herkulex {
 	}
 
 	template <uint8_t N_SERVOS>
-	void Manager<N_SERVOS>::sendDebugMessage() {
+	void Manager<N_SERVOS>::send_debug_message() {
 		_bus.sendDebugMessage();
 	}
 
 	template <uint8_t N_SERVOS>
-	void Manager<N_SERVOS>::flushBus() {
+	void Manager<N_SERVOS>::flush_bus() {
 		_bus.flush();
 	}
 }
