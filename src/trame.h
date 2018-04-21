@@ -39,8 +39,14 @@ public:
 	// Envoie la trame sur la connexion série.
 	static void send_ack(uint8_t packet_number, Serial* pc);
 
+	// Envoie un pong pour l'ID `id`.
+	static void send_pong(uint8_t id, Serial* pc);
+
 	// Envoie la trame a la carte CAN-USB
 	void sendToCan(Serial* pc);
+
+	// Renvoie vrai si la trame est un ping.
+	bool is_ping() const;
 
 	static uint8_t demultiplexId(uint8_t const& first, uint8_t const& second);
 

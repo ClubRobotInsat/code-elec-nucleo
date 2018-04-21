@@ -52,7 +52,7 @@ void Trame::sendToCan(Serial* pc) {
 	tab[1] = 0xDC;
 	tab[2] = 0xAB;
 	tab[3] = 0xBA;
-	tab[4] = _packet_number;
+	tab[4] = _packet_number; // FIXME
 	tab[5] = Trame::multiplexId(_id, _cmd);
 	tab[6] = Trame::multiplexCmd(_id, _cmd);
 	tab[7] = _data_length;
@@ -61,6 +61,28 @@ void Trame::sendToCan(Serial* pc) {
 	}
 	Buffer* buffer = new Buffer(tab, size);
 	buffer->write(pc);
+}
+
+void Trame::send_pong(uint8_t id, Serial* pc) {
+
+	uint8_t* tab = new uint8_t[8];
+
+	tab[0] = 0xAC;
+	tab[1] = 0xDC;
+	tab[2] = 0xAB;
+	tab[3] = 0xBA;
+	tab[4] = Trame::multiplexId(id, 0x00);
+	tab[5] = Trame::multiplexCmd(id, 0x00);
+	tab[6] = 0x01;
+	tab[7] = 0xAA;
+	
+	Buffer* buffer = new Buffer(tab,8);	
+	buffer->write(pc);
+
+}
+
+bool Trame::is_ping() const {
+	return _data_length == 1 && _cmd == 0x00 && _data[0] == 0x55;
 }
 
 uint8_t Trame::demultiplexId(uint8_t const& first, uint8_t const& second) {
@@ -82,3 +104,4 @@ uint8_t Trame::multiplexCmd(uint8_t id, uint8_t cmd) {
 	uint16_t muxedVal = (uint16_t(id) << BITS_CMD_TRAME) | uint16_t(cmd);
 	return ((muxedVal >> 8) & 0xFF);
 }
+
