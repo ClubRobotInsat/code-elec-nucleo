@@ -119,10 +119,10 @@ void Robot::handle_trame_motor(Trame trame) {
 				uint8_t direction = trame.get_data()[2];
 				switch(motor_id) {
 					case 0x01:
-						_motor_elevator_left.turn_n(revolution);
+						_motor_elevator_left.turn_n(revolution, static_cast<Direction>(direction));
 						break;
 					case 0x02:
-						_motor_elevator_right.turn_n(revolution);
+						_motor_elevator_right.turn_n(revolution, static_cast<Direction>(direction));
 						break;
 					default:
 						break;

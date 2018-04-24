@@ -14,17 +14,25 @@ Motor::Motor(PinName pin_qei_1, PinName pin_qei_2, PinName pin_motor_control, Pi
 }
 
 /* L'angle est en degré entre 0 et 360 !!!! */
-void Motor::set_position(float angle) {
+void Motor::set_position(float angle, Direction dir) {
 	// Reduction : 11.6 tours de codeur pour 1 tour de moteur
 	float reduction = 11.6;
 	float pulses = reduction * (float)PPR;
-	_pulse_wanted = static_cast<int>((pulses / 360.0) * angle);
+	if(dir == Direction::Clockwise) {
+		_pulse_wanted = static_cast<int>((pulses / 360.0) * angle);
+	} else {
+		_pulse_wanted = -static_cast<int>((pulses / 360.0) * angle);
+	}
 }
 
-void Motor::turn_n(int nb_turns) {
+void Motor::turn_n(int nb_turns, Direction dir) {
 	float reduction = 11.6;
 	float pulses = reduction * (float)PPR * (float)nb_turns;
-	_pulse_wanted += static_cast<int>(pulses);
+	if(dir == Direction::Clockwise) {
+		_pulse_wanted += static_cast<int>(pulses);
+	} else {
+		_pulse_wanted -= static_cast<int>(pulses);
+	}
 }
 
 void Motor::asserv() {

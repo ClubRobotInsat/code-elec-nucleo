@@ -5,14 +5,20 @@
 #include "QEI.h"
 #include <mbed.h>
 
+enum class Direction {
+	Clockwise = 0,
+	Trigonometric = 1,
+};
+
 class Motor {
 public:
 	Motor(PinName pin_qei_1, PinName pin_qei_2, PinName pin_motor_control, PinName pin_direction_control, float period_asserv);
 
 	/* L'angle est en degré entre 0 et 360 !!!! */
-	void set_position(float angle);
+	// TODO : Calculer le sens de rotation le plus rapide pour atteindre la position demandée !
+	void set_position(float angle, Direction dir = Direction::Clockwise);
 
-	void turn_n(int nb_turns);
+	void turn_n(int nb_turns, Direction dir);
 
 	void asserv();
 
