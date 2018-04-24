@@ -1,5 +1,6 @@
 #include "Robot.h"
 #include "Utils.h"
+#include "IDs_2018.h"
 
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
@@ -63,19 +64,19 @@ void Robot::handle_trame(Trame trame) {
 		case 0x00:
 			handle_trame_nucleo(trame);
 			break;
-		case 0x01:
+		case ID_ELEC_CARD_MOVEMENT:
 			handle_trame_can(trame);
 			break;
-		case 0x02:
+		case ID_ELEC_CARD_SERVOS:
 			handle_trame_servo(trame);
 			break;
-		case 0x03:
+		case ID_ELEC_CARD_IO:
 			handle_trame_io(trame);
 			break;
-		case 0x04:
+		case ID_ELEC_CARD_AVOIDANCE:
 			handle_trame_can(trame);
 			break;
-		case 0x05:
+		case ID_ELEC_CARD_MOTORS:
 			handle_trame_motor(trame);
 			break;
 		default:
@@ -99,10 +100,10 @@ void Robot::handle_trame_motor(Trame trame) {
 				uint8_t motor_id = trame.get_data()[0];
 				float angle = make_float(trame.get_data()[1], trame.get_data()[2], trame.get_data()[3], trame.get_data()[4]);
 				switch(motor_id) {
-					case 0x01:
+					case ID_MOTOR_ELEVATOR_LEFT:
 						_motor_elevator_left.set_position(angle);
 						break;
-					case 0x02:
+					case ID_MOTOR_ELEVATOR_RIGHT:
 						_motor_elevator_right.set_position(angle);
 						break;
 					default:
@@ -118,10 +119,10 @@ void Robot::handle_trame_motor(Trame trame) {
 				uint8_t revolution = trame.get_data()[1];
 				uint8_t direction = trame.get_data()[2];
 				switch(motor_id) {
-					case 0x01:
+					case ID_MOTOR_ELEVATOR_LEFT:
 						_motor_elevator_left.turn_n(revolution, static_cast<Direction>(direction));
 						break;
-					case 0x02:
+					case ID_MOTOR_ELEVATOR_RIGHT:
 						_motor_elevator_right.turn_n(revolution, static_cast<Direction>(direction));
 						break;
 					default:
@@ -136,16 +137,16 @@ void Robot::handle_trame_motor(Trame trame) {
 				uint8_t motor_id = trame.get_data()[0];
 				uint8_t direction = trame.get_data()[1];
 				switch(motor_id) {
-					case 0x03:
+					case ID_MOTOR_SWALLOW_LEFT:
 						_motor_swallow_left.turn_on(static_cast<Direction>(direction));
 						break;
-					case 0x04:
+					case ID_MOTOR_SWALLOW_RIGHT:
 						_motor_swallow_right.turn_on(static_cast<Direction>(direction));
 						break;
-					case 0x05:
+					case ID_MOTOR_BRUSHLESS_LEFT:
 						_turbine_left.set_brushless_state(BrushlessState::ON);
 						break;
-					case 0x06:
+					case ID_MOTOR_BRUSHLESS_RIGHT:
 						_turbine_left.set_brushless_state(BrushlessState::ON);
 						break;
 					default:
@@ -159,17 +160,17 @@ void Robot::handle_trame_motor(Trame trame) {
 			if(trame.get_data_length() == 1) {
 				uint8_t motor_id = trame.get_data()[0];
 				switch(motor_id) {
-					case 0x03:
+					case ID_MOTOR_SWALLOW_LEFT:
 						_motor_swallow_left.turn_off();
 						break;
-					case 0x04:
+					case ID_MOTOR_SWALLOW_RIGHT:
 						_motor_swallow_right.turn_off();
 						break;
-					case 0x05:
+					case ID_MOTOR_BRUSHLESS_LEFT:
 						_turbine_left.set_brushless_state(BrushlessState::OFF);
 						break;
-					case 0x06:
-						_turbine_left.set_brushless_state(BrushlessState::OFF);
+					case ID_MOTOR_BRUSHLESS_RIGHT:
+						_turbine_right.set_brushless_state(BrushlessState::OFF);
 						break;
 					default:
 						break;
@@ -229,7 +230,7 @@ void Robot::handle_trame_io(Trame trame) {
 		/* Lecture du pin de la tirette et réponse */
 		case 0x01: {
 			uint8_t data = _tirette.read();
-			Trame result = Trame(0x03, 0x01, 1, &data, 0);
+			Trame result = Trame(ID_ELEC_CARD_IO, 0x01, 1, &data, 0);
 			result.send_to_serial(&_pc);
 			break;
 		}
