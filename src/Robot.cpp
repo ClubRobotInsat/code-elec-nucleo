@@ -1,5 +1,5 @@
 #include "Robot.h"
-
+#include "Utils.h"
 
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
@@ -81,7 +81,17 @@ void Robot::handle_trame_motor(Trame trame) {
 		case 0x01: {
 			if(trame.get_data_length() == 5) {
 				uint8_t motor_id = trame.get_data()[0];
-				// TODO
+				float angle = make_float(trame.get_data()[1], trame.get_data()[2], trame.get_data()[3], trame.get_data()[4]);
+				switch(motor_id) {
+					case 0x01:
+						_motor_elevator_left.set_position(angle);
+						break;
+					case 0x02:
+						_motor_elevator_right.set_position(angle);
+						break;
+					default:
+						break;
+				}
 			}
 			break;
 		}
@@ -91,7 +101,16 @@ void Robot::handle_trame_motor(Trame trame) {
 				uint8_t motor_id = trame.get_data()[0];
 				uint8_t revolution = trame.get_data()[1];
 				uint8_t direction = trame.get_data()[2];
-				// TODO
+				switch(motor_id) {
+					case 0x01:
+						_motor_elevator_left.turn_n(revolution);
+						break;
+					case 0x02:
+						_motor_elevator_right.turn_n(revolution);
+						break;
+					default:
+						break;
+				}
 			}
 			break;
 		}
@@ -100,7 +119,22 @@ void Robot::handle_trame_motor(Trame trame) {
 			if(trame.get_data_length() == 2) {
 				uint8_t motor_id = trame.get_data()[0];
 				uint8_t direction = trame.get_data()[1];
-				// TODO
+				switch(motor_id) {
+					case 0x03:
+						_motor_swallow_left.write(1.0f);
+						break;
+					case 0x04:
+						_motor_swallow_right.write(1.0f);
+						break;
+					case 0x05:
+						_turbine_left.set_brushless_state(BrushlessState::ON);
+						break;
+					case 0x06:
+						_turbine_left.set_brushless_state(BrushlessState::ON);
+						break;
+					default:
+						break;
+				}
 			}
 			break;
 		}
@@ -109,7 +143,22 @@ void Robot::handle_trame_motor(Trame trame) {
 			if(trame.get_data_length() == 2) {
 				uint8_t motor_id = trame.get_data()[0];
 				uint8_t direction = trame.get_data()[1];
-				// TODO
+				switch(motor_id) {
+					case 0x03:
+						_motor_swallow_left.write(0.0f);
+						break;
+					case 0x04:
+						_motor_swallow_right.write(0.0f);
+						break;
+					case 0x05:
+						_turbine_left.set_brushless_state(BrushlessState::OFF);
+						break;
+					case 0x06:
+						_turbine_left.set_brushless_state(BrushlessState::OFF);
+						break;
+					default:
+						break;
+				}
 			}
 			break;
 		}
@@ -118,7 +167,27 @@ void Robot::handle_trame_motor(Trame trame) {
 	}
 }
 
-void Robot::handle_trame_servo(Trame trame) {}
+void Robot::handle_trame_servo(Trame trame) {
+	switch(trame.get_cmd()) {
+		/* Réglage de la position */
+		case 0x05: {
+			if(trame.get_data_length() == 3) {
+				uint8_t servo_id = trame.get_data()[0];
+				uint16_t angle = (trame.get_data()[1] << 8) | trame.get_data()[2];
+				if(angle <= 1023) {
+					_servo_manager.get_servo_by_id(servo_id)->set_position(angle);
+				}
+			}
+			break;
+		}
+		/* Demande de la position */
+		case 0x06: {
+			// TODO	(il faut d'abord fait la FSM pour la lecture des trames servos
+		}
+		default:
+			break;
+	}
+}
 
 void Robot::handle_trame_nucleo(Trame trame) {}
 
