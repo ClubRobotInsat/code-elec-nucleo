@@ -61,7 +61,6 @@ namespace herkulex {
 	};
 }
 
-// Templated source file, included in the header
-#include "HerkulexManager.tcc"
+#include "HerkulexManager.hpp"
 
 #endif

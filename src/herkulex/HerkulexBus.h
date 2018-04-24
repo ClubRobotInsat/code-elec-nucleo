@@ -66,7 +66,7 @@ namespace herkulex {
 		 * len < 2
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+		 void sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendEEPReadMsg
@@ -75,7 +75,7 @@ namespace herkulex {
 		 * !!! Ne realise pas l'operation de lecture !!!
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len = 1);
+		 void sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len = 1);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRAMWriteMsg
@@ -83,7 +83,7 @@ namespace herkulex {
 		 * len < 2
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+		 void sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRAMReadMsg
@@ -92,7 +92,7 @@ namespace herkulex {
 		 * !!! Ne realise pas l'operation de lecture !!!
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len = 1);
+		 void sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len = 1);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendIJOGMsg
@@ -100,7 +100,7 @@ namespace herkulex {
 		 * Utiliser des | entre flags de l'enum constants::JOG_CMD::JOG_CMDEnum pour composer SET
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void sendIJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
+		 void sendIJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendSJOGMsg
@@ -108,7 +108,7 @@ namespace herkulex {
 		 * Utiliser des | entre flags de l'enum constants::JOG_CMD::JOG_CMDEnum pour composer SET
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void sendSJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
+		 void sendSJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendStatMsg
@@ -117,21 +117,21 @@ namespace herkulex {
 !!! la requete de status
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void sendStatMsg(uint8_t id);
+		 void sendStatMsg(uint8_t id);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRollbackMsg
 		 * Envoi un message de rollback : remise en parametre d'usine (voir doc. p.49)
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void sendRollbackMsg(uint8_t id, bool skipIDRollback = true, bool skipBaudrateRollback = true);
+		 void sendRollbackMsg(uint8_t id, bool skipIDRollback = true, bool skipBaudrateRollback = true);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRebootMsg
 		 * Envoi un message de reboot
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void sendRebootMsg(uint8_t id);
+		 void sendRebootMsg(uint8_t id);
 
 		/* --------------------------------------------------------------------------------------------
 		 * readEEPAddr
@@ -140,7 +140,7 @@ namespace herkulex {
 		 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0);
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void readEEPAddr(uint8_t id,
+		 void readEEPAddr(uint8_t id,
 		                        constants::EEPAddr::EEPAddrEnum addr,
 		                        uint8_t len,
 		                        Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)>* callback);
@@ -152,7 +152,7 @@ namespace herkulex {
 		 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0);
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void readRAMAddr(uint8_t id,
+		 void readRAMAddr(uint8_t id,
 		                        constants::RAMAddr::RAMAddrEnum addr,
 		                        uint8_t len,
 		                        Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)>* callback);
@@ -164,7 +164,7 @@ namespace herkulex {
 		 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail);
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void readStat(uint8_t id, Callback<void(uint8_t, uint8_t, uint8_t)>* callback);
+		 void readStat(uint8_t id, Callback<void(uint8_t, uint8_t, uint8_t)>* callback);
 
 		void sendDebugMessage();
 
@@ -196,7 +196,7 @@ namespace herkulex {
 		 * Parses a addr read (EEP or RAM) ack message received from a servo.
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void parseAddrMsg();
+		 void parseAddrMsg();
 
 		/* --------------------------------------------------------------------------------------------
 		 * parseStatMsg
@@ -204,7 +204,7 @@ namespace herkulex {
 		 * Parses a status ack message received from a servo.
 		 * --------------------------------------------------------------------------------------------
 		 */
-		inline void parseStatMsg();
+		 void parseStatMsg();
 
 
 	private:
@@ -237,8 +237,5 @@ namespace herkulex {
 		uint8_t* _data_written;
 	};
 }
-
-// Definitions of the inline functions, included here
-#include "HerkulexBus.inl"
 
 #endif

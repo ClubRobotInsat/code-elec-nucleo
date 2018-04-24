@@ -1,6 +1,8 @@
 #ifndef HERKULEX_SERVO_INL
 #define HERKULEX_SERVO_INL
 
+#include "HerkulexServo.h"
+
 namespace herkulex {
 
 	Servo::Servo(uint8_t id, Bus* bus)
