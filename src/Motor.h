@@ -1,3 +1,6 @@
+#ifndef MOTOR_ROBOT_H
+#define MOTOR_ROBOT_H
+
 #define PPR 4096
 #define MIN_PWM 0.08
 #define MARGE 150
@@ -34,3 +37,5 @@ private:
 	float _prev_error;
 	float _error_sum;
 };
+
+#endif
