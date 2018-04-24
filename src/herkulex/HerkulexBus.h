@@ -138,7 +138,7 @@ namespace herkulex {
 		void cb_write_done(int e);
 
 	private:
-		Ticker _ticker_flush;
+		//Ticker _ticker_flush;
 
 		volatile bool _callback_waiting;
 		volatile bool _write_done;

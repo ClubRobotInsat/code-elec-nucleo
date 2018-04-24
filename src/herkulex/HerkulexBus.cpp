@@ -10,8 +10,9 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	Bus::Bus(PinName txPin, PinName rxPin, uint32_t baudrate, float flush_frequency)
-	        : _ticker_flush()
-	        , _callback_waiting(false)
+	        :
+		       //	_ticker_flush()
+	        /*,*/ _callback_waiting(false)
 	        , _write_done(true)
 	        , _ser(txPin, rxPin, baudrate)
 	        , _read_callback()
@@ -20,7 +21,7 @@ namespace herkulex {
 	        , _buffer_write_length()
 	        , _total_write_length(0)
 	        , _data_written(nullptr) {
-		_ticker_flush.attach(Callback<void()>(this, &Bus::flush_one_message), flush_frequency);
+		//_ticker_flush.attach(Callback<void()>(this, &Bus::flush_one_message), flush_frequency);
 	}
 
 	/* --------------------------------------------------------------------------------------------
