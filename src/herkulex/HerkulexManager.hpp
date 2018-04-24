@@ -89,7 +89,7 @@ namespace herkulex {
 	//			led_color = s->_moving_led_color;
 	//		// ?? PLAYTIME ??
 	//		_bus.sendSJOGMsg(s->_id, constants::jog_default_playtime, s->_desired_position,
-	//constants::JOG_CMD::PositionMode | 0x04);
+	// constants::JOG_CMD::PositionMode | 0x04);
 	//		//_bus.sendRAMWriteMsg(s->getId(), constants::RAMAddr::LedControl,static_cast<uint8_t>(led_color),1,0);
 	//		// Check and clear the status if needed
 	//		/*
