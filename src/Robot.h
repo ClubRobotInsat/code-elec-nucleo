@@ -18,6 +18,8 @@ public:
 	void manage_robot();
 
 private:
+	void send_pong(uint8_t id);
+
 	/* Traite une trame que l'on a reçue */
 	void handle_trame(Trame trame);
 

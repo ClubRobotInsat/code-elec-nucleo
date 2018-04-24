@@ -35,14 +35,14 @@ public:
 		return _packet_number;
 	}
 
-	// Envoie la trame sur la connexion série.
+	// Envoie une trame d'acquitement sur la connexion série.
 	static void send_ack(uint8_t packet_number, Serial* pc);
 
 	// Envoie un pong pour l'ID `id`.
 	static void send_pong(uint8_t id, Serial* pc);
 
-	// Envoie la trame a la carte CAN-USB
-	void send_to_can(Serial* pc);
+	// Envoie la trame sur la connexion série
+	void send_to_serial(Serial* pc);
 
 	// Renvoie vrai si la trame est un ping.
 	bool is_ping() const;

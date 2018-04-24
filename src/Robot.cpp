@@ -27,6 +27,14 @@ Robot::Robot()
 		servo->reboot();
 	}
 	_servo_manager.flush_bus();
+
+	// TODO : fixer le pullmode de la tirette
+}
+
+void Robot::send_pong(uint8_t id) {
+	uint8_t data = 0xaa;
+	Trame result = Trame(id, 0x00, 1, &data, 0);
+	result.send_to_serial(&_pc);
 }
 
 void Robot::initialize_meca() {
@@ -45,31 +53,33 @@ void Robot::manage_robot() {
 	/* Mise à jour des consignes d'asservissement des deux moteurs d'ascenseurs */
 	_motor_elevator_left.asserv();
 	_motor_elevator_right.asserv();
+	/* Envoi des messages aux servomoteurs */
 	_servo_manager.flush_bus();
 }
 
 
 void Robot::handle_trame(Trame trame) {
 	switch(trame.get_id()) {
-		case 0x00: {
+		case 0x00:
 			handle_trame_nucleo(trame);
-		}
-		case 0x02: {
-			handle_trame_servo(trame);
 			break;
-		}
-		case 0x03: {
-			handle_trame_io(trame);
-			break;
-		}
-		case 0x05: {
-			handle_trame_motor(trame);
-			break;
-		}
-		default: {
+		case 0x01:
 			handle_trame_can(trame);
 			break;
-		}
+		case 0x02:
+			handle_trame_servo(trame);
+			break;
+		case 0x03:
+			handle_trame_io(trame);
+			break;
+		case 0x04:
+			handle_trame_can(trame);
+			break;
+		case 0x05:
+			handle_trame_motor(trame);
+			break;
+		default:
+			break;
 	}
 }
 
@@ -77,6 +87,12 @@ void Robot::handle_trame_can(Trame trame) {}
 
 void Robot::handle_trame_motor(Trame trame) {
 	switch(trame.get_cmd()) {
+		/* Ping : on réponds pong */
+		case 0x00: {
+			if(trame.get_data_length() == 1 && trame.get_data()[0] == 0x55) {
+				this->send_pong(0x05);
+			}
+		}
 		/* Position en angle */
 		case 0x01: {
 			if(trame.get_data_length() == 5) {
@@ -169,6 +185,12 @@ void Robot::handle_trame_motor(Trame trame) {
 
 void Robot::handle_trame_servo(Trame trame) {
 	switch(trame.get_cmd()) {
+		/* Ping : on réponds Pong */
+		case 0x00: {
+			if(trame.get_data_length() == 1 && trame.get_data()[0] == 0x55) {
+				this->send_pong(0x02);
+			}
+		}
 		/* Réglage de la position */
 		case 0x05: {
 			if(trame.get_data_length() == 3) {
@@ -189,6 +211,30 @@ void Robot::handle_trame_servo(Trame trame) {
 	}
 }
 
-void Robot::handle_trame_nucleo(Trame trame) {}
+void Robot::handle_trame_nucleo(Trame trame) {
+	/* Gestion du ping pour la nucléo */
+	if(trame.get_cmd() == 0x00 && trame.get_data_length() == 1 && trame.get_data()[0] == 0x55) {
+		this->send_pong(0x00);
+	}
+}
 
-void Robot::handle_trame_io(Trame trame){};
+void Robot::handle_trame_io(Trame trame) {
+	switch(trame.get_cmd()) {
+		/* Ping : on réponds PONG */
+		case 0x00: {
+			if(trame.get_data_length() == 1 && trame.get_data()[0] == 0x55) {
+				this->send_pong(0x03);
+			}
+			break;
+		}
+		/* Lecture du pin de la tirette et réponse */
+		case 0x01: {
+			uint8_t data = _tirette.read();
+			Trame result = Trame(0x03, 0x01, 1, &data, 0);
+			result.send_to_serial(&_pc);
+			break;
+		}
+		default:
+			break;
+	}
+};

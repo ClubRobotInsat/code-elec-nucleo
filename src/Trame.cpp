@@ -36,7 +36,7 @@ void Trame::send_ack(uint8_t packet_number, Serial* pc) {
 }
 
 
-void Trame::send_to_can(Serial* pc) {
+void Trame::send_to_serial(Serial* pc) {
 	int size = 8 + _data_length;
 	uint8_t* tab = new uint8_t[size];
 
