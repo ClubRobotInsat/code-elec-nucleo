@@ -8,7 +8,7 @@
 #define HERKULEX_BUS_H
 
 #include "HerkulexConst.h"
-#include "platform/CircularBuffer.h"
+#include "CircularBuffer.h"
 
 namespace herkulex {
 	template <uint8_t N_SERVOS>
