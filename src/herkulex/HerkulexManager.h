@@ -1,63 +1,54 @@
 #ifndef HERKULEX_MANAGER_H
 #define HERKULEX_MANAGER_H
 
+#define BUS_BAUDRATE 115200
+
 #include "HerkulexBus.h"
 #include "HerkulexServo.h"
 #include <mbed.h>
 
 namespace herkulex {
+	/* Le Manager s'occupe de créer des servos et de les surveiller :
+	 * Il peut enregistrer un nouveau servo sur le bus et traiter les messages qui le concerne.
+	 * Le paramètre `N_SERVOS` indique le nombre maximal de servo que pourra gérer le Manager. */
 	template <uint8_t N_SERVOS>
 	class Manager {
-	private:
-		// Stocke le bus
-		Bus _bus;
-
-		// The manager stores servos
-		Servo* _servos[N_SERVOS];
-
-		// This member stores the number of registred servos.
-		// It must raise an error/a warning if _nb_reg_servos != N_SERVOS
-		uint8_t _nb_reg_servos;
-
-		// Le numero du prochain servo a manager
-		uint8_t _num_next_servo;
-
-		// Periode de raffraichissement -> le temps ecoule entre la mise
-		// a jour de deux servos stockes consecutivement dans _servos
-		// sera de _refreshPeriod / N_SERVOS (? ou _nb_reg_servos ? a voir)
-		// La période est en seconde.
-		const float _refreshPeriod; // TODO : RENAME (naming conv...)
-
-		Callback<void(uint8_t, uint8_t, uint8_t)> _callback_update_servo_status;
-		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)> _callback_update_servo;
-
-
 	public:
+		explicit Manager(PinName txPin, PinName rxPin);
+
+		virtual ~Manager();
+
+		/* Envoie un message sur le bus qui demande à tous les servos de s'identifier */
 		void send_debug_message();
 
 		/*
-		 * Return a pointer to a Servo if there is a registered Servo with the specified id.
-		 * Otherwise return nullptr.
+		 * Renvoie un pointeur vers le servo concerné par `id` si le manager à un servo enregistré avec cet ID.
+		 * Sinon retourne nullptr.
 		 */
 		Servo* get_servo_by_id(uint8_t id);
 
-		explicit Manager(PinName txPin, PinName rxPin, float _refreshPeriod);
-		virtual ~Manager();
 
 		/*
-		 * Create a new Servo with the given id. If there is alreay N_SERVOS registered on this manager, return nullptr.
+		 * Crée un nouveau servo avec pour id `id`.
 		 */
 		Servo* register_new_servo(uint8_t id);
 
+		/*
+		 * Envoie tous les messages nous envoyés sur le bus.
+		 */
 		void flush_bus();
 
-
 	private:
-		void sendUpdatesToNextServo();
-		void cbFuncUpdateServoStatus(uint8_t id, uint8_t status_error, uint8_t status_detail);
-		void cbFuncUpdateServo(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0); // Checker l'addresse lue dans le Ack coté bus
+		/* Stocke le bus. */
+		Bus _bus;
 
-		inline void updateServo(uint8_t id);
+		/* Les servos que manipule le manager */
+		Servo* _servos[N_SERVOS];
+
+		/* Stocke le numbre de servos actuellement enregistré.
+		 * Si nb_reg_servos > N_SERVOS lève une erreur.
+		 */
+		uint8_t _nb_reg_servos;
 	};
 }
 

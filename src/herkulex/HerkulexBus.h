@@ -14,22 +14,16 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	class Manager;
 
-	/* TODO : Revoir le mecanisme de lecture,
-	 * le bus n'a pas a stocker de Servo.
-	 * Il doit notifier une reponse d'un servo (identifié par un ID) au manager.
-	 * L'ideal etant que le manager s'occupe de chaque servo de maniere periodique.
-	 * On pourrait ainsi borner le temps d'attente pour la reponse d'un servo, et
-	 * s'en servir comme timeout pour une fonction de lecture blocante.
-	 * Dans ce cas la, on eviterait de rechercher par ID quel servo a repondu, du cote du manager.
-	 * En sachant que la solution : bus qui update le servo sans passer par le manager n'est vraiment pas propre...
+	/* La classe bus gère un bus UART.
+	 * Elle propose plusieurs types de messages et permet de les envoyer.
+	 * A noter qu'aucun message n'est réellement envoyé tant que l'on a pas flush le bus.
 	 */
 	class Bus {
 	public:
 		/* --------------------------------------------------------------------------------------------
 		 * Constructeur (explicit)
 		 * Construit un bus serie pour communiquer avec les servos sur les pin txPin et rxPin.
-		 * Log son activite sur le Serial pointe par log.
-		 * Le baudrate de la com. peut etre specifie.
+		 * Le baudrate de la com peut etre specifie.
 		 * --------------------------------------------------------------------------------------------
 		 */
 		explicit Bus(PinName txPin, PinName rxPin, uint32_t baudrate = 115200, float flush_frequency = 0.2);
@@ -42,20 +36,21 @@ namespace herkulex {
 		virtual ~Bus();
 
 		/*
-		 * Return true if there is some message that need to be flushed.
+		 * Renvoie vrai si il y a des messages à envoyer.
 		 */
-		bool needFlush();
+		bool need_flush();
 
 		/*
-		 * This function will issue a call to write.
+		 * Envoie tous les messages du buffer sur le bus.
 		 */
 		void flush();
+
 		/* --------------------------------------------------------------------------------------------
 		 * sendMsg
-		 * Construct a message and add it to the list of message to be sent with the next flush.
+		 * Construis un message et l'ajoute à la liste des messages devant être envoyé lors du prochain flush.
 		 * --------------------------------------------------------------------------------------------
 		 */
-		void sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data = nullptr, const uint8_t length = 0);
+		void send_msg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data = nullptr, const uint8_t length = 0);
 
 
 		// - TODO - Optimize Read/Write functions (same operations, duplicated... )
@@ -66,7 +61,7 @@ namespace herkulex {
 		 * len < 2
 		 * --------------------------------------------------------------------------------------------
 		 */
-		 void sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+		void send_EEP_write_msg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendEEPReadMsg
@@ -75,7 +70,7 @@ namespace herkulex {
 		 * !!! Ne realise pas l'operation de lecture !!!
 		 * --------------------------------------------------------------------------------------------
 		 */
-		 void sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len = 1);
+		void send_EEP_read_msg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len = 1);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRAMWriteMsg
@@ -83,7 +78,7 @@ namespace herkulex {
 		 * len < 2
 		 * --------------------------------------------------------------------------------------------
 		 */
-		 void sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
+		void send_RAM_write_msg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len = 1, uint8_t msb = 0x00);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRAMReadMsg
@@ -92,7 +87,7 @@ namespace herkulex {
 		 * !!! Ne realise pas l'operation de lecture !!!
 		 * --------------------------------------------------------------------------------------------
 		 */
-		 void sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len = 1);
+		void send_RAM_read_msg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len = 1);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendIJOGMsg
@@ -100,7 +95,7 @@ namespace herkulex {
 		 * Utiliser des | entre flags de l'enum constants::JOG_CMD::JOG_CMDEnum pour composer SET
 		 * --------------------------------------------------------------------------------------------
 		 */
-		 void sendIJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
+		void send_IJOG_msg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendSJOGMsg
@@ -108,7 +103,7 @@ namespace herkulex {
 		 * Utiliser des | entre flags de l'enum constants::JOG_CMD::JOG_CMDEnum pour composer SET
 		 * --------------------------------------------------------------------------------------------
 		 */
-		 void sendSJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
+		void send_SJOG_msg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendStatMsg
@@ -117,95 +112,30 @@ namespace herkulex {
 !!! la requete de status
 		 * --------------------------------------------------------------------------------------------
 		 */
-		 void sendStatMsg(uint8_t id);
+		void send_stat_msg(uint8_t id);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRollbackMsg
 		 * Envoi un message de rollback : remise en parametre d'usine (voir doc. p.49)
 		 * --------------------------------------------------------------------------------------------
 		 */
-		 void sendRollbackMsg(uint8_t id, bool skipIDRollback = true, bool skipBaudrateRollback = true);
+		void send_rollback_msg(uint8_t id, bool skipIDRollback = true, bool skipBaudrateRollback = true);
 
 		/* --------------------------------------------------------------------------------------------
 		 * sendRebootMsg
 		 * Envoi un message de reboot
 		 * --------------------------------------------------------------------------------------------
 		 */
-		 void sendRebootMsg(uint8_t id);
+		void send_reboot_msg(uint8_t id);
 
-		/* --------------------------------------------------------------------------------------------
-		 * readEEPAddr
-		 * Read at a specified address in a servo's EEP.
-		 * Callback prototype example :
-		 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0);
-		 * --------------------------------------------------------------------------------------------
-		 */
-		 void readEEPAddr(uint8_t id,
-		                        constants::EEPAddr::EEPAddrEnum addr,
-		                        uint8_t len,
-		                        Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)>* callback);
-
-		/* --------------------------------------------------------------------------------------------
-		 * readRAMAddr
-		 * Read at a specified address in a servo's RAM.
-		 * Callback prototype example :
-		 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0);
-		 * --------------------------------------------------------------------------------------------
-		 */
-		 void readRAMAddr(uint8_t id,
-		                        constants::RAMAddr::RAMAddrEnum addr,
-		                        uint8_t len,
-		                        Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)>* callback);
-
-		/* --------------------------------------------------------------------------------------------
-		 * readStat
-		 * Read the status of a servo.
-		 * Callback prototype example :
-		 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail);
-		 * --------------------------------------------------------------------------------------------
-		 */
-		 void readStat(uint8_t id, Callback<void(uint8_t, uint8_t, uint8_t)>* callback);
-
-		void sendDebugMessage();
+		void send_debug_message();
 
 	protected:
-		/* This method send one message from the buffer to the bus.
-		 */
-		void flushOneMessage();
+		/* Envoie un message du buffer vers le bus. */
+		void flush_one_message();
 
-		void cbWriteDone(int e);
-
-		/* --------------------------------------------------------------------------------------------
-		 * write
-		 * Prend un buffer (data), de taille fixe (length), passe par addresse et l'ecoule sur le bus
-		 * --------------------------------------------------------------------------------------------
-		 */
-		void write(uint8_t* data, uint8_t length);
-
-		/* --------------------------------------------------------------------------------------------
-		 * cbInterpretBuffer
-		 * Callback pour lire et interpreter un message recu. Globalement, switch sur le type de
-		 * message et appelle le parser correspondant au message.
-		 * --------------------------------------------------------------------------------------------
-		 */
-		void cbInterpretBuffer(int event);
-
-		/* --------------------------------------------------------------------------------------------
-		 * parseAddrMsg
-		 * This function is an helper. It should not be called outside of cbInterpretBuffer.
-		 * Parses a addr read (EEP or RAM) ack message received from a servo.
-		 * --------------------------------------------------------------------------------------------
-		 */
-		 void parseAddrMsg();
-
-		/* --------------------------------------------------------------------------------------------
-		 * parseStatMsg
-		 * This function is an helper. It should not be called outside of cbInterpretBuffer.
-		 * Parses a status ack message received from a servo.
-		 * --------------------------------------------------------------------------------------------
-		 */
-		 void parseStatMsg();
-
+		/* Cette méthode est appelée quand le flush est terminé */
+		void cb_write_done(int e);
 
 	private:
 		Ticker _ticker_flush;

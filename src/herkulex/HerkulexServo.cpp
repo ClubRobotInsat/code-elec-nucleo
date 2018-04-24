@@ -56,159 +56,69 @@ namespace herkulex {
 
 	/* GETTERS */
 
-	bool Servo::shouldReboot() const {
-		return _should_reboot;
-	}
-	/* --------------------------------------------------------------------------------------------
-	 * getStatusError
-	 * Return servo's StatusError. For further informations, refer to herkulex documentation p.39.
-	 * Update rate defined from the refresh period of the manager.
-	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	uint8_t Servo::getStatusError() const {
+	uint8_t Servo::get_status_error() const {
 		return _status_error;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * getStatusDetail
-	 * Return servo's StatusDetail. For further informations, refer to herkulex documentation p.39.
-	 * Update rate defined from the refresh period of the manager.
-	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	uint8_t Servo::getStatusDetail() const {
+	uint8_t Servo::get_status_detail() const {
 		return _status_detail;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * getId
-	 * Return servo's ID.
-	 * --------------------------------------------------------------------------------------------
-	 */
-	uint8_t Servo::getId() const {
+	uint8_t Servo::get_id() const {
 		return _id;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * getPosition
-	 * Return servo's current position.
-	 <!> Position range is 0~1023, as defined in datasheet. Angle is position * 0.325 <!>
-	 * Update rate defined from the refresh period of the manager.
-	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	uint16_t Servo::getPosition() const {
+	uint16_t Servo::get_position() const {
 		return _position;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * isTorqueOn
-	 * Return servo's motor on (= torque on ) flag. (cf. status detail doc.).
-	 * Update rate defined from the refresh period of the manager.
-	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	bool Servo::isTorqueOn() const {
+	bool Servo::is_torque_on() const {
 		return (_status_detail & constants::StatusDetail::MotorOnFlag) > 0;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * isInPosition
-	 * Return servo's inposition flag. (cf. status detail doc.).
-	 * Update rate defined from the refresh period of the manager.
-	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	bool Servo::isInPosition() const {
+	bool Servo::is_in_position() const {
 		return (_status_detail & constants::StatusDetail::InpositionFlag) > 0;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * isMoving
-	 * Return servo's moving flag. (cf. status detail doc.).
-	 * Update rate defined from the refresh period of the manager.
-	 * update rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	bool Servo::isMoving() const {
+	bool Servo::is_moving() const {
 		return (_status_detail & constants::StatusDetail::MovingFlag) > 0;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * getInpositionLedColor
-	 * Get the color of the led for a servo in position.
-	 * --------------------------------------------------------------------------------------------
-	 */
-	constants::LedColor::LedColorEnum Servo::getInpositionLedColor() const {
+	constants::LedColor::LedColorEnum Servo::get_inposition_led_color() const {
 		return _inposition_led_color;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * getMovingLedColor
-	 * Get the color of the led for a servo moving.
-	 * --------------------------------------------------------------------------------------------
-	 */
-	constants::LedColor::LedColorEnum Servo::getMovingLedColor() const {
+	constants::LedColor::LedColorEnum Servo::get_moving_led_color() const {
 		return _moving_led_color;
 	}
 
 
 	/* SETTERS */
 
-
-	/* --------------------------------------------------------------------------------------------
-	 * setPosition
-	 * Set a new position for the servo.
-	 * Sent at a rate defined from the refresh period of the manager.
-	 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Servo::setPosition(uint16_t newPosition) {
-		_bus->sendSJOGMsg(_id, constants::jog_default_playtime, newPosition, constants::JOG_CMD::PositionMode | 0x04);
+	void Servo::set_position(uint16_t newPosition) {
+		_bus->send_SJOG_msg(_id, constants::jog_default_playtime, newPosition, constants::JOG_CMD::PositionMode | 0x04);
 		_desired_position = newPosition;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * enableTorque
-	 * Set a new torque mode for the servo (on/off).
-	 * Sent at a rate defined from the refresh period of the manager.
-	 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Servo::enableTorque(bool value) {
+	void Servo::enable_torque(bool value) {
 		if(value) {
-			_bus->sendRAMWriteMsg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueOn);
+			_bus->send_RAM_write_msg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueOn);
 		} else {
-			_bus->sendRAMWriteMsg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueFree);
+			_bus->send_RAM_write_msg(_id, constants::RAMAddr::TorqueControl, constants::TorqueControl::TorqueFree);
 		}
 		_desired_torque_on = value;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * setInpositionLedColor
-	 * Set the color of the led for a servo in position.
-	 * Sent at a rate defined from the refresh period of the manager.
-	 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Servo::setInpositionLedColor(constants::LedColor::LedColorEnum led_color) {
+	void Servo::set_inposition_led_color(constants::LedColor::LedColorEnum led_color) {
 		_inposition_led_color = led_color;
 	}
 
-	/* --------------------------------------------------------------------------------------------
-	 * setMovingLedColor
-	 * Set the color of the led for a servo moving.
-	 * Sent at a rate defined from the refresh period of the manager.
-	 * sending rate = refresh period / number of servos (template argument N_SERVOS of the manager).
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Servo::setMovingLedColor(constants::LedColor::LedColorEnum led_color) {
+	void Servo::set_moving_led_color(constants::LedColor::LedColorEnum led_color) {
 		_moving_led_color = led_color;
 	}
 
 	void Servo::reboot() {
-		_bus->sendRebootMsg(_id);
+		_bus->send_reboot_msg(_id);
 		_should_reboot = true;
 	}
 }

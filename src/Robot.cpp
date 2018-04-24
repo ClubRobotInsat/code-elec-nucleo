@@ -4,7 +4,7 @@
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
         , _pc(USBTX, USBRX, 921600)
-        , _servo_manager(A0, A1, 2)
+        , _servo_manager(A0, A1)
         , _turbine_left(PA_15)
         , _turbine_right(PA_10)
         , _motor_elevator_left(PB_3, PB_4, PA_8, PB_3, 0.05f)

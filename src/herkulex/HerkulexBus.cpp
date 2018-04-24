@@ -14,13 +14,13 @@ namespace herkulex {
 	        , _callback_waiting(false)
 	        , _write_done(true)
 	        , _ser(txPin, rxPin, baudrate)
-	        , _read_callback(Callback<void(int)>(this, &Bus::cbInterpretBuffer))
-	        , _write_callback(Callback<void(int)>(this, &Bus::cbWriteDone))
+	        , _read_callback()
+	        , _write_callback(Callback<void(int)>(this, &Bus::cb_write_done))
 	        , _buffer_write_data()
 	        , _buffer_write_length()
 	        , _total_write_length(0)
 	        , _data_written(nullptr) {
-		_ticker_flush.attach(Callback<void()>(this, &Bus::flushOneMessage), flush_frequency);
+		_ticker_flush.attach(Callback<void()>(this, &Bus::flush_one_message), flush_frequency);
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -28,11 +28,9 @@ namespace herkulex {
 	 * Desalloue le Serial utilise par le bus
 	 * --------------------------------------------------------------------------------------------
 	 */
-	Bus::~Bus() {
-		// debug("Destruction du bus");
-	}
+	Bus::~Bus() {}
 
-	void Bus::flushOneMessage() {
+	void Bus::flush_one_message() {
 		if(not _write_done or _buffer_write_data.empty()) {
 			return;
 		}
@@ -72,37 +70,13 @@ namespace herkulex {
 		_data_written = message;
 	}
 
-	void Bus::cbWriteDone(int e) {
+	void Bus::cb_write_done(int e) {
 		_write_done = true;
 		delete[] _data_written;
 	}
 
-	bool Bus::needFlush() {
+	bool Bus::need_flush() {
 		return _buffer_write_data.full();
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * write
-	 * Prend un buffer (data), de taille fixe (length), passe par addresse et l'ecoule sur le bus
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::write(uint8_t* data, uint8_t length) {
-		for(uint8_t i = 0; i < length; i++) {
-			//_ser.putc(data[i]);
-		}
-
-		while(not _write_done) {
-			// debug("Waiting for previous write\n\r");
-			wait_ms(1000);
-		}
-
-		_write_done = false;
-
-		if(data == nullptr) {
-			// debug("Erreur nullptr data write\n\r");
-		}
-		// debug("Write call\n\r");
-		_ser.write(data, length, _write_callback, SERIAL_EVENT_TX_ALL);
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -110,7 +84,7 @@ namespace herkulex {
 	 * Construit un message pour les servos, et l'envoi immediatement sur le bus.
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendMsg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data, const uint8_t length) {
+	void Bus::send_msg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data, const uint8_t length) {
 		uint8_t total_length = length + constants::Size::MinPacketSize;
 		uint8_t index = 0;
 
@@ -140,72 +114,10 @@ namespace herkulex {
 		_buffer_write_length.push(total_length);
 		_buffer_write_data.push(txBuf);
 		_total_write_length += total_length;
-
-		// DELETE
-		// delete txBuf;
 	}
 
-
-	/* --------------------------------------------------------------------------------------------
-	 * cbInterpretBuffer
-	 * Callback pour lire et interpreter un message recu. Globalement, switch sur le type de
-	 * message et appelle le parser correspondant au message.
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::cbInterpretBuffer(int event) {
-		// debug("Callback \n\r");
-		if(_buffer[3] == _expected_reply_id && _buffer[4] == _expected_reply_cmd) {
-			switch(_buffer[4]) {
-				// If we received an addr read ack
-				case constants::CMD::fromServo::EEPReadAck:
-					break;
-				case constants::CMD::fromServo::RAMReadAck:
-					// debug("Received RAMREAD\n\r");
-					parseAddrMsg();
-					break;
-
-				// If we received a status read ack
-				case constants::CMD::fromServo::StatAck:
-					parseStatMsg();
-					break;
-
-				// Do nothing for other replies
-				case constants::CMD::fromServo::EEPWriteAck:
-					break;
-				case constants::CMD::fromServo::RAMWriteAck:
-					break;
-				case constants::CMD::fromServo::IJOGAck:
-					break;
-				case constants::CMD::fromServo::SJOGAck:
-					break;
-				case constants::CMD::fromServo::RollbackAck:
-					break;
-				case constants::CMD::fromServo::RebootAck:
-					break;
-
-				default:
-					// debug("Recu un message servo avec une mauvaise CMD\n");
-					break;
-			}
-			_callback_waiting = false; // TODO - [supprimer], ou utiliser avec un timeout
-		} else {
-			// debug("Bad ID");
-		}
-	}
-
-	void Bus::sendDebugMessage() {
-		// debug("Sending _log->printf... \n\r");
-		uint8_t txBuf[9];
-		txBuf[0] = 0xFF;
-		txBuf[1] = 0xFF;
-		txBuf[2] = 0x07;
-		txBuf[3] = 0xFD;
-		txBuf[4] = 0x07;
-		txBuf[5] = 0xFC;
-		txBuf[6] = 0x02;
-		txBuf[7] = 0x00;
-		txBuf[8] = 0x40;
-		write(txBuf, 9);
+	void Bus::send_debug_message() {
+		send_stat_msg(0xFD);
 	}
 	/* --------------------------------------------------------------------------------------------
 	 * sendEEPWriteMsg
@@ -213,12 +125,11 @@ namespace herkulex {
 	 * len < 2
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendEEPWriteMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
+	void Bus::send_EEP_write_msg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
 		// Check valid length
 		if(len < 1 || len > 2) {
-			debug("Utilisation de Bus::sendEEPWriteMsg avec une longueur erronee !\n");
+			debug("Utilisation de Bus::sendEEPWrite_msg avec une longueur erronee !\n");
 		} else {
-			// NEW
 			uint8_t* data = new uint8_t(2 + len);
 
 			data[0] = addr;
@@ -228,10 +139,7 @@ namespace herkulex {
 				data[3] = msb;
 			}
 
-			sendMsg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
-
-			// DELETE
-			// delete data;
+			send_msg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
 		}
 	}
 
@@ -242,7 +150,7 @@ namespace herkulex {
 	 * !!! Ne realise pas l'operation de lecture !!!
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendEEPReadMsg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len) {
+	void Bus::send_EEP_read_msg(uint8_t id, constants::EEPAddr::EEPAddrEnum addr, uint8_t len) {
 		// Check valid length
 		if(len < 1 || len > 2) {
 			debug("Utilisation de Bus::sendEEPReadMsg avec une longueur erronee !\n");
@@ -252,7 +160,7 @@ namespace herkulex {
 			data[0] = addr;
 			data[1] = len;
 
-			sendMsg(id, constants::CMD::toServo::EEPRead, data, 2);
+			send_msg(id, constants::CMD::toServo::EEPRead, data, 2);
 		}
 	}
 
@@ -263,12 +171,11 @@ namespace herkulex {
 	 * len < 2
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendRAMWriteMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
+	void Bus::send_RAM_write_msg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t lsb, uint8_t len, uint8_t msb) {
 		// Check valid length
 		if(len < 1 || len > 2) {
 			debug("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
 		} else {
-			// NEW
 			uint8_t* data = new uint8_t(2 + len);
 
 			data[0] = addr;
@@ -278,10 +185,7 @@ namespace herkulex {
 				data[3] = msb;
 			}
 
-			sendMsg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
-
-			// DELETE
-			// delete data;
+			send_msg(id, constants::CMD::toServo::RAMWrite, data, 2 + len);
 		}
 	}
 
@@ -292,21 +196,17 @@ namespace herkulex {
 	 * !!! Ne realise pas l'operation de lecture !!!
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendRAMReadMsg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len) {
+	void Bus::send_RAM_read_msg(uint8_t id, constants::RAMAddr::RAMAddrEnum addr, uint8_t len) {
 		// Check valid length
 		if(len < 1 || len > 2) {
-			debug("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
+			debug("Utilisation de Bus::sendRAMWrite_msg avec une longueur erronee !\n");
 		} else {
-			// NEW
 			uint8_t* data = new uint8_t(2 + len);
 
 			data[0] = addr;
 			data[1] = len;
 
-			sendMsg(id, constants::CMD::toServo::RAMRead, data, 2);
-
-			// DELETE
-			// delete data;
+			send_msg(id, constants::CMD::toServo::RAMRead, data, 2);
 		}
 	}
 
@@ -317,8 +217,7 @@ namespace herkulex {
 	 * -> champ SET d'un paquet IJOG
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendIJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
-		// NEW
+	void Bus::send_IJOG_msg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
 		uint8_t* data = new uint8_t(5);
 
 		data[0] = (jogValue & 0xff);
@@ -327,10 +226,7 @@ namespace herkulex {
 		data[3] = id;
 		data[4] = playtime;
 
-		sendMsg(id, constants::CMD::toServo::IJOG, data, 5);
-
-		// DELETE
-		// delete data;
+		send_msg(id, constants::CMD::toServo::IJOG, data, 5);
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -340,8 +236,7 @@ namespace herkulex {
 	 * -> champ SET d'un paquet SJOG
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendSJOGMsg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
-		// NEW
+	void Bus::send_SJOG_msg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
 		uint8_t* data = new uint8_t(5);
 
 		data[0] = playtime;
@@ -350,10 +245,7 @@ namespace herkulex {
 		data[3] = set;
 		data[4] = id;
 
-		sendMsg(id, constants::CMD::toServo::SJOG, data, 5);
-
-		// DELETE
-		// delete data;
+		send_msg(id, constants::CMD::toServo::SJOG, data, 5);
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -363,17 +255,13 @@ namespace herkulex {
 	 !!! la requete de status
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendStatMsg(uint8_t id) {
-		// NEW
+	void Bus::send_stat_msg(uint8_t id) {
 		uint8_t* data = new uint8_t(2);
 
 		data[0] = 0;
 		data[1] = 0;
 
-		sendMsg(id, constants::CMD::toServo::Stat, data, 2);
-
-		// DELETE
-		// delete data;
+		send_msg(id, constants::CMD::toServo::Stat, data, 2);
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -381,17 +269,13 @@ namespace herkulex {
 	 * Envoi un message de rollback : remise en parametre d'usine (voir doc. p.49)
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendRollbackMsg(uint8_t id, bool skipIDRollback, bool skipBaudrateRollback) {
-		// NEW
+	void Bus::send_rollback_msg(uint8_t id, bool skipIDRollback, bool skipBaudrateRollback) {
 		uint8_t* data = new uint8_t(2);
 
 		data[0] = (skipIDRollback ? 1 : 0);
 		data[1] = (skipBaudrateRollback ? 1 : 0);
 
-		sendMsg(id, constants::CMD::toServo::Rollback, data, 2);
-
-		// DELETE
-		// delete data;
+		send_msg(id, constants::CMD::toServo::Rollback, data, 2);
 	}
 
 	/* --------------------------------------------------------------------------------------------
@@ -399,113 +283,7 @@ namespace herkulex {
 	 * Envoi un message de reboot
 	 * --------------------------------------------------------------------------------------------
 	 */
-	void Bus::sendRebootMsg(uint8_t id) {
-		sendMsg(id, constants::CMD::toServo::Reboot);
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * readEEPAddr
-	 * Read at a specified address in a servo's EEP.
-	 * Callback prototype example :
-	 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0);
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::readEEPAddr(uint8_t id,
-	                      constants::EEPAddr::EEPAddrEnum addr,
-	                      uint8_t len,
-	                      Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)>* callback) {
-		sendEEPReadMsg(id, addr, len);
-		_callback_read_addr = callback;
-		_expected_reply_id = id;
-		_expected_reply_cmd = constants::CMD::fromServo::EEPReadAck;
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * readRAMAddr
-	 * Read at a specified address in a servo's RAM.
-	 * Callback prototype example :
-	 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail, uint8_t data0, uint8_t data1 = 0);
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::readRAMAddr(uint8_t id,
-	                      constants::RAMAddr::RAMAddrEnum addr,
-	                      uint8_t len,
-	                      Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)>* callback) {
-		_ser.read(_buffer, (uint8_t)13, _read_callback, SERIAL_EVENT_RX_COMPLETE);
-		sendRAMReadMsg(id, addr, len);
-		_callback_read_addr = callback;
-		_expected_reply_id = id;
-		_expected_reply_cmd = constants::CMD::fromServo::RAMReadAck;
-		debug("Read called\n\r");
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * readStat
-	 * Read the status of a servo.
-	 * Callback prototype example :
-	 * 	void callback(uint8_t id, uint8_t status_error, uint8_t status_detail);
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::readStat(uint8_t id, Callback<void(uint8_t, uint8_t, uint8_t)>* callback) {
-		sendStatMsg(id);
-		_callback_read_stat = callback;
-		_expected_reply_id = id;
-		_expected_reply_cmd = constants::CMD::fromServo::StatAck;
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * parseAddrMsg
-	 * This function is an helper. It should not be called outside of cbInterpretBuffer.
-	 * Parses a addr read (EEP or RAM) ack message received from a servo.
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::parseAddrMsg() {
-		// Check checksum validity
-		uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8] ^ _buffer[9] ^ _buffer[10] ^
-		                   _buffer[11] ^ _buffer[12]) &
-		                  0xFE;
-		uint8_t chksum2 = (~_buffer[5] & 0xFE);
-
-		if(chksum1 != _buffer[5] || chksum2 != _buffer[6]) {
-			debug("Bad position Checksum\n\r");
-		} else if(_callback_read_addr == nullptr) {
-			debug("Callback for read addr is nullptr.\n\r");
-		} else {
-			// Check carried data length
-			if(_buffer[8] == 1) {
-				// Call the callback with status error, status detail, data[0] - id allready checked
-				_callback_read_addr->call(_expected_reply_id, _buffer[10], _buffer[11], _buffer[9], 0);
-			} else {
-				// Call the callback with status error, status detail, data[0], data[1] - id allready checked
-				_callback_read_addr->call(_expected_reply_id, _buffer[11], _buffer[12], _buffer[9], _buffer[10]);
-			}
-
-			// Reset the callback storage member
-			_callback_read_addr = nullptr;
-		}
-	}
-
-	/* --------------------------------------------------------------------------------------------
-	 * parseStatMsg
-	 * This function is an helper. It should not be called outside of cbInterpretBuffer.
-	 * Parses a status ack message received from a servo.
-	 * --------------------------------------------------------------------------------------------
-	 */
-	void Bus::parseStatMsg() {
-		// Check checksum validity
-		uint8_t chksum1 = (_buffer[2] ^ _buffer[3] ^ _buffer[4] ^ _buffer[7] ^ _buffer[8]) & 0xFE;
-		uint8_t chksum2 = (~_buffer[5] & 0xFE);
-
-		if(chksum1 != _buffer[5] || chksum2 != _buffer[6]) {
-			debug("Bad status checksum.");
-		} else if(_callback_read_stat == nullptr) {
-			debug("Callback for read status is nullptr.");
-		} else {
-			// Call the callback with status error and status detail - id allready checked
-			_callback_read_stat->call(_expected_reply_id, _buffer[7], _buffer[8]);
-
-			// Reset the callback storage member
-			_callback_read_stat = nullptr;
-		}
+	void Bus::send_reboot_msg(uint8_t id) {
+		send_msg(id, constants::CMD::toServo::Reboot);
 	}
 }
