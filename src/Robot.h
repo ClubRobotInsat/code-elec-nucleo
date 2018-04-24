@@ -4,6 +4,7 @@
 #include "Brushless.h"
 #include "HerkulexManager.h"
 #include "Motor.h"
+#include "SimpleMotor.h"
 #include "TrameReader.h"
 #include <mbed.h>
 
@@ -51,8 +52,8 @@ private:
 	Motor _motor_elevator_right;
 
 	// Moteurs non asservis
-	PwmOut _motor_swallow_left;
-	PwmOut _motor_swallow_right;
+	SimpleMotor _motor_swallow_left;
+	SimpleMotor _motor_swallow_right;
 
 	// La tirette
 	DigitalIn _tirette;

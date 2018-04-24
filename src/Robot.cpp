@@ -9,8 +9,8 @@ Robot::Robot()
         , _turbine_right(PA_10)
         , _motor_elevator_left(PB_3, PB_4, PA_8, PB_3, 0.05f)
         , _motor_elevator_right(PA_6, PA_7, PA_5, PB_4, 0.05f)
-        , _motor_swallow_left(PB_8)
-        , _motor_swallow_right(PB_9)
+        , _motor_swallow_left(PB_8, PB_9) // FIXME
+        , _motor_swallow_right(PB_9, PB_8)
         , _tirette(PA_9)
         , _trame_reader() {
 
@@ -137,10 +137,10 @@ void Robot::handle_trame_motor(Trame trame) {
 				uint8_t direction = trame.get_data()[1];
 				switch(motor_id) {
 					case 0x03:
-						_motor_swallow_left.write(1.0f);
+						_motor_swallow_left.turn_on(static_cast<Direction>(direction));
 						break;
 					case 0x04:
-						_motor_swallow_right.write(1.0f);
+						_motor_swallow_right.turn_on(static_cast<Direction>(direction));
 						break;
 					case 0x05:
 						_turbine_left.set_brushless_state(BrushlessState::ON);
@@ -156,15 +156,14 @@ void Robot::handle_trame_motor(Trame trame) {
 		}
 		/* Moteur OFF */
 		case 0x04: {
-			if(trame.get_data_length() == 2) {
+			if(trame.get_data_length() == 1) {
 				uint8_t motor_id = trame.get_data()[0];
-				uint8_t direction = trame.get_data()[1];
 				switch(motor_id) {
 					case 0x03:
-						_motor_swallow_left.write(0.0f);
+						_motor_swallow_left.turn_off();
 						break;
 					case 0x04:
-						_motor_swallow_right.write(0.0f);
+						_motor_swallow_right.turn_off();
 						break;
 					case 0x05:
 						_turbine_left.set_brushless_state(BrushlessState::OFF);
