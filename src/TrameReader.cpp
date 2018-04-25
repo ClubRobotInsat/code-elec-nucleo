@@ -33,9 +33,7 @@ void print_state(TrameReaderState state) {
 }
 
 TrameReader::TrameReader()
-        : _trame_buffer(nullptr)
-        , _trame_buffer_size(255)
-        , _trame_buffer_position(0)
+        : _trame_buffer()
         , _byte_buffer(nullptr)
         , _byte_buffer_size(255)
         , _state(TrameReaderState::WAITING_FOR_H1)
@@ -44,7 +42,6 @@ TrameReader::TrameReader()
         , _trame_in_build()
         , _input_buffer{0}
         , _read_done(Callback<void(int)>(this, &TrameReader::handle_buffer)) {
-	_trame_buffer = new Trame[_trame_buffer_size];
 	_byte_buffer = new uint8_t[_byte_buffer_size];
 }
 
@@ -126,23 +123,13 @@ void TrameReader::parse_byte(uint8_t byte) {
 				_byte_buffer[_data_received] = byte;
 				uint8_t id = Trame::demultiplex_id(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
 				uint8_t cmd = Trame::demultiplex_cmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
-				if(_trame_buffer_position < _trame_buffer_size) {
-					_trame_buffer[_trame_buffer_position] =
-					    Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
-				}
-
-				/* The buffer is full we dump all the Trame */
-				else {
-					_trame_buffer_position = 0;
-					_trame_buffer[_trame_buffer_position] =
-					    Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
-				}
-
-				_trame_buffer_position++;
-				_state = TrameReaderState::WAITING_FOR_H1;
-				_data_received = 0;
-				break;
+				Trame t = Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
+				_trame_buffer.push(t);
 			}
+
+			_state = TrameReaderState::WAITING_FOR_H1;
+			_data_received = 0;
+			break;
 		}
 
 		default:
@@ -151,15 +138,16 @@ void TrameReader::parse_byte(uint8_t byte) {
 }
 
 Trame TrameReader::get_trame() {
-	if(_trame_buffer_position == 0) {
+	if(_trame_buffer.empty()) {
 		error("Empty Trame Buffer \n\r");
 		return Trame();
 	} else {
 		debug("Renvoi d'une bonne trame : \n\r");
-		_trame_buffer_position--;
-		return _trame_buffer[_trame_buffer_position];
+		Trame result;
+		_trame_buffer.pop(result);
+		return result;
 	}
 }
 bool TrameReader::trame_ready() const {
-	return _trame_buffer_position > 0;
+	return not _trame_buffer.empty();
 }

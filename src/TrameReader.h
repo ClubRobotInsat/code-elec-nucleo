@@ -1,11 +1,13 @@
 #include "Trame.h"
+#include <CircularBuffer.h>
 #include <mbed.h>
-
 
 #ifndef DEF_TRAME_READER
 #define DEF_TRAME_READER
 
 #define READ_BUFFER_SIZE 8
+
+#define TRAME_BUFFER_SIZE 1024
 
 /* Une énumeration qui représente les différents états que l'on peut avoir lorsque on lis des trames depuis une
  * connexion série */
@@ -41,7 +43,6 @@ public:
 
 	~TrameReader() {
 		delete[] _byte_buffer;
-		delete[] _trame_buffer;
 	}
 
 	/* Attache la machine à état sur une connexion série */
@@ -62,22 +63,18 @@ private:
 	void parse_byte(uint8_t byte);
 
 	/* Le buffer contenant les trames */
-	Trame* _trame_buffer;
-	/* La taille du buffer */
-	uint8_t _trame_buffer_size;
-	/* Notre position dans le buffer */
-	uint8_t _trame_buffer_position;
+	CircularBuffer<Trame, 1024> _trame_buffer;
 
 	/* Le buffer contenant les octets de données */
 	uint8_t* _byte_buffer;
 	/* La taille du buffer */
-	uint8_t _byte_buffer_size;
+	volatile uint8_t _byte_buffer_size;
 
 	/* L'état actuel de la machine à état */
-	TrameReaderState _state;
+	volatile TrameReaderState _state;
 
 	/* Le nombre d'octet de donnée que l'on a reçu à l'état actuel */
-	uint8_t _data_received;
+	volatile uint8_t _data_received;
 
 	/* La connexion série potentiellement non initialisé (il faut appeler TrameRead::attach_to_serial) */
 	Serial* _ser;
