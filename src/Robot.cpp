@@ -193,7 +193,10 @@ void Robot::handle_trame_servo(Trame trame) {
 				uint8_t servo_id = trame.get_data()[0];
 				uint16_t angle = (trame.get_data()[1] << 8) | trame.get_data()[2];
 				if(angle <= 1023) {
-					_servo_manager.get_servo_by_id(servo_id)->set_position(angle);
+					herkulex::Servo* serv = _servo_manager.get_servo_by_id(servo_id);
+					if(serv != nullptr) {
+						serv->set_position(angle);
+					}
 				}
 			}
 			break;
