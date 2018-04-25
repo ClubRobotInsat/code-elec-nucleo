@@ -44,6 +44,7 @@ void Robot::initialize_meca() {
 }
 
 void Robot::manage_robot() {
+
 	if(_trame_reader.trame_ready()) {
 		Trame trame = _trame_reader.get_trame();
 		// Acquittement de la trame reçue.
@@ -84,7 +85,9 @@ void Robot::handle_trame(Trame trame) {
 	}
 }
 
-void Robot::handle_trame_can(Trame trame) {}
+void Robot::handle_trame_can(Trame trame) {
+	_can.write(trame.into_can_message());
+}
 
 void Robot::handle_trame_motor(Trame trame) {
 	switch(trame.get_cmd()) {

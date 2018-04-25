@@ -96,3 +96,8 @@ uint8_t Trame::multiplex_cmd(uint8_t id, uint8_t cmd) {
 	uint16_t muxedVal = (uint16_t(id) << BITS_CMD_TRAME) | uint16_t(cmd);
 	return ((muxedVal >> 8) & 0xFF);
 }
+
+CANMessage Trame::into_can_message() {
+	// TODO 
+	return CANMessage();
+}

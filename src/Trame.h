@@ -44,6 +44,8 @@ public:
 	// Envoie la trame sur la connexion série
 	void send_to_serial(Serial* pc);
 
+	CANMessage into_can_message();
+
 	// Renvoie vrai si la trame est un ping.
 	bool is_ping() const;
 
