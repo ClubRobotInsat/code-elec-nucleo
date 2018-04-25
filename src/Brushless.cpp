@@ -14,3 +14,15 @@ void Brushless::set_brushless_state(BrushlessState state) {
 		}
 	}
 }
+
+void Brushless::handle_trame(Trame t) {
+	switch(t.get_cmd()) {
+		case 0x03: {
+			this->set_brushless_state(BrushlessState::ON);
+		}
+		case 0x04: {
+
+			this->set_brushless_state(BrushlessState::OFF);
+		}
+	}
+}

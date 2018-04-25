@@ -1,6 +1,6 @@
 #include "Robot.h"
-#include "Utils.h"
 #include "IDs_2018.h"
+#include "Utils.h"
 
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
@@ -98,13 +98,12 @@ void Robot::handle_trame_motor(Trame trame) {
 		case 0x01: {
 			if(trame.get_data_length() == 5) {
 				uint8_t motor_id = trame.get_data()[0];
-				float angle = make_float(trame.get_data()[1], trame.get_data()[2], trame.get_data()[3], trame.get_data()[4]);
 				switch(motor_id) {
 					case ID_MOTOR_ELEVATOR_LEFT:
-						_motor_elevator_left.set_position(angle);
+						_motor_elevator_left.handle_trame(trame);
 						break;
 					case ID_MOTOR_ELEVATOR_RIGHT:
-						_motor_elevator_right.set_position(angle);
+						_motor_elevator_right.handle_trame(trame);
 						break;
 					default:
 						break;
@@ -116,14 +115,12 @@ void Robot::handle_trame_motor(Trame trame) {
 		case 0x02: {
 			if(trame.get_data_length() == 3) {
 				uint8_t motor_id = trame.get_data()[0];
-				uint8_t revolution = trame.get_data()[1];
-				uint8_t direction = trame.get_data()[2];
 				switch(motor_id) {
 					case ID_MOTOR_ELEVATOR_LEFT:
-						_motor_elevator_left.turn_n(revolution, static_cast<Direction>(direction));
+						_motor_elevator_left.handle_trame(trame);
 						break;
 					case ID_MOTOR_ELEVATOR_RIGHT:
-						_motor_elevator_right.turn_n(revolution, static_cast<Direction>(direction));
+						_motor_elevator_right.handle_trame(trame);
 						break;
 					default:
 						break;
@@ -135,19 +132,18 @@ void Robot::handle_trame_motor(Trame trame) {
 		case 0x03: {
 			if(trame.get_data_length() == 2) {
 				uint8_t motor_id = trame.get_data()[0];
-				uint8_t direction = trame.get_data()[1];
 				switch(motor_id) {
 					case ID_MOTOR_SWALLOW_LEFT:
-						_motor_swallow_left.turn_on(static_cast<Direction>(direction));
+						_motor_swallow_left.handle_trame(trame);
 						break;
 					case ID_MOTOR_SWALLOW_RIGHT:
-						_motor_swallow_right.turn_on(static_cast<Direction>(direction));
+						_motor_swallow_right.handle_trame(trame);
 						break;
 					case ID_MOTOR_BRUSHLESS_LEFT:
-						_turbine_left.set_brushless_state(BrushlessState::ON);
+						_turbine_left.handle_trame(trame);
 						break;
 					case ID_MOTOR_BRUSHLESS_RIGHT:
-						_turbine_left.set_brushless_state(BrushlessState::ON);
+						_turbine_right.handle_trame(trame);
 						break;
 					default:
 						break;
@@ -161,16 +157,16 @@ void Robot::handle_trame_motor(Trame trame) {
 				uint8_t motor_id = trame.get_data()[0];
 				switch(motor_id) {
 					case ID_MOTOR_SWALLOW_LEFT:
-						_motor_swallow_left.turn_off();
+						_motor_swallow_left.handle_trame(trame);
 						break;
 					case ID_MOTOR_SWALLOW_RIGHT:
-						_motor_swallow_right.turn_off();
+						_motor_swallow_right.handle_trame(trame);
 						break;
 					case ID_MOTOR_BRUSHLESS_LEFT:
-						_turbine_left.set_brushless_state(BrushlessState::OFF);
+						_turbine_left.handle_trame(trame);
 						break;
 					case ID_MOTOR_BRUSHLESS_RIGHT:
-						_turbine_right.set_brushless_state(BrushlessState::OFF);
+						_turbine_right.handle_trame(trame);
 						break;
 					default:
 						break;

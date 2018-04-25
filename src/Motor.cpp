@@ -1,5 +1,5 @@
 #include "Motor.h"
-
+#include "Utils.h"
 
 Motor::Motor(PinName pin_qei_1, PinName pin_qei_2, PinName pin_motor_control, PinName pin_direction_control, float period_asserv)
         : _pulse_wanted(0)
@@ -71,6 +71,24 @@ void Motor::asserv() {
 		_motor_speed_control.write(0);
 		_error_sum = 0;
 		_prev_error = 0;
+	}
+}
+
+void Motor::handle_trame(Trame t) {
+	switch(t.get_cmd()) {
+		case 0x01: {
+			float angle = make_float(t.get_data()[1], t.get_data()[2], t.get_data()[3], t.get_data()[4]);
+			this->set_position(angle);
+			break;
+		}
+		case 0x02: {
+			uint8_t revolution = t.get_data()[1];
+			uint8_t direction = t.get_data()[2];
+			this->turn_n(revolution, static_cast<Direction>(direction));
+			break;
+		}
+		default:
+			break;
 	}
 }
 

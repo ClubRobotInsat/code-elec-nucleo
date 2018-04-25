@@ -6,6 +6,7 @@
 #define MARGE 150
 
 #include "QEI.h"
+#include "Trame.h"
 #include <mbed.h>
 
 enum class Direction {
@@ -24,6 +25,8 @@ public:
 	void turn_n(int nb_turns, Direction dir);
 
 	void asserv();
+
+	void handle_trame(Trame t);
 
 	static float KP;
 	static float KI;
