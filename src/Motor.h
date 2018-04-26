@@ -15,7 +15,7 @@ enum class Direction {
 
 class Motor {
 public:
-	Motor(PinName pin_qei_1, PinName pin_qei_2, PinName pin_motor_control, PinName pin_direction_control, float period_asserv);
+	Motor(PinName pin_qei_1, PinName pin_qei_2, PinName pin_motor_control, PinName pin_direction_control);
 
 	/* L'angle est en degré entre 0 et 360 !!!! */
 	// TODO : Calculer le sens de rotation le plus rapide pour atteindre la position demandée !

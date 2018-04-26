@@ -1,6 +1,6 @@
 #include "SimpleMotor.h"
 
-SimpleMotor::SimpleMotor(PinName pwm, PinName dir) : _pwm(pwm), _dir(dir) {}
+SimpleMotor::SimpleMotor(PinName dir, PinName pwm) : _pwm(pwm), _dir(dir) {}
 
 void SimpleMotor::turn_on(Direction dir) {
 	_dir.write(static_cast<uint8_t>(dir));

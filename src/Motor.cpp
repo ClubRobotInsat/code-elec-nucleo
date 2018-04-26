@@ -1,7 +1,7 @@
 #include "Motor.h"
 #include "Utils.h"
 
-Motor::Motor(PinName pin_qei_1, PinName pin_qei_2, PinName pin_motor_control, PinName pin_direction_control, float period_asserv)
+Motor::Motor(PinName pin_qei_1, PinName pin_qei_2, PinName pin_motor_control, PinName pin_direction_control)
         : _pulse_wanted(0)
         , _encoder(pin_qei_1, pin_qei_2, NC, PPR, QEI::X4_ENCODING)
         , _motor_speed_control(pin_motor_control)

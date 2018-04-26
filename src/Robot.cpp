@@ -5,15 +5,15 @@
 
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
-        , _pc(USBTX, USBRX, BAUD_RATE_RPI_NUCLEO)
-        , _servo_manager(A0, A1, BAUD_RATE_SERVO, DMA_USAGE_ROBOT)
-        , _turbine_left(PA_15)
-        , _turbine_right(PA_10)
-        , _motor_elevator_left(PB_3, PB_4, PA_8, PB_3, 0.05f)
-        , _motor_elevator_right(PA_6, PA_7, PA_5, PB_4, 0.05f)
-        , _motor_swallow_left(PB_8, PB_9) // FIXME
-        , _motor_swallow_right(PB_9, PB_8)
-        , _tirette(PA_9)
+        , _pc(PA_3, PA_2, BAUD_RATE_RPI_NUCLEO)
+        , _servo_manager(PA_0, PA_1, BAUD_RATE_SERVO, DMA_USAGE_ROBOT)
+        , _turbine_left(PB_15)
+        , _turbine_right(PB_14)
+        , _motor_elevator_left(PA_5, PA_6, PC_7, PA_9)
+        , _motor_elevator_right(PC_14, PC_15, PC_13, PB_7)
+        , _motor_swallow_left(PC_9, PC_8)
+        , _motor_swallow_right(PB_9, PC_6)
+        , _tirette(PC_2)
         , _trame_reader()
         , _trame_from_can_buffer() {
 

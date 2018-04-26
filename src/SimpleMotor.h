@@ -9,7 +9,7 @@
 class SimpleMotor {
 
 public:
-	SimpleMotor(PinName pwm, PinName dir);
+	SimpleMotor(PinName dir, PinName pwm);
 
 	void turn_off();
 	void turn_on(Direction dir);
