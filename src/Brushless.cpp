@@ -17,12 +17,17 @@ void Brushless::set_brushless_state(BrushlessState state) {
 
 void Brushless::handle_trame(Trame t) {
 	switch(t.get_cmd()) {
-		case 0x03: {
+		/*Moteur ON Brushless*/
+		case 0x05: {
 			this->set_brushless_state(BrushlessState::ON);
+			break;
 		}
+		/*Moteur OFF*/
 		case 0x04: {
-
 			this->set_brushless_state(BrushlessState::OFF);
+			break;
 		}
+		default:
+			break;
 	}
 }

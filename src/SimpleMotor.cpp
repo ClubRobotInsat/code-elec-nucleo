@@ -20,6 +20,9 @@ void SimpleMotor::handle_trame(Trame t) {
 		}
 		case 0x04: {
 			this->turn_off();
+			break;
 		}
+		default:
+			break;
 	}
 }

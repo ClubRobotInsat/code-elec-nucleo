@@ -51,7 +51,7 @@ void Robot::initialize_meca() {
 
 void Robot::manage_robot() {
 
-	/* Lecture des trames reçus depuis la connexion avec l'informatique */
+	/* Lecture des trames reçues depuis la connexion avec l'informatique */
 	if(_trame_reader.trame_ready()) {
 		Trame trame = _trame_reader.get_trame();
 		// Acquittement de la trame reçue.
@@ -76,7 +76,7 @@ void Robot::manage_robot() {
 
 void Robot::handle_trame(Trame trame) {
 	switch(trame.get_id()) {
-		case 0x00:
+		case ID_NUCLEO:
 			handle_trame_nucleo(trame);
 			break;
 		case ID_ELEC_CARD_MOVEMENT:
@@ -108,8 +108,9 @@ void Robot::handle_trame_motor(Trame trame) {
 		/* Ping : on réponds pong */
 		case 0x00: {
 			if(trame.get_data_length() == 1 && trame.get_data()[0] == 0x55) {
-				this->send_pong(0x05);
+				this->send_pong(ID_ELEC_CARD_MOTORS);
 			}
+			break;
 		}
 		/* Position en angle */
 		case 0x01: {
@@ -156,12 +157,6 @@ void Robot::handle_trame_motor(Trame trame) {
 					case ID_MOTOR_SWALLOW_RIGHT:
 						_motor_swallow_right.handle_trame(trame);
 						break;
-					case ID_MOTOR_BRUSHLESS_LEFT:
-						_turbine_left.handle_trame(trame);
-						break;
-					case ID_MOTOR_BRUSHLESS_RIGHT:
-						_turbine_right.handle_trame(trame);
-						break;
 					default:
 						break;
 				}
@@ -191,6 +186,23 @@ void Robot::handle_trame_motor(Trame trame) {
 			}
 			break;
 		}
+		/* Moteur ON Brushless*/
+		case 0x05: {
+			if(trame.get_data_length() == 1) {
+				uint8_t brushless_id = trame.get_data()[0];
+				switch(brushless_id) {
+					case ID_MOTOR_BRUSHLESS_LEFT:
+						_turbine_left.handle_trame(trame);
+						break;
+					case ID_MOTOR_BRUSHLESS_RIGHT:
+						_turbine_right.handle_trame(trame);
+						break;
+					default:
+						break;
+				}
+			}
+			break;
+		}
 		default:
 			break;
 	}
@@ -201,8 +213,9 @@ void Robot::handle_trame_servo(Trame trame) {
 		/* Ping : on réponds Pong */
 		case 0x00: {
 			if(trame.get_data_length() == 1 && trame.get_data()[0] == 0x55) {
-				this->send_pong(0x02);
+				this->send_pong(ID_ELEC_CARD_SERVOS);
 			}
+			break;
 		}
 		/* Réglage de la position */
 		case 0x05: {
@@ -230,7 +243,7 @@ void Robot::handle_trame_servo(Trame trame) {
 void Robot::handle_trame_nucleo(Trame trame) {
 	/* Gestion du ping pour la nucléo */
 	if(trame.get_cmd() == 0x00 && trame.get_data_length() == 1 && trame.get_data()[0] == 0x55) {
-		this->send_pong(0x00);
+		this->send_pong(ID_NUCLEO);
 	}
 }
 
@@ -239,7 +252,7 @@ void Robot::handle_trame_io(Trame trame) {
 		/* Ping : on réponds PONG */
 		case 0x00: {
 			if(trame.get_data_length() == 1 && trame.get_data()[0] == 0x55) {
-				this->send_pong(0x03);
+				this->send_pong(ID_ELEC_CARD_IO);
 			}
 			break;
 		}

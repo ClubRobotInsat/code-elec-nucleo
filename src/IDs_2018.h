@@ -19,6 +19,7 @@
 
 /// IDs des cartes
 
+#define ID_NUCLEO 0
 #define ID_ELEC_CARD_MOVEMENT 1
 // La nucléo gère directement l'IO, les servos et les moteurs
 #define ID_ELEC_CARD_SERVOS 2
