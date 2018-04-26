@@ -11,6 +11,15 @@ Trame::Trame(uint8_t id, uint8_t cmd, uint8_t data_length, uint8_t* data, uint8_
 
 Trame::Trame() : _id(0), _cmd(0), _data_length(0), _packet_number(0), _data{0} {}
 
+Trame::Trame(CANMessage message) : Trame() {
+
+	_data_length = message.len;
+	memcpy(_data, message.data, _data_length);
+	uint16_t id_and_cmd = static_cast<uint16_t>(message.id);
+	_id = Trame::demultiplex_id(id_and_cmd);
+	_cmd = Trame::demultiplex_cmd(id_and_cmd);
+}
+
 void Trame::send_ack(uint8_t packet_number, Serial* pc) {
 	int size = 8;
 	uint8_t* tab = new uint8_t[size];
@@ -24,12 +33,6 @@ void Trame::send_ack(uint8_t packet_number, Serial* pc) {
 	tab[5] = 0;
 	tab[6] = 0;
 	tab[7] = 0;
-
-	// printf("Envoi du ack : ");
-	for(uint8_t k; k < 8; k++) {
-		// printf("%#x ",tab[k]);
-	}
-	// printf("\n\r");
 
 	Buffer* buffer = new Buffer(tab, size);
 	buffer->write(pc);
@@ -77,27 +80,40 @@ bool Trame::is_ping() const {
 	return _data_length == 1 && _cmd == 0x00 && _data[0] == 0x55;
 }
 
-uint8_t Trame::demultiplex_id(uint8_t const& first, uint8_t const& second) {
+uint8_t Trame::demultiplex_id(uint8_t const first, uint8_t const second) {
 	uint16_t muxedVal = (uint16_t(second) << 8) | uint16_t(first);
 	return uint8_t((muxedVal >> BITS_CMD_TRAME) & ~(1 << BITS_ID_TRAME));
 }
 
-uint8_t Trame::demultiplex_cmd(uint8_t const& first, uint8_t const& second) {
+uint8_t Trame::demultiplex_id(uint16_t const data) {
+	return uint8_t(data >> BITS_CMD_TRAME) & ~(1 << BITS_ID_TRAME);
+}
+
+uint8_t Trame::demultiplex_cmd(uint16_t const data) {
+	return uint8_t(data & 0xF);
+}
+
+uint8_t Trame::demultiplex_cmd(uint8_t const first, uint8_t const second) {
 	uint16_t muxedVal = (uint16_t(second) << 8) | uint16_t(first);
 	return uint8_t(muxedVal & 0xF);
 }
 
-uint8_t Trame::multiplex_id(uint8_t id, uint8_t cmd) {
+uint8_t Trame::multiplex_id(uint8_t const id, uint8_t const cmd) {
 	uint16_t muxedVal = (uint16_t(id) << BITS_CMD_TRAME) | uint16_t(cmd);
 	return (muxedVal & 0xFF);
 }
 
-uint8_t Trame::multiplex_cmd(uint8_t id, uint8_t cmd) {
+uint8_t Trame::multiplex_cmd(uint8_t const id, uint8_t const cmd) {
 	uint16_t muxedVal = (uint16_t(id) << BITS_CMD_TRAME) | uint16_t(cmd);
 	return ((muxedVal >> 8) & 0xFF);
 }
 
+uint16_t Trame::multiplex_id_and_cmd(uint8_t const id, uint8_t const cmd) {
+	// TODO à check
+	return (multiplex_cmd(id, cmd) << BITS_ID_TRAME) | (multiplex_id(id, cmd) & 0xEF);
+}
+
 CANMessage Trame::into_can_message() {
-	// TODO 
-	return CANMessage();
+	uint16_t sid = multiplex_id_and_cmd(_id, _cmd);
+	return CANMessage(sid & 0x7FF, (char*)_data, _data_length);
 }

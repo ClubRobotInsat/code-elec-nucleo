@@ -1,8 +1,8 @@
 namespace herkulex {
 
 	template <uint8_t N_SERVOS>
-	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin)
-	        : _bus(txPin, rxPin, BUS_BAUDRATE, 0.05), _nb_reg_servos(0) {}
+	Manager<N_SERVOS>::Manager(PinName txPin, PinName rxPin, int baudrate, DMAUsage usage)
+	        : _bus(txPin, rxPin, baudrate, 0.05, usage), _nb_reg_servos(0) {}
 
 	template <uint8_t N_SERVOS>
 	Manager<N_SERVOS>::~Manager() {

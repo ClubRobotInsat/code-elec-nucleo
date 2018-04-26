@@ -39,7 +39,7 @@ void Motor::asserv() {
 
 	int pulses = _encoder.getPulses();
 
-	if(_pulse_wanted >= pulses + MARGE || _pulse_wanted <= pulses - MARGE) {
+	if(_pulse_wanted >= pulses + MOTOR_DEAD_ZONE || _pulse_wanted <= pulses - MOTOR_DEAD_ZONE) {
 
 		float error = abs(pulses - _pulse_wanted);
 		float delta_error = fabs(error - _prev_error);
@@ -51,8 +51,8 @@ void Motor::asserv() {
 		float pwm_value =
 		    static_cast<float>(error * KP) + static_cast<float>(_error_sum * KI) + static_cast<float>(delta_error * KD);
 
-		if(pwm_value < MIN_PWM) {
-			pwm_value = MIN_PWM;
+		if(pwm_value < MOTOR_MIN_PWM) {
+			pwm_value = MOTOR_MIN_PWM;
 		}
 
 		// debug("Je veut être en %d et je suis en %d => déplacement avec pour consigne

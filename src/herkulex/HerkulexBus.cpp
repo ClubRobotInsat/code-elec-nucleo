@@ -9,9 +9,8 @@ namespace herkulex {
 	 * Le baudrate de la com. peut etre specifie.
 	 * --------------------------------------------------------------------------------------------
 	 */
-	Bus::Bus(PinName txPin, PinName rxPin, uint32_t baudrate, float flush_frequency)
-	        :
-		       //	_ticker_flush()
+	Bus::Bus(PinName txPin, PinName rxPin, uint32_t baudrate, float flush_frequency, DMAUsage usage)
+	        : //	_ticker_flush()
 	        /*,*/ _callback_waiting(false)
 	        , _write_done(true)
 	        , _ser(txPin, rxPin, baudrate)
@@ -21,6 +20,8 @@ namespace herkulex {
 	        , _buffer_write_length()
 	        , _total_write_length(0)
 	        , _data_written(nullptr) {
+		_ser.set_dma_usage_rx(usage);
+		_ser.set_dma_usage_tx(usage);
 		//_ticker_flush.attach(Callback<void()>(this, &Bus::flush_one_message), flush_frequency);
 	}
 

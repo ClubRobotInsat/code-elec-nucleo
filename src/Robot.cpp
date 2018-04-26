@@ -1,11 +1,12 @@
 #include "Robot.h"
+#include "Config.h"
 #include "IDs_2018.h"
 #include "Utils.h"
 
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
-        , _pc(USBTX, USBRX, 921600)
-        , _servo_manager(A0, A1)
+        , _pc(USBTX, USBRX, BAUD_RATE_RPI_NUCLEO)
+        , _servo_manager(A0, A1, BAUD_RATE_SERVO, DMA_USAGE_ROBOT)
         , _turbine_left(PA_15)
         , _turbine_right(PA_10)
         , _motor_elevator_left(PB_3, PB_4, PA_8, PB_3, 0.05f)
@@ -13,14 +14,19 @@ Robot::Robot()
         , _motor_swallow_left(PB_8, PB_9) // FIXME
         , _motor_swallow_right(PB_9, PB_8)
         , _tirette(PA_9)
-        , _trame_reader() {
+        , _trame_reader()
+        , _trame_from_can_buffer() {
 
 	/* Activation des modules DMA */
-	_pc.set_dma_usage_tx(DMA_USAGE_OPPORTUNISTIC);
-	_pc.set_dma_usage_rx(DMA_USAGE_OPPORTUNISTIC);
+	_pc.set_dma_usage_tx(DMA_USAGE_ROBOT);
+	_pc.set_dma_usage_rx(DMA_USAGE_ROBOT);
 
-	/* Activation de la reception des trames */
+	/* Activation de la reception des trames depuis l'informatique */
 	_trame_reader.attach_to_serial(&_pc);
+
+	/* Activation de la reception des trames de puis le bus CAN */
+	_can.attach(Callback<void()>(this, &Robot::read_trame_from_can), mbed::CAN::IrqType::RxIrq);
+
 
 	/* Initialisation des servos (redémarrage) */
 	for(uint8_t i = 0; i < 5; i++) {
@@ -45,11 +51,19 @@ void Robot::initialize_meca() {
 
 void Robot::manage_robot() {
 
+	/* Lecture des trames reçus depuis la connexion avec l'informatique */
 	if(_trame_reader.trame_ready()) {
 		Trame trame = _trame_reader.get_trame();
 		// Acquittement de la trame reçue.
 		Trame::send_ack(trame.get_packet_number(), &_pc);
 		this->handle_trame(trame);
+	}
+
+	/* Lecture des trames reçus depuis le CAN */
+	while(not _trame_from_can_buffer.empty()) {
+		Trame trame;
+		_trame_from_can_buffer.pop(trame);
+		trame.send_to_serial(&_pc);
 	}
 
 	/* Mise à jour des consignes d'asservissement des deux moteurs d'ascenseurs */
@@ -240,3 +254,11 @@ void Robot::handle_trame_io(Trame trame) {
 			break;
 	}
 };
+
+void Robot::read_trame_from_can() {
+	CANMessage message_received;
+	_can.read(message_received);
+	Trame t(message_received);
+	_trame_from_can_buffer.push(t);
+	// TODO : delete le pointeur sur data de CANMessage ?
+}

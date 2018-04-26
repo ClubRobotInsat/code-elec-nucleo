@@ -8,7 +8,7 @@
 #define HERKULEX_BUS_H
 
 #include "HerkulexConst.h"
-#include "CircularBuffer.h"
+#include <CircularBuffer.h>
 
 namespace herkulex {
 	template <uint8_t N_SERVOS>
@@ -26,7 +26,7 @@ namespace herkulex {
 		 * Le baudrate de la com peut etre specifie.
 		 * --------------------------------------------------------------------------------------------
 		 */
-		explicit Bus(PinName txPin, PinName rxPin, uint32_t baudrate = 115200, float flush_frequency = 0.2);
+		explicit Bus(PinName txPin, PinName rxPin, uint32_t baudrate = 115200, float flush_frequency = 0.2, DMAUsage usage = DMA_USAGE_NEVER);
 
 		/* --------------------------------------------------------------------------------------------
 		 * Destructeur
@@ -138,7 +138,7 @@ namespace herkulex {
 		void cb_write_done(int e);
 
 	private:
-		//Ticker _ticker_flush;
+		// Ticker _ticker_flush;
 
 		volatile bool _callback_waiting;
 		volatile bool _write_done;

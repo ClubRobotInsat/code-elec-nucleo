@@ -14,7 +14,7 @@ namespace herkulex {
 	template <uint8_t N_SERVOS>
 	class Manager {
 	public:
-		explicit Manager(PinName txPin, PinName rxPin);
+		explicit Manager(PinName txPin, PinName rxPin, int baudrate = 115200, DMAUsage usage = DMA_USAGE_NEVER);
 
 		virtual ~Manager();
 

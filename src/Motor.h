@@ -2,11 +2,10 @@
 #define MOTOR_ROBOT_H
 
 #define PPR 4096
-#define MIN_PWM 0.08
-#define MARGE 150
 
-#include "QEI.h"
+#include "Config.h"
 #include "Trame.h"
+#include <QEI.h>
 #include <mbed.h>
 
 enum class Direction {

@@ -2,7 +2,7 @@
 #define TRAME_H
 
 #include "Buffer.h"
-#include "mbed.h"
+#include <mbed.h>
 
 #define BITS_CMD_TRAME 4
 #define BITS_ID_TRAME 7
@@ -14,6 +14,7 @@ public:
 	Trame(uint8_t id, uint8_t cmd, uint8_t data_length, uint8_t* data, uint8_t packet_number);
 	Trame();
 
+	Trame(CANMessage);
 
 	void print() const {
 		debug("ID : %#x | CMD : %#x | N° : %#x | DL : %#x \n\r", _id, _cmd, _packet_number, _data_length);
@@ -49,13 +50,21 @@ public:
 	// Renvoie vrai si la trame est un ping.
 	bool is_ping() const;
 
-	static uint8_t demultiplex_id(uint8_t const& first, uint8_t const& second);
+	/* Fonctions utilitaires permettant de sérialiser et déserialiser des trames facilement */
 
-	static uint8_t demultiplex_cmd(uint8_t const& first, uint8_t const& second);
+	static uint8_t demultiplex_id(uint8_t const first, uint8_t const second);
 
-	static uint8_t multiplex_id(uint8_t id, uint8_t cmd);
+	static uint8_t demultiplex_cmd(uint8_t const first, uint8_t const second);
 
-	static uint8_t multiplex_cmd(uint8_t id, uint8_t cmd);
+	static uint8_t multiplex_id(uint8_t const id, uint8_t const cmd);
+
+	static uint8_t multiplex_cmd(uint8_t const id, uint8_t const cmd);
+
+	static uint8_t demultiplex_id(uint16_t const);
+
+	static uint8_t demultiplex_cmd(uint16_t const);
+
+	static uint16_t multiplex_id_and_cmd(uint8_t const id, uint8_t const cmd);
 
 private:
 	static uint8_t* make_ack(uint8_t num_packet);
