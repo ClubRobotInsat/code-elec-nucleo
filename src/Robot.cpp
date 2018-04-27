@@ -25,7 +25,7 @@ Robot::Robot()
 	_trame_reader.attach_to_serial(&_pc);
 
 	/* Activation de la reception des trames de puis le bus CAN */
-	_can.attach(Callback<void()>(this, &Robot::read_trame_from_can), mbed::CAN::IrqType::RxIrq);
+	_can.attach(Callback<void()>(this, &Robot::read_trame_from_can), CAN::IrqType::RxIrq);
 
 
 	/* Initialisation des servos (redémarrage) */
