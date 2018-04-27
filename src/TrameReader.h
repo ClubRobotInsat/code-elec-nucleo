@@ -43,6 +43,7 @@ public:
 
 	~TrameReader() {
 		delete[] _byte_buffer;
+		delete _ser;
 	}
 
 	/* Attache la machine à état sur une connexion série */
