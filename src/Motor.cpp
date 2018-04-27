@@ -76,11 +76,13 @@ void Motor::asserv() {
 
 void Motor::handle_trame(Trame t) {
 	switch(t.get_cmd()) {
+		/*Position en angle*/
 		case 0x01: {
 			float angle = make_float(t.get_data()[1], t.get_data()[2], t.get_data()[3], t.get_data()[4]);
 			this->set_position(angle);
 			break;
 		}
+		/*Position en tour*/
 		case 0x02: {
 			uint8_t revolution = t.get_data()[1];
 			uint8_t direction = t.get_data()[2];
