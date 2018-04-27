@@ -91,7 +91,7 @@ namespace herkulex {
 		uint8_t index = 0;
 
 		// NEW
-		uint8_t* txBuf = new uint8_t(total_length);
+		uint8_t* txBuf = new uint8_t[total_length];
 
 		txBuf[0] = constants::header;
 		txBuf[1] = constants::header;
@@ -178,7 +178,7 @@ namespace herkulex {
 		if(len < 1 || len > 2) {
 			debug("Utilisation de Bus::sendRAMWriteMsg avec une longueur erronee !\n");
 		} else {
-			uint8_t* data = new uint8_t(2 + len);
+			uint8_t* data = new uint8_t[2 + len];
 
 			data[0] = addr;
 			data[1] = len;
@@ -203,7 +203,7 @@ namespace herkulex {
 		if(len < 1 || len > 2) {
 			debug("Utilisation de Bus::sendRAMWrite_msg avec une longueur erronee !\n");
 		} else {
-			uint8_t* data = new uint8_t(2 + len);
+			uint8_t* data = new uint8_t[2 + len];
 
 			data[0] = addr;
 			data[1] = len;
@@ -220,7 +220,7 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::send_IJOG_msg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
-		uint8_t* data = new uint8_t(5);
+		uint8_t* data = new uint8_t[5];
 
 		data[0] = (jogValue & 0xff);
 		data[1] = (jogValue & 0xff00) >> 8;
@@ -239,7 +239,7 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::send_SJOG_msg(uint8_t id, uint8_t playtime, uint16_t jogValue, uint8_t set) {
-		uint8_t* data = new uint8_t(5);
+		uint8_t* data = new uint8_t[5];
 
 		data[0] = playtime;
 		data[1] = (jogValue & 0x00ff);
@@ -258,7 +258,7 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::send_stat_msg(uint8_t id) {
-		uint8_t* data = new uint8_t(2);
+		uint8_t* data = new uint8_t[2];
 
 		data[0] = 0;
 		data[1] = 0;
@@ -272,7 +272,7 @@ namespace herkulex {
 	 * --------------------------------------------------------------------------------------------
 	 */
 	void Bus::send_rollback_msg(uint8_t id, bool skipIDRollback, bool skipBaudrateRollback) {
-		uint8_t* data = new uint8_t(2);
+		uint8_t* data = new uint8_t[2];
 
 		data[0] = (skipIDRollback ? 1 : 0);
 		data[1] = (skipBaudrateRollback ? 1 : 0);
