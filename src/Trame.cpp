@@ -40,7 +40,7 @@ void Trame::send_ack(uint8_t packet_number, Serial* pc) {
 
 
 void Trame::send_to_serial(Serial* pc) {
-	int size = 8 + _data_length;
+	int size = 7 + _data_length;
 	uint8_t* tab = new uint8_t[size];
 
 	// Remplir le tableau contenant la trame
@@ -48,12 +48,11 @@ void Trame::send_to_serial(Serial* pc) {
 	tab[1] = 0xDC;
 	tab[2] = 0xAB;
 	tab[3] = 0xBA;
-	tab[4] = _packet_number; // FIXME
-	tab[5] = Trame::multiplex_id(_id, _cmd);
-	tab[6] = Trame::multiplex_cmd(_id, _cmd);
-	tab[7] = _data_length;
+	tab[4] = Trame::multiplex_id(_id, _cmd);
+	tab[5] = Trame::multiplex_cmd(_id, _cmd);
+	tab[6] = _data_length;
 	for(int j = 0; j < _data_length; j++) {
-		tab[8 + j] = _data[j];
+		tab[7 + j] = _data[j];
 	}
 	Buffer* buffer = new Buffer(tab, size);
 	buffer->write(pc);
