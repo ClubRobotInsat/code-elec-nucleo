@@ -64,7 +64,7 @@ namespace herkulex {
 			for(uint8_t i = 0; i < length; i++) {
 				message[index + i] = data[i];
 			}
-			delete data;
+			delete[] data;
 			index += length;
 		}
 		_ser.write(message, _total_write_length, _write_callback, SERIAL_EVENT_TX_ALL);
