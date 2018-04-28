@@ -11,7 +11,7 @@ enum BrushlessState { ON, OFF };
 class Brushless {
 
 public:
-	Brushless(PinName motor_pin);
+	explicit Brushless(PinName motor_pin);
 
 	void set_brushless_state(BrushlessState state);
 

@@ -14,7 +14,7 @@ public:
 	Trame(uint8_t id, uint8_t cmd, uint8_t data_length, uint8_t* data, uint8_t packet_number);
 	Trame();
 
-	Trame(CANMessage);
+	explicit Trame(CANMessage);
 
 	void print() const {
 		debug("ID : %#x | CMD : %#x | N° : %#x | DL : %#x \n\r", _id, _cmd, _packet_number, _data_length);

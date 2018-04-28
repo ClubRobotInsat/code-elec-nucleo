@@ -158,10 +158,10 @@ namespace herkulex {
 
 		uint32_t _total_write_length;
 
-		Callback<void(uint8_t, uint8_t, uint8_t)>* _callback_read_stat;
-		Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)>* _callback_read_addr;
+		// Callback<void(uint8_t, uint8_t, uint8_t)>* _callback_read_stat;
+		// Callback<void(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t)>* _callback_read_addr;
 
-		uint8_t _expected_reply_id;
+		// uint8_t _expected_reply_id;
 		constants::CMD::fromServo::fromServoEnum _expected_reply_cmd;
 
 		uint8_t* _data_written;

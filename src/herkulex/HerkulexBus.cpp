@@ -16,6 +16,7 @@ namespace herkulex {
 	        , _ser(txPin, rxPin, baudrate)
 	        , _read_callback()
 	        , _write_callback(Callback<void(int)>(this, &Bus::cb_write_done))
+	        , _buffer{}
 	        , _buffer_write_data()
 	        , _buffer_write_length()
 	        , _total_write_length(0)
@@ -88,7 +89,6 @@ namespace herkulex {
 	 */
 	void Bus::send_msg(const uint8_t id, const constants::CMD::toServo::toServoEnum cmd, const uint8_t* data, const uint8_t length) {
 		uint8_t total_length = length + constants::Size::MinPacketSize;
-		uint8_t index = 0;
 
 		// NEW
 		uint8_t* txBuf = new uint8_t[total_length];
@@ -104,7 +104,7 @@ namespace herkulex {
 		txBuf[6] = 0;
 
 		if(data != nullptr) {
-			for(index = 0; index < length; ++index) {
+			for(uint8_t index = 0; index < length; ++index) {
 				txBuf[constants::Size::MinPacketSize + index] = data[index];
 				// Iteratively construct the checksum
 				txBuf[5] = txBuf[5] ^ data[index];
