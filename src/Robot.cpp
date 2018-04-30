@@ -5,17 +5,18 @@
 
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
-        , _pc(PA_2, PA_3, BAUD_RATE_RPI_NUCLEO)
+        , _pc(PC_10, PC_11, BAUD_RATE_RPI_NUCLEO)
         , _servo_manager(PA_0, PA_1, BAUD_RATE_SERVO, DMA_USAGE_ROBOT)
         , _turbine_left(PB_15)
         , _turbine_right(PB_14)
         , _motor_elevator_left(PA_5, PA_6, PC_7, PA_9)
-        , _motor_elevator_right(PC_14, PC_15, PC_13, PB_7)
+        , _motor_elevator_right(PC_14, PC_15, PB_7, PC_13)
         , _motor_swallow_left(PC_9, PC_8)
         , _motor_swallow_right(PB_9, PC_6)
         , _tirette(PC_2)
         , _trame_reader()
         , _trame_from_can_buffer() {
+	debug("Activation du robot ...\n\r");
 
 	/* Activation des modules DMA */
 	_pc.set_dma_usage_tx(DMA_USAGE_ROBOT);
