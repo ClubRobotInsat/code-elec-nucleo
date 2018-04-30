@@ -5,7 +5,7 @@
 
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
-        , _pc(PA_3, PA_2, BAUD_RATE_RPI_NUCLEO)
+        , _pc(PA_2, PA_3, BAUD_RATE_RPI_NUCLEO)
         , _servo_manager(PA_0, PA_1, BAUD_RATE_SERVO, DMA_USAGE_ROBOT)
         , _turbine_left(PB_15)
         , _turbine_right(PB_14)
