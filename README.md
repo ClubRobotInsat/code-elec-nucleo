@@ -124,6 +124,8 @@ Il est aussi possible d'afficher les printf sur notre pc (tout du moins ceux ré
 sudo screen /dev/ttyACM0 9600
 ```
 
+Enfin, il existe une [petite application](https://git.florencepaul.com/gbip/robot/releases) pour débugger la communication elec-info. Il faut la compiler à la mano.
+
 Pour quitter `screen` il faut taper : `ctrl-a` , puis k, puis y.
 
 ## Petite liste de liens utiles pour le développement
