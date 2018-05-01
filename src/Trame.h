@@ -27,6 +27,11 @@ public:
 	uint8_t* get_data() {
 		return _data;
 	}
+
+	const uint8_t* get_data() const {
+		return _data;
+	}
+
 	uint8_t get_id() const {
 		return _id;
 	}

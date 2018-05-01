@@ -20,6 +20,8 @@ public:
 	 * Cette fonction doit être appelée regulièrement.  */
 	void manage_robot();
 
+	static void print_trame(const Trame& trame);
+
 private:
 	/* Fonction utilitaire pour répondre facilement pong. */
 	void send_pong(uint8_t id);

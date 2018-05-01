@@ -35,6 +35,7 @@ Robot::Robot()
 		servo->reboot();
 	}
 	_servo_manager.flush_bus();
+	Buffer::delete_buffers();
 
 	// TODO : fixer le pullmode de la tirette
 }
@@ -52,9 +53,10 @@ void Robot::initialize_meca() {
 }
 
 void Robot::manage_robot() {
-
+	_trame_reader.parse_buffer();
 	/* Lecture des trames reçues depuis la connexion avec l'informatique */
-	if(_trame_reader.trame_ready()) {
+	while(_trame_reader.trame_ready()) {
+		// debug("Trame reçue \n\r!");
 		Trame trame = _trame_reader.get_trame();
 		// Acquittement de la trame reçue.
 		Trame::send_ack(trame.get_packet_number(), &_pc);
@@ -77,6 +79,9 @@ void Robot::manage_robot() {
 
 
 void Robot::handle_trame(Trame trame) {
+	printf("Handling : ");
+	print_trame(trame);
+	printf("\n\r");
 	switch(trame.get_id()) {
 		case ID_NUCLEO:
 			handle_trame_nucleo(trame);
@@ -276,4 +281,11 @@ void Robot::read_trame_from_can() {
 	Trame t(message_received);
 	_trame_from_can_buffer.push(t);
 	// TODO : delete le pointeur sur data de CANMessage ?
+}
+
+void Robot::print_trame(const Trame& trame) {
+	printf("id : %#x | cmd %#x | (%d) ", trame.get_id(), trame.get_cmd(), trame.get_data_length());
+	for(int i = 0; i < trame.get_data_length(); i++) {
+		printf("%#x ", trame.get_data()[i]);
+	}
 }

@@ -47,14 +47,27 @@ TrameReader::TrameReader()
 
 void TrameReader::attach_to_serial(Serial* ser) {
 	_ser = ser;
-	ser->read((uint8_t*)&_input_buffer, READ_BUFFER_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
+	ser->read((uint8_t*)&_input_buffer, READ_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
 }
 
 void TrameReader::handle_buffer(int e) {
 	for(uint8_t byte : _input_buffer) {
-		this->parse_byte(byte);
+		_read_buffer.push(byte);
 	}
-	_ser->read((uint8_t*)&_input_buffer, READ_BUFFER_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
+
+	_ser->read((uint8_t*)&_input_buffer, READ_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
+}
+
+void TrameReader::parse_buffer() {
+	while(not _read_buffer.empty()) {
+		uint8_t byte;
+		_read_buffer.pop(byte);
+		// printf("Byte : %#x",byte);
+		// printf(" | State :");
+		// print_state(_state);
+		// printf("\n\r");
+		parse_byte(byte);
+	}
 }
 
 void TrameReader::parse_byte(uint8_t byte) {
@@ -116,8 +129,9 @@ void TrameReader::parse_byte(uint8_t byte) {
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_DATA: {
+			debug("Byte for data : %#x \n\r", byte);
 			/* On reçois tout sauf le dernier octet */
-			if(not _trame_in_build.data_length == 0 and _data_received < _trame_in_build.data_length - 1) {
+			if(not _trame_in_build.data_length == 0 and _data_received <= _trame_in_build.data_length - 1) {
 				_byte_buffer[_data_received] = byte;
 				_data_received++;
 				break;
@@ -127,11 +141,11 @@ void TrameReader::parse_byte(uint8_t byte) {
 				_byte_buffer[_data_received] = byte;
 				uint8_t id = Trame::demultiplex_id(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
 				uint8_t cmd = Trame::demultiplex_cmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
-				debug("id : %#x | num : %#x | cmd : %#x | data_l : %#x \n\r",
-				      id,
-				      _trame_in_build.num_paquet,
-				      cmd,
-				      _trame_in_build.data_length);
+				debug("id : %#x | num : %#x | cmd : %#x | (%d)", id, _trame_in_build.num_paquet, cmd, _trame_in_build.data_length);
+				for(int i = 0; i < _trame_in_build.data_length; i++) {
+					debug("%#x ", _byte_buffer[i]);
+				}
+				debug("\n\r");
 				Trame t = Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
 				_trame_buffer.push(t);
 			}

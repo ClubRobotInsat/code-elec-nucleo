@@ -5,9 +5,14 @@
 #ifndef DEF_TRAME_READER
 #define DEF_TRAME_READER
 
-#define READ_BUFFER_SIZE 1024
+// Le nombre d'octets que l'on demande à mbed de nous lire à chaque fois.
+#define READ_SIZE 8
 
-#define TRAME_BUFFER_SIZE 1024
+// Le nombre d'octets que l'on peut stocker
+#define READ_BUFFER_SIZE 256
+
+// Le nombre de trames que l'on peut stocker.
+#define TRAME_BUFFER_SIZE 128
 
 /* Une énumeration qui représente les différents états que l'on peut avoir lorsque on lis des trames depuis une
  * connexion série */
@@ -55,6 +60,8 @@ public:
 	/* Renvoie vrai si le buffer contiens au moins une trame. */
 	bool trame_ready() const;
 
+	void parse_buffer();
+
 private:
 	/* S'occupe d'un buffer en le traitant octet par octet. */
 	void handle_buffer(int e);
@@ -63,7 +70,7 @@ private:
 	void parse_byte(uint8_t byte);
 
 	/* Le buffer contenant les trames */
-	CircularBuffer<Trame, 1024> _trame_buffer;
+	CircularBuffer<Trame, TRAME_BUFFER_SIZE> _trame_buffer;
 
 	/* Le buffer contenant les octets de données */
 	uint8_t* _byte_buffer;
@@ -83,7 +90,9 @@ private:
 	WIPTrame _trame_in_build;
 
 	/* Le buffer que l'on donne à la couche mbed pour la lecture */
-	uint8_t _input_buffer[READ_BUFFER_SIZE];
+	uint8_t _input_buffer[READ_SIZE];
+
+	CircularBuffer<uint8_t, READ_BUFFER_SIZE> _read_buffer;
 
 	/* Le callback que l'on donne à mbed pour la lecture */
 	event_callback_t _read_done;
