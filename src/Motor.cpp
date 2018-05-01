@@ -13,6 +13,11 @@ Motor::Motor(PinName pin_qei_1, PinName pin_qei_2, PinName pin_motor_control, Pi
 	_motor_direction_control.write(0);
 }
 
+bool Motor::is_in_position() {
+	int pulses = _encoder.getPulses();
+	return _pulse_wanted >= pulses + MOTOR_DEAD_ZONE || _pulse_wanted <= pulses - MOTOR_DEAD_ZONE;
+}
+
 /* L'angle est en degré entre 0 et 360 !!!! */
 void Motor::set_position(float angle, Direction dir) {
 	// Reduction : 11.6 tours de codeur pour 1 tour de moteur
