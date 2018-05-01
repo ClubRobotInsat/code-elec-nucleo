@@ -37,7 +37,7 @@ void Trame::send_ack(uint8_t packet_number, Serial* pc) {
 	tab[7] = 0;
 	Buffer* buffer = new Buffer(tab, size);
 	buffer->write();
-	delete tab;
+	delete[] tab;
 }
 
 
@@ -58,7 +58,7 @@ void Trame::send_to_serial(Serial* pc) {
 	}
 	Buffer* buffer = new Buffer(tab, size);
 	buffer->write();
-	delete tab;
+	delete[] tab;
 }
 
 void Trame::send_pong(uint8_t id, Serial* pc) {
@@ -76,7 +76,7 @@ void Trame::send_pong(uint8_t id, Serial* pc) {
 
 	Buffer* buffer = new Buffer(tab, 8);
 	buffer->write();
-	delete tab;
+	delete[] tab;
 }
 
 bool Trame::is_ping() const {
