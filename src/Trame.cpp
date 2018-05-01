@@ -2,14 +2,16 @@
 
 Trame::Trame(uint8_t id, uint8_t cmd, uint8_t data_length, uint8_t* data, uint8_t packet_number)
         : _id(id), _cmd(cmd), _data_length(data_length), _packet_number(packet_number), _data{0} {
-	if(data_length < 16) {
+	if(data_length < TRAME_DATA_SIZE) {
 		memcpy(_data, data, data_length);
 	} else {
-		error("Invalid trame data length \n\r");
+		debug("Invalid trame data length \n\r");
+		_data_length = 0;
 	}
 }
 
 Trame::Trame() : _id(0), _cmd(0), _data_length(0), _packet_number(0), _data{0} {}
+
 
 Trame::Trame(CANMessage message) : Trame() {
 
@@ -33,9 +35,9 @@ void Trame::send_ack(uint8_t packet_number, Serial* pc) {
 	tab[5] = 0;
 	tab[6] = 0;
 	tab[7] = 0;
-
 	Buffer* buffer = new Buffer(tab, size);
 	buffer->write(pc);
+	delete tab;
 }
 
 
@@ -56,6 +58,7 @@ void Trame::send_to_serial(Serial* pc) {
 	}
 	Buffer* buffer = new Buffer(tab, size);
 	buffer->write(pc);
+	delete tab;
 }
 
 void Trame::send_pong(uint8_t id, Serial* pc) {
@@ -73,6 +76,7 @@ void Trame::send_pong(uint8_t id, Serial* pc) {
 
 	Buffer* buffer = new Buffer(tab, 8);
 	buffer->write(pc);
+	delete tab;
 }
 
 bool Trame::is_ping() const {

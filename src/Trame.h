@@ -7,12 +7,16 @@
 #define BITS_CMD_TRAME 4
 #define BITS_ID_TRAME 7
 #define HEADER_SIZE 4
+#define TRAME_DATA_SIZE 16
 
 class Trame {
 
 public:
 	Trame(uint8_t id, uint8_t cmd, uint8_t data_length, uint8_t* data, uint8_t packet_number);
+
 	Trame();
+
+	~Trame() = default;
 
 	explicit Trame(CANMessage);
 
@@ -69,7 +73,7 @@ public:
 private:
 	static uint8_t* make_ack(uint8_t num_packet);
 	uint8_t _id, _cmd, _data_length, _packet_number;
-	uint8_t _data[16];
+	uint8_t _data[TRAME_DATA_SIZE];
 };
 
 #endif

@@ -3,31 +3,31 @@
 void print_state(TrameReaderState state) {
 	switch(state) {
 		case TrameReaderState::WAITING_FOR_H1:
-			debug("WAITING_FOR_H1\n\r");
+			printf("WAITING_FOR_H1\n\r");
 			break;
 		case TrameReaderState::WAITING_FOR_H2:
-			debug("WAITING_FOR_H2\n\r");
+			printf("WAITING_FOR_H2\n\r");
 			break;
 		case TrameReaderState::WAITING_FOR_H3:
-			debug("WAITING_FOR_H3\n\r");
+			printf("WAITING_FOR_H3\n\r");
 			break;
 		case TrameReaderState::WAITING_FOR_BYTE_1_ID_CMD:
-			debug("WAITING_FOR_BYTE_1_ID_CMD\n\r");
+			printf("WAITING_FOR_BYTE_1_ID_CMD\n\r");
 			break;
 		case TrameReaderState::WAITING_FOR_BYTE_2_ID_CMD:
-			debug("WAITING_FOR_BYTE_2_ID_CMD\n\r");
+			printf("WAITING_FOR_BYTE_2_ID_CMD\n\r");
 			break;
 		case TrameReaderState::WAITING_FOR_DATA:
-			debug("WAITING_FOR_DATA\n\r");
+			printf("WAITING_FOR_DATA\n\r");
 			break;
 		case TrameReaderState::WAITING_FOR_DATA_LENGTH:
-			debug("WAITING_FOR_DATA_LENGTH\n\r");
+			printf("WAITING_FOR_DATA_LENGTH\n\r");
 			break;
 		case TrameReaderState::WAITING_FOR_NUMPAQUET:
-			debug("WAITING_FOR_NUMPAQUET\n\r");
+			printf("WAITING_FOR_NUMPAQUET\n\r");
 			break;
 		case TrameReaderState::WAITING_FOR_TRAME_TYPE:
-			debug("WAITING_FOR_TRAME_TYPE\n\r");
+			printf("WAITING_FOR_TRAME_TYPE\n\r");
 			break;
 	}
 }
@@ -46,8 +46,8 @@ TrameReader::TrameReader()
 }
 
 void TrameReader::attach_to_serial(Serial* ser) {
-	ser->read((uint8_t*)&_input_buffer, READ_BUFFER_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
 	_ser = ser;
+	ser->read((uint8_t*)&_input_buffer, READ_BUFFER_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
 }
 
 void TrameReader::handle_buffer(int e) {
@@ -61,7 +61,7 @@ void TrameReader::parse_byte(uint8_t byte) {
 	switch(_state) {
 		case TrameReaderState::WAITING_FOR_H1: {
 			if(byte == 0xAC) {
-				this->_state = TrameReaderState::WAITING_FOR_H2;
+				_state = TrameReaderState::WAITING_FOR_H2;
 			} else {
 				_state = TrameReaderState::WAITING_FOR_H1;
 			}
@@ -107,8 +107,12 @@ void TrameReader::parse_byte(uint8_t byte) {
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_DATA_LENGTH: {
-			_trame_in_build.data_length = byte;
-			_state = TrameReaderState::WAITING_FOR_DATA;
+			if(byte < 8) {
+				_trame_in_build.data_length = byte;
+				_state = TrameReaderState::WAITING_FOR_DATA;
+			} else {
+				_state = TrameReaderState::WAITING_FOR_H1;
+			}
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_DATA: {
@@ -123,6 +127,11 @@ void TrameReader::parse_byte(uint8_t byte) {
 				_byte_buffer[_data_received] = byte;
 				uint8_t id = Trame::demultiplex_id(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
 				uint8_t cmd = Trame::demultiplex_cmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
+				debug("id : %#x | num : %#x | cmd : %#x | data_l : %#x \n\r",
+				      id,
+				      _trame_in_build.num_paquet,
+				      cmd,
+				      _trame_in_build.data_length);
 				Trame t = Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
 				_trame_buffer.push(t);
 			}
@@ -142,7 +151,6 @@ Trame TrameReader::get_trame() {
 		error("Empty Trame Buffer \n\r");
 		return Trame();
 	} else {
-		debug("Renvoi d'une bonne trame : \n\r");
 		Trame result;
 		_trame_buffer.pop(result);
 		return result;

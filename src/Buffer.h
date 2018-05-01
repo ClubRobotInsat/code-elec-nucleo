@@ -4,8 +4,12 @@
 class Buffer {
 
 public:
+	// Le tableau est copié lors de l'appel.
 	Buffer(uint8_t* data, uint8_t size)
-	        : _data(data), _size(size), _destroy(Callback<void(int)>(this, &Buffer::destroy)) {}
+	        : _data(nullptr), _size(size), _destroy(Callback<void(int)>(this, &Buffer::destroy)) {
+		_data = new uint8_t[size];
+		memcpy(_data, data, size);
+	}
 	~Buffer() {
 		delete[] _data;
 	}

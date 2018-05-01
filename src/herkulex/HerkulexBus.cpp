@@ -132,7 +132,7 @@ namespace herkulex {
 		if(len < 1 || len > 2) {
 			debug("Utilisation de Bus::sendEEPWrite_msg avec une longueur erronee !\n");
 		} else {
-			uint8_t* data = new uint8_t(2 + len);
+			uint8_t* data = new uint8_t[2 + len];
 
 			data[0] = addr;
 			data[1] = len;

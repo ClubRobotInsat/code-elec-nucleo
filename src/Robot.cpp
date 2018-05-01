@@ -40,6 +40,7 @@ Robot::Robot()
 }
 
 void Robot::send_pong(uint8_t id) {
+	debug("Pong : %#x \n\r", id);
 	uint8_t data = 0xaa;
 	Trame result = Trame(id, 0x00, 1, &data, 0);
 	result.send_to_serial(&_pc);
