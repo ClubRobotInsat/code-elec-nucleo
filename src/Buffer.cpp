@@ -27,6 +27,9 @@ void Buffer::delete_buffers() {
 }
 
 void Buffer::flush_buffers(Serial* ser) {
+	if(!write_done) {
+		return;
+	}
 	uint32_t total_length = 0;
 	for(int i = 0; i < Buffer::index_write; i++) {
 		total_length += buffers_to_write[i]->_size;
@@ -56,7 +59,7 @@ void Buffer::write_callback(int) {
 uint8_t Buffer::index_delete = 0;
 uint8_t Buffer::index_write = 0;
 uint8_t* Buffer::data_wrote = nullptr;
-volatile bool Buffer::write_done = false;
+volatile bool Buffer::write_done = true;
 Buffer* Buffer::buffers_to_delete[MAX_SEND_BUFFER]{};
 Buffer* Buffer::buffers_to_write[MAX_SEND_BUFFER]{};
 event_callback_t Buffer::destroy = Callback<void(int)>(&Buffer::write_callback);
