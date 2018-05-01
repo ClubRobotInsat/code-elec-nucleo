@@ -2,7 +2,7 @@
 
 #ifndef ROBOT_BUFFER_C
 #define ROBOT_BUFFER_C
-#define MAX_SEND_BUFFER 8
+#define MAX_SEND_BUFFER 256
 
 /* Un buffer qui s'auto-détruit après écriture */
 class Buffer {
@@ -23,7 +23,6 @@ public:
 	static void flush_buffers(Serial* ser);
 
 private:
-
 	static void write_callback(int e);
 
 	static volatile bool write_done;
@@ -36,7 +35,6 @@ private:
 
 	uint8_t* _data;
 	uint8_t _size;
-
 };
 
 #endif

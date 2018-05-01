@@ -1,8 +1,7 @@
 #include "Buffer.h"
 
 // Le tableau est copié lors de l'appel.
-Buffer::Buffer(uint8_t* data, uint8_t size)
-        : _data(nullptr), _size(size) {
+Buffer::Buffer(uint8_t* data, uint8_t size) : _data(nullptr), _size(size) {
 	_data = new uint8_t[size];
 	memcpy(_data, data, size);
 }
@@ -15,8 +14,12 @@ uint8_t* Buffer::get_buffer() const {
 }
 
 void Buffer::write() {
-	buffers_to_write[index_write] = this;
-	index_write++;
+	if(index_write < MAX_SEND_BUFFER) {
+		buffers_to_write[index_write] = this;
+		index_write++;
+	} else {
+		debug("Erreur écriture\n\r");
+	}
 }
 
 void Buffer::delete_buffers() {
@@ -25,23 +28,25 @@ void Buffer::delete_buffers() {
 
 void Buffer::flush_buffers(Serial* ser) {
 	uint32_t total_length = 0;
-	for (int i = 0; i < Buffer::index_write; i++) {
+	for(int i = 0; i < Buffer::index_write; i++) {
 		total_length += buffers_to_write[i]->_size;
 	}
-	uint8_t* data = new uint8_t[total_length];
-	uint32_t ind = 0;
-	for (int i = 0; i < Buffer::index_write; i++) {
-		uint8_t length = buffers_to_write[i]->_size;
-		for (int k = 0; k < length; k++) {
-			data[ind + k] = buffers_to_write[i]->_data[k];
+	if(total_length != 0) {
+		uint8_t* data = new uint8_t[total_length];
+		uint32_t ind = 0;
+		for(int i = 0; i < Buffer::index_write; i++) {
+			uint8_t length = buffers_to_write[i]->_size;
+			for(int k = 0; k < length; k++) {
+				data[ind + k] = buffers_to_write[i]->_data[k];
+			}
+			ind += length;
+			delete buffers_to_write[i];
 		}
-		ind += length;
-		delete buffers_to_write[i];
+		data_wrote = data;
+		Buffer::write_done = false;
+		ser->write(data, total_length, Buffer::destroy, SERIAL_EVENT_TX_ALL);
+		index_write = 0;
 	}
-	data_wrote = data;
-	Buffer::write_done = false;
-	ser->write(data,total_length,Buffer::destroy,SERIAL_EVENT_TX_ALL);
-	index_write = 0;
 }
 
 void Buffer::write_callback(int) {

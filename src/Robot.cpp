@@ -35,8 +35,7 @@ Robot::Robot()
 		servo->reboot();
 	}
 	_servo_manager.flush_bus();
-	Buffer::flush_buffers(&_pc);
-	//Buffer::delete_buffers();
+	// Buffer::delete_buffers();
 
 	// TODO : fixer le pullmode de la tirette
 }
@@ -75,13 +74,14 @@ void Robot::manage_robot() {
 	_motor_elevator_right.asserv();
 	/* Envoi des messages aux servomoteurs */
 	_servo_manager.flush_bus();
+	Buffer::flush_buffers(&_pc);
 }
 
 
 void Robot::handle_trame(Trame trame) {
-	//printf("Handling : ");
-	//print_trame(trame);
-	//printf("\n\r");
+	// printf("Handling : ");
+	// print_trame(trame);
+	// printf("\n\r");
 	switch(trame.get_id()) {
 		case ID_NUCLEO:
 			handle_trame_nucleo(trame);

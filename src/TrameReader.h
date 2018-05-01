@@ -63,7 +63,6 @@ public:
 	void parse_buffer();
 
 private:
-
 	void make_trame();
 
 	/* S'occupe d'un buffer en le traitant octet par octet. */
