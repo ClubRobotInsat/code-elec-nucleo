@@ -41,6 +41,7 @@ void Buffer::flush_buffers(Serial* ser) {
 	data_wrote = data;
 	Buffer::write_done = false;
 	ser->write(data,total_length,Buffer::destroy,SERIAL_EVENT_TX_ALL);
+	index_write = 0;
 }
 
 void Buffer::write_callback(int) {
