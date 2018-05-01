@@ -25,10 +25,8 @@ public:
 
 	void asserv();
 
-	void handle_trame(Trame t);
-
 	bool is_in_position();
-
+	
 	static float KP;
 	static float KI;
 	static float KD;

@@ -4,7 +4,6 @@
 #include "Trame.h"
 #include <Servo.h>
 #include <mbed.h>
-
 enum BrushlessState { ON, OFF };
 
 
@@ -14,8 +13,6 @@ public:
 	explicit Brushless(PinName motor_pin);
 
 	void set_brushless_state(BrushlessState state);
-
-	void handle_trame(Trame t);
 
 private:
 	brushless::Servo _motor;
