@@ -35,7 +35,8 @@ Robot::Robot()
 		servo->reboot();
 	}
 	_servo_manager.flush_bus();
-	Buffer::delete_buffers();
+	Buffer::flush_buffers(&_pc);
+	//Buffer::delete_buffers();
 
 	// TODO : fixer le pullmode de la tirette
 }

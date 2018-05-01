@@ -36,7 +36,7 @@ void Trame::send_ack(uint8_t packet_number, Serial* pc) {
 	tab[6] = 0;
 	tab[7] = 0;
 	Buffer* buffer = new Buffer(tab, size);
-	buffer->write(pc);
+	buffer->write();
 	delete tab;
 }
 
@@ -57,7 +57,7 @@ void Trame::send_to_serial(Serial* pc) {
 		tab[7 + j] = _data[j];
 	}
 	Buffer* buffer = new Buffer(tab, size);
-	buffer->write(pc);
+	buffer->write();
 	delete tab;
 }
 
@@ -75,7 +75,7 @@ void Trame::send_pong(uint8_t id, Serial* pc) {
 	tab[7] = 0xAA;
 
 	Buffer* buffer = new Buffer(tab, 8);
-	buffer->write(pc);
+	buffer->write();
 	delete tab;
 }
 
