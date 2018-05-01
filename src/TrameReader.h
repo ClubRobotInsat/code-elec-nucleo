@@ -6,7 +6,7 @@
 #define DEF_TRAME_READER
 
 // Le nombre d'octets que l'on demande à mbed de nous lire à chaque fois.
-#define READ_SIZE 8
+#define READ_SIZE 16
 
 // Le nombre d'octets que l'on peut stocker
 #define READ_BUFFER_SIZE 256
@@ -63,6 +63,9 @@ public:
 	void parse_buffer();
 
 private:
+
+	void make_trame();
+
 	/* S'occupe d'un buffer en le traitant octet par octet. */
 	void handle_buffer(int e);
 

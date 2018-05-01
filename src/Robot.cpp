@@ -41,7 +41,6 @@ Robot::Robot()
 }
 
 void Robot::send_pong(uint8_t id) {
-	debug("Pong : %#x \n\r", id);
 	uint8_t data = 0xaa;
 	Trame result = Trame(id, 0x00, 1, &data, 0);
 	result.send_to_serial(&_pc);
@@ -79,9 +78,9 @@ void Robot::manage_robot() {
 
 
 void Robot::handle_trame(Trame trame) {
-	printf("Handling : ");
-	print_trame(trame);
-	printf("\n\r");
+	//printf("Handling : ");
+	//print_trame(trame);
+	//printf("\n\r");
 	switch(trame.get_id()) {
 		case ID_NUCLEO:
 			handle_trame_nucleo(trame);

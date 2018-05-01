@@ -51,21 +51,16 @@ void TrameReader::attach_to_serial(Serial* ser) {
 }
 
 void TrameReader::handle_buffer(int e) {
+	_ser->read((uint8_t*)&_input_buffer, READ_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
 	for(uint8_t byte : _input_buffer) {
 		_read_buffer.push(byte);
 	}
-
-	_ser->read((uint8_t*)&_input_buffer, READ_SIZE, _read_done, SERIAL_EVENT_RX_ALL);
 }
 
 void TrameReader::parse_buffer() {
 	while(not _read_buffer.empty()) {
-		uint8_t byte;
+		uint8_t byte = 0xFF;
 		_read_buffer.pop(byte);
-		// printf("Byte : %#x",byte);
-		// printf(" | State :");
-		// print_state(_state);
-		// printf("\n\r");
 		parse_byte(byte);
 	}
 }
@@ -120,7 +115,10 @@ void TrameReader::parse_byte(uint8_t byte) {
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_DATA_LENGTH: {
-			if(byte < 8) {
+			if(byte == 0) {
+				_trame_in_build.data_length = byte;
+				this->make_trame();
+			} else if(byte < 9) {
 				_trame_in_build.data_length = byte;
 				_state = TrameReaderState::WAITING_FOR_DATA;
 			} else {
@@ -130,34 +128,38 @@ void TrameReader::parse_byte(uint8_t byte) {
 		}
 		case TrameReaderState::WAITING_FOR_DATA: {
 			debug("Byte for data : %#x \n\r", byte);
-			/* On reçois tout sauf le dernier octet */
-			if(not _trame_in_build.data_length == 0 and _data_received <= _trame_in_build.data_length - 1) {
+			/* On reçois le dernier octet */
+			if(_data_received == _trame_in_build.data_length - 1) {
 				_byte_buffer[_data_received] = byte;
-				_data_received++;
+				this->make_trame();
+				_state = TrameReaderState::WAITING_FOR_H1;
+				_data_received = 0;
 				break;
 			}
-			/* On reçois le dernier octet */
+			/* Sinon on reçois encore des données */
 			else {
 				_byte_buffer[_data_received] = byte;
-				uint8_t id = Trame::demultiplex_id(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
-				uint8_t cmd = Trame::demultiplex_cmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
-				debug("id : %#x | num : %#x | cmd : %#x | (%d)", id, _trame_in_build.num_paquet, cmd, _trame_in_build.data_length);
-				for(int i = 0; i < _trame_in_build.data_length; i++) {
-					debug("%#x ", _byte_buffer[i]);
-				}
-				debug("\n\r");
-				Trame t = Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
-				_trame_buffer.push(t);
+				_data_received++;
+				_state = TrameReaderState::WAITING_FOR_DATA;
+				break;
 			}
-
-			_state = TrameReaderState::WAITING_FOR_H1;
-			_data_received = 0;
-			break;
 		}
 
 		default:
 			break;
 	}
+}
+
+void TrameReader::make_trame() {
+	uint8_t id = Trame::demultiplex_id(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
+	uint8_t cmd = Trame::demultiplex_cmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
+	debug("id : %#x | num : %#x | cmd : %#x | (%d)", id, _trame_in_build.num_paquet, cmd, _trame_in_build.data_length);
+	for(int i = 0; i < _trame_in_build.data_length; i++) {
+		debug("%#x ", _byte_buffer[i]);
+	}
+	debug("\n\r");
+	Trame t = Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
+	_trame_buffer.push(t);
 }
 
 Trame TrameReader::get_trame() {

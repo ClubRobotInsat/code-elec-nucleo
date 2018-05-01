@@ -3,7 +3,7 @@
 
 /* Variable de configuration du robot */
 #define DMA_USAGE_ROBOT DMA_USAGE_OPPORTUNISTIC // La politique d'utilisation des DMAs sur le robot
-#define BAUD_RATE_RPI_NUCLEO 921600             // Le baudrate de la connexion nucleo <-> info
+#define BAUD_RATE_RPI_NUCLEO 115200 // Le baudrate de la connexion nucleo <-> info
 #define BAUD_RATE_SERVO 115200                  // Le baudrate de la connexion servo <-> nucleo
 
 /* Variable de configuration des moteurs */
