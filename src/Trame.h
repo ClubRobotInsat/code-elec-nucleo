@@ -52,7 +52,7 @@ public:
 	static void send_pong(uint8_t id, Serial* pc);
 
 	// Envoie la trame sur la connexion série
-	void send_to_serial(Serial* pc);
+	void send_to_serial();
 
 	CANMessage into_can_message();
 

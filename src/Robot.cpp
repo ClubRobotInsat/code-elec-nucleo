@@ -1,8 +1,8 @@
 #include "Robot.h"
 #include "Config.h"
 #include "IDs_2018.h"
-#include "Utils.h"
 #include "IDs_2018.h"
+#include "Utils.h"
 
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
@@ -44,7 +44,7 @@ Robot::Robot()
 void Robot::send_pong(uint8_t id) {
 	uint8_t data = 0xaa;
 	Trame result = Trame(id, 0x00, 1, &data, 0);
-	result.send_to_serial(&_pc);
+	result.send_to_serial();
 }
 
 void Robot::initialize_meca() {
@@ -67,7 +67,7 @@ void Robot::manage_robot() {
 	while(not _trame_from_can_buffer.empty()) {
 		Trame trame;
 		_trame_from_can_buffer.pop(trame);
-		trame.send_to_serial(&_pc);
+		trame.send_to_serial();
 	}
 
 	/* Mise à jour des consignes d'asservissement des deux moteurs d'ascenseurs */
@@ -221,6 +221,27 @@ void Robot::handle_trame_motor(Trame trame) {
 			}
 			break;
 		}
+		/* Lecture état des moteurs asservis */
+		case 0x06: {
+			if(trame.get_data_length() == 1) {
+				uint8_t motor_id = trame.get_data()[0];
+				switch(motor_id) {
+					case ID_MOTOR_ELEVATOR_LEFT: {
+						uint8_t data = static_cast<uint8_t>(_motor_elevator_left.is_in_position());
+						Trame t(ID_ELEC_CARD_MOTORS, 0x06, 1, &data, 0);
+						t.send_to_serial();
+						break;
+					}
+					case ID_MOTOR_ELEVATOR_RIGHT: {
+						uint8_t data = static_cast<uint8_t>(_motor_elevator_right.is_in_position());
+						Trame t(ID_ELEC_CARD_MOTORS, 0x06, 1, &data, 0);
+						t.send_to_serial();
+						break;
+					}
+				}
+			}
+			break;
+		}
 		default:
 			break;
 	}
@@ -278,7 +299,7 @@ void Robot::handle_trame_io(Trame trame) {
 		case 0x01: {
 			uint8_t data = _tirette.read();
 			Trame result = Trame(ID_ELEC_CARD_IO, 0x01, 1, &data, 0);
-			result.send_to_serial(&_pc);
+			result.send_to_serial();
 			break;
 		}
 		default:

@@ -26,7 +26,7 @@ public:
 	void asserv();
 
 	bool is_in_position();
-	
+
 	static float KP;
 	static float KI;
 	static float KD;

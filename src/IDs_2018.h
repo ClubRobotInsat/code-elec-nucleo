@@ -49,4 +49,3 @@
 #define ID_MOTOR_BRUSHLESS_RIGHT 6
 
 #endif /* HEADER_COMMUN */
-
