@@ -4,6 +4,7 @@
 #include "Brushless.h"
 #include "HerkulexManager.h"
 #include "Motor.h"
+#include "Motor2018.h"
 #include "SimpleMotor.h"
 #include "TrameReader.h"
 #include <CircularBuffer.h>
@@ -22,22 +23,22 @@ public:
 
 	static void print_trame(const Trame& trame);
 
-private:
 	/* Fonction utilitaire pour répondre facilement pong. */
 	void send_pong(uint8_t id);
 
+private:
 	/* Traite une trame que l'on a reçue */
 	void handle_trame(Trame trame);
 
 	void handle_trame_can(Trame trame);
-
-	void handle_trame_motor(Trame trame);
 
 	void handle_trame_servo(Trame trame);
 
 	void handle_trame_nucleo(Trame trame);
 
 	void handle_trame_io(Trame trame);
+
+	void callback_tirette();
 
 	/* La méthode appelée quand un message est reçu depuis le bus CAN. */
 	void read_trame_from_can();
@@ -64,13 +65,17 @@ private:
 	SimpleMotor _motor_swallow_right;
 
 	// La tirette.
-	DigitalIn _tirette;
+	InterruptIn _tirette;
 
 	// La machine à état permettant de lire des trames.
 	TrameReader _trame_reader;
 
 	// Un buffer de trame lue depuis le CAN.
 	CircularBuffer<Trame, 256> _trame_from_can_buffer;
+
+	Motor2018 _motor_logic;
+
+	volatile bool _tirette_detected;
 };
 
 

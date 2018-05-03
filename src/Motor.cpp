@@ -58,6 +58,8 @@ void Motor::asserv() {
 
 		if(pwm_value < MOTOR_MIN_PWM) {
 			pwm_value = MOTOR_MIN_PWM;
+		} else if(pwm_value > MOTOR_MAX_PWM) {
+			pwm_value = MOTOR_MAX_PWM;
 		}
 
 		// debug("Je veut être en %d et je suis en %d => déplacement avec pour consigne
@@ -79,6 +81,6 @@ void Motor::asserv() {
 	}
 }
 
-float Motor::KP = 0.200 / 10000;
-float Motor::KI = 0 / 10000;
-float Motor::KD = 0 / 10000;
+float Motor::KP = 0.157 / 10000;
+float Motor::KI = 0.006471 / 10000;
+float Motor::KD = 0.005000 / 10000;

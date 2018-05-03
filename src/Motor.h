@@ -38,6 +38,7 @@ private:
 	DigitalOut _motor_direction_control;
 	float _prev_error;
 	float _error_sum;
+	float _previous_pwm;
 };
 
 #endif

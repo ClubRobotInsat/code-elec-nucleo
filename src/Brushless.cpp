@@ -1,6 +1,8 @@
 #include "Brushless.h"
 
-Brushless::Brushless(PinName motor_pin) : _motor(motor_pin) {}
+Brushless::Brushless(PinName motor_pin) : _motor(motor_pin) {
+	_motor = 0.0;
+}
 
 void Brushless::set_brushless_state(BrushlessState state) {
 	switch(state) {

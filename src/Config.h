@@ -7,7 +7,8 @@
 #define BAUD_RATE_SERVO 115200                  // Le baudrate de la connexion servo <-> nucleo
 
 /* Variable de configuration des moteurs */
-#define MOTOR_MIN_PWM 0.08  // La PWM minimale que l'on sors aux moteurs
+#define MOTOR_MIN_PWM 0.01 // La PWM minimale que l'on sors aux moteurs
+#define MOTOR_MAX_PWM 0.2
 #define MOTOR_DEAD_ZONE 150 // Le nombre de pulse de tolérance sur l'asservissement en position d'un moteur
 
 #endif
