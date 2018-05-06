@@ -31,8 +31,7 @@
 #define ID_SERVO_CUBE_DOOR 1
 #define ID_SERVO_HOLD_DOOR_LEFT 2
 #define ID_SERVO_HOLD_DOOR_RIGHT 3
-#define ID_SERVO_BEE_LEFT 4
-#define ID_SERVO_BEE_RIGHT 5
+#define ID_SERVO_BEE 4
 
 /// IDs des contacteurs
 #define ID_CONTACTOR_TIRETTE 2

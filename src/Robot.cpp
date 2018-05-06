@@ -36,12 +36,14 @@ Robot::Robot()
 
 
 	/* Initialisation des servos (redémarrage) */
-	for(uint8_t i = 0; i < 5; i++) {
-		// herkulex::Servo* servo = _servo_manager.register_new_servo(i);
-		// servo->reboot();
+	for(uint8_t i = 1; i <= 4; i++) {
+		herkulex::Servo* servo = _servo_manager.register_new_servo(i);
+		servo->reboot();
 	}
-	herkulex::Servo* servo = _servo_manager.register_new_servo(0xFD);
-	servo->reboot();
+	/// debug
+	// herkulex::Servo* servo = _servo_manager.register_new_servo(0xFD);
+	// servo->reboot();
+
 	_servo_manager.flush_bus();
 
 	_tirette.mode(PinMode::PullDown);
