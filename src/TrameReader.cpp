@@ -127,7 +127,7 @@ void TrameReader::parse_byte(uint8_t byte) {
 			break;
 		}
 		case TrameReaderState::WAITING_FOR_DATA: {
-			debug("Byte for data : %#x \n\r", byte);
+			//debug("Byte for data : %#x \n\r", byte);
 			/* On reçois le dernier octet */
 			if(_data_received == _trame_in_build.data_length - 1) {
 				_byte_buffer[_data_received] = byte;
@@ -153,11 +153,12 @@ void TrameReader::parse_byte(uint8_t byte) {
 void TrameReader::make_trame() {
 	uint8_t id = Trame::demultiplex_id(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
 	uint8_t cmd = Trame::demultiplex_cmd(_trame_in_build.byte_1_id_and_cmd, _trame_in_build.byte_2_id_and_cmd);
-	debug("id : %#x | num : %#x | cmd : %#x | (%d)", id, _trame_in_build.num_paquet, cmd, _trame_in_build.data_length);
+	/*printf("id : %#x | num : %#x | cmd : %#x | (%d)", id, _trame_in_build.num_paquet, cmd, _trame_in_build.data_length);
 	for(int i = 0; i < _trame_in_build.data_length; i++) {
-		debug("%#x ", _byte_buffer[i]);
+		printf("%#x ", _byte_buffer[i]);
 	}
-	debug("\n\r");
+	printf("\n\r");
+	*/
 	Trame t = Trame(id, cmd, _trame_in_build.data_length, _byte_buffer, _trame_in_build.num_paquet);
 	_trame_buffer.push(t);
 }

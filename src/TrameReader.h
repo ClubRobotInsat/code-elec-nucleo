@@ -6,7 +6,7 @@
 #define DEF_TRAME_READER
 
 // Le nombre d'octets que l'on demande à mbed de nous lire à chaque fois.
-#define READ_SIZE 8
+#define READ_SIZE 4
 
 // Le nombre d'octets que l'on peut stocker
 #define READ_BUFFER_SIZE 256

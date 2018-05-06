@@ -121,6 +121,8 @@ namespace herkulex {
 		 */
 		void send_rollback_msg(uint8_t id, bool skipIDRollback = true, bool skipBaudrateRollback = true);
 
+		void broadcast_reboot();
+
 		/* --------------------------------------------------------------------------------------------
 		 * sendRebootMsg
 		 * Envoi un message de reboot

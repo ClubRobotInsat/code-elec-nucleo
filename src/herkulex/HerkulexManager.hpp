@@ -119,4 +119,9 @@ namespace herkulex {
 	void Manager<N_SERVOS>::flush_bus() {
 		_bus.flush();
 	}
+
+	template <uint8_t N_SERVOS>
+	void Manager<N_SERVOS>::broadcast_reboot() {
+		_bus.broadcast_reboot();
+	}
 }

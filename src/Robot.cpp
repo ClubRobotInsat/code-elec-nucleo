@@ -6,7 +6,7 @@
 
 Robot::Robot()
         : _can(PA_11, PA_12, 500000)
-        , _pc(PC_10, PC_11, BAUD_RATE_RPI_NUCLEO)
+        , _pc(PB_6, PA_10, BAUD_RATE_RPI_NUCLEO)
         , _servo_manager(PA_0, PA_1, BAUD_RATE_SERVO, DMA_USAGE_ROBOT)
         , _turbine_left(PB_15)
         , _turbine_right(PB_14)
@@ -37,11 +37,9 @@ Robot::Robot()
 
 	/* Initialisation des servos (redémarrage) */
 	for(uint8_t i = 0; i < 5; i++) {
-		// herkulex::Servo* servo = _servo_manager.register_new_servo(i);
-		// servo->reboot();
+		herkulex::Servo* servo = _servo_manager.register_new_servo(i);
 	}
-	herkulex::Servo* servo = _servo_manager.register_new_servo(0xFD);
-	servo->reboot();
+	_servo_manager.broadcast_reboot();
 	_servo_manager.flush_bus();
 
 	_tirette.mode(PinMode::PullDown);
@@ -57,10 +55,13 @@ void Robot::send_pong(uint8_t id) {
 void Robot::initialize_meca() {
 	_turbine_left.set_brushless_state(BrushlessState::OFF);
 	_turbine_right.set_brushless_state(BrushlessState::OFF);
-	_servo_manager.get_servo_by_id(0xFD)->enable_torque(true);
+	for(uint8_t i = 0; i < 5; i++) {
+		_servo_manager.get_servo_by_id(i)->enable_torque(true);
+	}
+	//_servo_manager.send_debug_message();
 	_servo_manager.flush_bus();
 	wait_ms(10);
-	_servo_manager.get_servo_by_id(0xFD)->set_position(256);
+	//_servo_manager.get_servo_by_id(0xFD)->set_position(256);
 }
 
 void Robot::callback_tirette() {
@@ -71,7 +72,7 @@ void Robot::manage_robot() {
 	_trame_reader.parse_buffer();
 	/* Lecture des trames reçues depuis la connexion avec l'informatique */
 	while(_trame_reader.trame_ready()) {
-		// debug("Trame reçue \n\r!");
+		//debug("Trame reçue \n\r!");
 		Trame trame = _trame_reader.get_trame();
 		// Acquittement de la trame reçue.
 		Trame::send_ack(trame.get_packet_number(), &_pc);
@@ -146,7 +147,7 @@ void Robot::handle_trame_servo(Trame trame) {
 			break;
 		}
 		/* Réglage de la position */
-		case 0x05: {
+		case 0x01: {
 			if(trame.get_data_length() == 3) {
 				uint8_t servo_id = trame.get_data()[0];
 				uint16_t angle = (trame.get_data()[1] << 8) | trame.get_data()[2];

@@ -119,7 +119,19 @@ namespace herkulex {
 	}
 
 	void Bus::send_debug_message() {
-		send_stat_msg(0xFD);
+		uint8_t* data = new uint8_t[7];
+		data[0] = 0xFF;
+		data[1] = 0xFF;
+		data[2] = 0x07;
+		data[3] = 0xFE;
+		data[4] = 0x07;
+		data[5] = 0xFE;
+		data[6] = 0x00;
+	
+		_buffer_write_length.push(7);
+		_buffer_write_data.push(data);
+		_total_write_length += 7;
+		send_stat_msg(0xFE);
 	}
 	/* --------------------------------------------------------------------------------------------
 	 * sendEEPWriteMsg
@@ -143,6 +155,10 @@ namespace herkulex {
 
 			send_msg(id, constants::CMD::toServo::EEPWrite, data, (2 + len));
 		}
+	}
+	
+	void Bus::broadcast_reboot() {
+		this->send_reboot_msg(0xFE);
 	}
 
 	/* --------------------------------------------------------------------------------------------

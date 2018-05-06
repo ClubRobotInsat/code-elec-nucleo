@@ -38,6 +38,8 @@ namespace herkulex {
 		 */
 		void flush_bus();
 
+		void broadcast_reboot();
+
 	private:
 		/* Stocke le bus. */
 		Bus _bus;
