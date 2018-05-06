@@ -40,6 +40,7 @@ Robot::Robot()
 		herkulex::Servo* servo = _servo_manager.register_new_servo(i);
 	}
 	_servo_manager.broadcast_reboot();
+
 	_servo_manager.flush_bus();
 
 	_tirette.mode(PinMode::PullDown);
