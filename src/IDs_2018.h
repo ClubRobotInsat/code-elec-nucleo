@@ -33,6 +33,8 @@
 #define ID_SERVO_HOLD_DOOR_RIGHT 0
 #define ID_SERVO_BEE_LEFT 4
 #define ID_SERVO_BEE_RIGHT 5
+#define ID_SERVO_LOQUET 1
+
 /// IDs des contacteurs
 #define ID_CONTACTOR_TIRETTE 2
 
